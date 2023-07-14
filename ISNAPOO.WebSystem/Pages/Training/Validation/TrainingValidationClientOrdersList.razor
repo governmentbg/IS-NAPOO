@@ -1,0 +1,93 @@
+﻿@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+@using Data.Models.Data.Training
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                    <div class="card-header">
+                    @if (this.IsEditable)
+                    {
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    @*<SfTooltip Content="Създаване на нов курс" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">*@
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddValidationOrderBtn">Нова заповед</button>
+                                    @*</SfTooltip>*@
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+
+                            </ul>
+                        </nav>
+                    }
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="validationOrdersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ValidationOrderVM).IdValidationOrder).Result
+                                </Template>
+                            </GridColumn>
+                            @if(this.IsEditable)
+                            {
+                                <GridColumn Width="13" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditValidationOrderBtn(context as ValidationOrderVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="13" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteSelected(context as ValidationOrderVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                }
+                            <GridColumn Field="IdValidationOrder" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="OrderNumber" HeaderText="№ на заповед" TextAlign="TextAlign.Left" Width="70"></GridColumn>
+                            <GridColumn Field="OrderDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="40" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as ValidationOrderVM);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                            foreach (var item in files)
+                                            {
+                                                <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                                <br />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @entry.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<TrainingValidationClientOrderModal @ref="trainingValidationClientOrderModal" CallbackAfterSubmit="UpdateAfterSave"></TrainingValidationClientOrderModal>
+<ToastMsg @ref="toast"></ToastMsg>

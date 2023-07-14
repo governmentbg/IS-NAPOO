@@ -1,0 +1,564 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <p></p>
+            <div class="card">
+                <div class="card-header">
+                    <nav>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <nav class="navbar navbar-expand" style="padding-top:0">
+                                    <ul class="navbar-nav">
+                                        @if (this.IsCPO)
+                                        {
+                                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange && !this.DisableFieldsWhenUserIsNAPOO)
+                                            {
+                                                <label>&nbsp</label>
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на специалност/и за избрана материално-техническата база" OpensOn="Hover">
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSpecialitiesToMTBsClickHandler" disabled="@(this.candidateProviderPremisesVM.IdCandidateProviderPremises == 0)">Добави специалност</button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <label>&nbsp</label>
+                                            }
+
+                                            @if (this.DisableFieldsWhenUserIsNAPOO)
+                                            {
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на информация за извършена проверка от НАПОО" OpensOn="Hover">
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddCheckingToMTBsClickHandler" disabled="@(this.candidateProviderPremisesVM.IdCandidateProviderPremises == 0)">Проверка НАПОО</button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <label>&nbsp</label>
+                                            }
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-2">
+                                <nav class="navbar navbar-expand" style="justify-content: flex-end;padding-top:0;">
+                                    <ul class="navbar-nav">
+                                        <label>&nbsp</label>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Справка за материално-техническите бази" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="ExportPDF">Справка</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <label>&nbsp</label>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Търсене в списъка с МТБ по зададени критерии" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterSelect">Филтър</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <label>&nbsp</label>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-7">
+                                <nav class="navbar navbar-expand" style="padding-top:0;">
+                                    <ul class="navbar-nav">
+                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                        {
+                                            <label>&nbsp</label>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на информация за нова материално-техническата база" OpensOn="Hover">
+                                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewMTBClickHandler">Нова МТБ</button>
+                                                </SfTooltip>
+                                            </li>
+                                            <label>&nbsp</label>
+                                        }
+
+                                        @if (this.mtbsSource.Count > 1 && this.candidateProviderPremisesVM is not null && this.candidateProviderPremisesVM.IdCandidateProviderPremises != 0)
+                                        {
+                                            <li class="nav-item d-none d-sm-inline-block" style="@(!this.DisableFieldsWhenUserIsExternalExpertOrCommittee ? "margin-left: 40px; !important" : string.Empty)">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PreviousMTBBtn" disabled="@(this.disablePreviousBtn)"><i class="fa fa-arrow-circle-left" style="margin-right: 3px !important;"></i>Предишна МТБ</button>
+                                            </li>
+                                            <label>&nbsp</label>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextMTBBtn" disabled="@(this.disableNextBtn)"><i class="fa fa-arrow-circle-right" style="margin-right: 3px !important;"></i>Следваща МТБ</button>
+                                            </li>
+                                            <label>&nbsp</label>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <div class="row mainBGColor">
+                        <div class="col-sm-5">
+                            <SfGrid DataSource="this.mtbsSource"
+                                    AllowPaging="true" EnableAltRow="true" EnableHover="false" AllowFiltering="true"
+                                    AllowTextWrap="true" @ref="mtbsGrid" AllowSelection="true" Height="100%" EnablePersistence="true" SelectedRowIndex="0">
+                                <GridEvents TValue="CandidateProviderPremisesVM" QueryCellInfo="QueryCellInfo"
+                                            RowSelecting="MTBSelectingHandler" OnRecordClick="PremisesRecordClickHandler" />
+                                <GridPageSettings PageSize="20"></GridPageSettings>
+                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                @if (this.IsCPO)
+                                {
+                                    <GridTemplates>
+                                        <DetailTemplate Context="candidateProviderPremisesCtx">
+                                            <SfTab>
+                                                <ChildContent>
+                                                    <div class="text-center">
+                                                        <label class="control-label" style="font-size:large">Специалности, по които се извършва обучение:</label>
+                                                    </div>
+                                                    <TabItems>
+                                                        <TabItem>
+                                                            <ChildContent>
+                                                                <TabHeader Text="Обучение по теория"></TabHeader>
+                                                            </ChildContent>
+                                                            <ContentTemplate>
+                                                                @{
+                                                                    var candidateProviderPremises = candidateProviderPremisesCtx as CandidateProviderPremisesVM;
+                                                                    string DOC = "Няма";
+                                                                    if (candidateProviderPremises.CandidateProviderPremisesSpecialities == null)
+                                                                    {
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        var candidateProviderPremisesFromSource = this.mtbsSource.FirstOrDefault(x => x.IdCandidateProviderPremises == candidateProviderPremises.IdCandidateProviderPremises);
+                                                                        if (candidateProviderPremisesFromSource != null)
+                                                                        {
+                                                                            foreach (var speciality in candidateProviderPremisesFromSource.CandidateProviderPremisesSpecialities.OrderBy(x => x.Speciality.Code))
+                                                                            {
+                                                                                var temp = this.specialitiesSource.First(x => x.IdSpeciality == speciality.IdSpeciality);
+                                                                                var doc = this.docSource.FirstOrDefault(x => x.IdProfession == temp.IdProfession);
+                                                                                if (speciality.IdUsage == kvTheory.IdKeyValue || speciality.IdUsage == kvTheoryAndPractice.IdKeyValue)
+                                                                                {
+                                                                                    if (kvDocComplianceYes.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Напълно";
+                                                                                    }
+                                                                                    if (kvDocComplianceNo.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Не съответства";
+                                                                                    }
+                                                                                    if (kvDocCompliancePartial.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Частично";
+                                                                                    }
+                                                                                    if (temp.IdVQS != 0)
+                                                                                    {
+                                                                                        temp.VQS_Name = this.kvVQSSource.FirstOrDefault(x => x.IdKeyValue == temp.IdVQS).Name;
+                                                                                    }
+
+                                                                                    <p style="margin-bottom: -7px;">
+                                                                                        <button type="button" class="btn-row" @onclick="(async () => await this.ShowDOSInfoBtn(doc))"><i class="fa fa-info-circle"></i></button>
+                                                                                        <b>
+                                                                                            @($"{temp.CodeAndName}, {temp.VQS_Name}") <b style="color:gray">@(DOC)</b>
+
+                                                                                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                                                            {
+                                                                                                <button type="button" class="btn-row" @onclick="(() => DeleteSpecialityBtn(speciality.IdSpeciality, candidateProviderPremises.IdCandidateProviderPremises, this.kvTheory.IdKeyValue))"><i class="fa fa-times"></i></button>
+                                                                                            }
+                                                                                            <br style="display:block;margin-bottom:0em" />
+                                                                                        </b>
+                                                                                        <а style="color:gray">@($"Добавена на: {speciality.ModifyDate.ToString(GlobalConstants.DATE_FORMAT)} г.") </а> <br style="display:block;margin-bottom:2em" />
+                                                                                    </p>
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                }
+                                                            </ContentTemplate>
+                                                        </TabItem>
+                                                        <TabItem>
+                                                            <ChildContent>
+                                                                <TabHeader Text="Обучение по практика"></TabHeader>
+                                                            </ChildContent>
+                                                            <ContentTemplate>
+                                                                @{
+                                                                    var candidateProviderPremises = candidateProviderPremisesCtx as CandidateProviderPremisesVM;
+                                                                    string DOC = "Няма";
+                                                                    if (candidateProviderPremises.CandidateProviderPremisesSpecialities == null)
+                                                                    {
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        var candidateProviderPremisesFromSource = this.mtbsSource.FirstOrDefault(x => x.IdCandidateProviderPremises == candidateProviderPremises.IdCandidateProviderPremises);
+                                                                        foreach (var speciality in candidateProviderPremisesFromSource.CandidateProviderPremisesSpecialities.OrderBy(x => x.Speciality.Code))
+                                                                        {
+                                                                            if (candidateProviderPremisesFromSource != null)
+                                                                            {
+                                                                                var temp = this.specialitiesSource.First(x => x.IdSpeciality == speciality.IdSpeciality);
+                                                                                var doc = this.docSource.FirstOrDefault(x => x.IdProfession == temp.IdProfession);
+                                                                                if (speciality.IdUsage == kvPractice.IdKeyValue || speciality.IdUsage == kvTheoryAndPractice.IdKeyValue)
+                                                                                {
+                                                                                    if (kvDocComplianceYes.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Напълно";
+                                                                                    }
+                                                                                    if (kvDocComplianceNo.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Не съответства";
+                                                                                    }
+                                                                                    if (kvDocCompliancePartial.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Частично";
+                                                                                    }
+                                                                                    if (temp.IdVQS != 0)
+                                                                                    {
+                                                                                        temp.VQS_Name = this.kvVQSSource.FirstOrDefault(x => x.IdKeyValue == temp.IdVQS).Name;
+                                                                                    }
+
+                                                                                    <p style="margin-bottom: -7px;">
+                                                                                        <button type="button" class="btn-row" @onclick="(async () => await this.ShowDOSInfoBtn(doc))"><i class="fa fa-info-circle"></i></button>
+                                                                                        <b>
+                                                                                            @(
+                                                                                            $"{temp.CodeAndName}, {temp.VQS_Name}"
+                                                                                                ) <b style="color:gray">
+                                                                                                @(
+                                                                                                DOC
+                                                                                                    )
+                                                                                            </b>
+                                                                                        </b>
+                                                                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                                                        {
+                                                                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteSpecialityBtn(speciality.IdSpeciality, candidateProviderPremises.IdCandidateProviderPremises, this.kvPractice.IdKeyValue))"><i class="fa fa-times"></i></button>
+                                                                                        }
+                                                                                        <br style="display:block;margin-bottom:0em" />
+                                                                                        <а style="color:gray">
+                                                                                            @(
+                                                                                            $"Добавена на: {speciality.ModifyDate.ToString(GlobalConstants.DATE_FORMAT)} г."
+                                                                                                )
+                                                                                        </а> <br style="display:block;margin-bottom:2em" />
+                                                                                    </p>
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            </ContentTemplate>
+                                                        </TabItem>
+                                                        <TabItem Visible="this.DisableFieldsWhenUserIsNAPOO">
+                                                            <ChildContent>
+                                                                <TabHeader Text="Проверка НАПОО"></TabHeader>
+                                                            </ChildContent>
+                                                            <ContentTemplate>
+                                                                @{
+                                                                    var candidateProviderPremises = candidateProviderPremisesCtx as CandidateProviderPremisesVM;
+                                                                    var candidateProviderPremisesFromSource = this.mtbsSource.FirstOrDefault(x => x.IdCandidateProviderPremises == candidateProviderPremises.IdCandidateProviderPremises);
+                                                                    if (candidateProviderPremisesFromSource.CandidateProviderPremisesCheckings == null)
+                                                                    {
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        foreach (var checking in candidateProviderPremisesFromSource.CandidateProviderPremisesCheckings)
+                                                                        {
+                                                                            <p style="margin-bottom: -15px;">
+
+                                                                                <span style="color:grey">
+                                                                                    @($"{(checking.CheckDone ? "Дата:" + checking.CheckingDate.Value.ToString(GlobalConstants.DATE_FORMAT) + "г." + " Коментар: " + checking.Comment : string.Empty)}")
+                                                                                    <button type="button" class="btn-row"
+                                                                                @onclick="(async () => await this.DeleteCheckingBtn(checking.IdCandidateProviderPremisesChecking, checking.IdCandidateProviderPremises.Value))">
+                                                                                        <i class="fa fa-times"></i>
+                                                                                    </button> <br style="display:block;margin-bottom:0em" />
+                                                                                </span>
+                                                                            </p>  <br />
+                                                                        }
+                                                                    }
+                                                                }
+                                                            </ContentTemplate>
+                                                        </TabItem>
+                                                    </TabItems>
+                                                </ChildContent>
+                                            </SfTab>
+                                        </DetailTemplate>
+                                    </GridTemplates>
+                                }
+                                <GridColumns>
+                                    <GridColumn Field="IdCandidateProviderPremises" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn TextAlign="TextAlign.Left" Width="10" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" HeaderText=" ">
+                                        <Template>
+                                            @GetRowNumber(mtbsGrid, (context as CandidateProviderPremisesVM).IdCandidateProviderPremises).Result
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="PremisesName" HeaderText="Материално-технически бази" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                                    <GridColumn Field="StatusValue" HeaderText="Статус" TextAlign="TextAlign.Left" Width="55"></GridColumn>
+                                    <GridColumn TextAlign="TextAlign.Center" Width="20">
+                                        <Template>
+                                            @{
+                                                var premises = context as CandidateProviderPremisesVM;
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на промените" OpensOn="Hover">
+                                                    <button type="button" class="btn-row" @onclick="(() => this.mTBStatusModal.OpenModal(premises))"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                        <div class="col-sm-7">
+                            <SfAccordion ExpandMode="ExpandMode.Single">
+                                <AccordionItems>
+                                    <AccordionItem Expanded="true">
+                                        <HeaderTemplate>
+                                            Данни за материално-техническа база <span style="color: #01a9ac !important;">@this.premisesNameInformation</span>
+                                        </HeaderTemplate>
+                                        <ContentTemplate>
+                                            <EditForm EditContext="this.editContext">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Материално-техническа база:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderPremisesVM.PremisesName" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Кратко описание:
+                                                            </label>
+                                                            <InputTextArea rows="4" class="form-control" @bind-Value="this.candidateProviderPremisesVM.PremisesNote" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation || this.DisableFieldsWhenActiveLicenceChange)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">Населено място: </label>
+                                                            <SfAutoComplete Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @ref="sfAutoCompleteLocation" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                                            @bind-Value="this.candidateProviderPremisesVM.IdLocation"
+                                                                            DataSource="this.locationSource" AllowFiltering="true" CssClass="form-control customPad">
+                                                                <AutoCompleteTemplates TItem="LocationVM">
+                                                                    <NoRecordsTemplate>
+                                                                        Няма намерени резултати.
+                                                                    </NoRecordsTemplate>
+                                                                </AutoCompleteTemplates>
+                                                                <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                                                <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocation" ValueChange="SetZIPCode"></AutoCompleteEvents>
+                                                            </SfAutoComplete>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-10">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Адрес:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderPremisesVM.ProviderAddress" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Пощ. код:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderPremisesVM.ZipCode" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Телефон:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderPremisesVM.Phone" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Форма на собственост:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderPremisesVM.IdOwnership" DataSource="this.kvMTBOwnershipSource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            </SfComboBox>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Статус:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderPremisesVM.IdStatus" DataSource="this.kvMTBStatusSource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            </SfComboBox>
+                                                        </div>
+                                                    </div>
+                                                    @if (this.kvMTBStatusInactive != null && this.candidateProviderPremisesVM.IdStatus == this.kvMTBStatusInactive.IdKeyValue)
+                                                    {
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Неактивен от:
+                                                                </label>
+                                                                <SfDatePicker Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="DateTime?" ShowClearButton="true" @bind-Value="this.candidateProviderPremisesVM.InactiveDate" Format="@GlobalConstants.DATE_FORMAT" />
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </EditForm>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                    <AccordionItem Header="Данни за помещения">
+                                        <ContentTemplate>
+                                            <nav>
+                                                <div class="row">
+                                                    <div class="col-sm-10">
+                                                        <!-- text input -->
+                                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                        {
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на помещение за материално-техническата база" OpensOn="Hover">
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewRoomClickHandler" disabled="@(this.candidateProviderPremisesVM.IdCandidateProviderPremises == 0)">Добави помещение</button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    &nbsp;
+                                                </li>
+                                                        }
+                        </div>
+                    </div>
+                    </nav>
+                    &nbsp;
+                    <div class="col-sm-12">
+                        <SfGrid DataSource="this.premisesRoomsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                AllowTextWrap="true" @ref="premisesRoomsGrid" AllowSelection="false">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridColumns>
+                                <GridColumn Width="15">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditRoomBtn(context as CandidateProviderPremisesRoomVM))">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="15" Visible="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteRoomBtn(context as CandidateProviderPremisesRoomVM))">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="PremisesRoomName" HeaderText="Помещение" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                                <GridColumn Field="PremisesTypeName" HeaderText="Вид на помещението" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                <GridColumn Field="UsageName" HeaderText="Провеждано обучение" TextAlign="TextAlign.Left" Width="60" Visible="this.IsCPO"></GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                    </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Документи">
+                        <ContentTemplate>
+                            <nav>
+                                <div class="row">
+                                    <div class="col-sm-10">
+                                        <!-- text input -->
+                                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                        {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на приложен документ за материално-техническата база" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewDocumentClickHandler" disabled="@(this.candidateProviderPremisesVM.IdCandidateProviderPremises == 0)">Добави документ</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                                        }
+                </div>
+            </div>
+            </nav>
+            &nbsp;
+            <div class="col-sm-12">
+                <SfGrid DataSource="this.mtbDocumentsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                        AllowTextWrap="true" @ref="this.mtbDocumentsGrid" AllowSelection="false">
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                    <GridColumns>
+                        <GridColumn Width="40" Visible="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(async () => await this.DeleteDocumentBtn(context as CandidateProviderPremisesDocumentVM))">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                        <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                        <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                            <Template Context="docContext">
+                                                                @{
+                                                                    var entry = (docContext as CandidateProviderPremisesDocumentVM);
+
+                                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                                    {
+                                                                        var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                                                        foreach (var item in files)
+                                                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                            <br />
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @entry.FileName
+                                                                    }
+                                                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="50%" Format="dd.MM.yyyy">
+                            <Template>
+                                                                @{
+                                                                    var ctx = context as CandidateProviderPremisesDocumentVM;
+                                                                    var date = ctx.CreationDate != null ? $"{ctx.CreationDate.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                                                    @date
+                                                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+            </ContentTemplate>
+            </AccordionItem>
+            </AccordionItems>
+            </SfAccordion>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .color-elements {
+        color: red !important;
+    }
+
+    .e-grid .e-table .e-rowcell.font-size-10px {
+        font-size: 10px !important;
+    }
+
+</style>
+
+<CandidateProviderPremisesRoomModal @ref="candidateProviderPremisesRoomModal" CallbackAfterModalSubmit="OnRoomModalSubmit" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenActiveLicenceChange || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation" />
+<CandidateProviderPremisesDocumentModal @ref="candidateProviderPremisesDocumentModal" CallbackAfterModalSubmit="OnDocumentModalSubmit" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenActiveLicenceChange || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation" />
+<CandidateProviderPremisesSearchModal @ref="searchModal" CallBackRefreshGrid="FilterApply" />
+@if (this.IsCPO)
+{
+    <CandidateProviderPremisesSpecialityModal @ref="candidateProviderPremisesSpecialityModal" CallbackAfterSpecialitiesSelected="OnPremisesSpecialityModalSubmit" />
+    <CandidateProviderPremisesCheckingModal @ref="candidateProviderPremisesCheckingModal" CallbackAfterModalSubmit="OnCheckingModalSubmit" />
+    <ShowDOCInfoModal @ref="docInfoModal" />
+}
+
+<MTBStatusModal @ref="mTBStatusModal" />

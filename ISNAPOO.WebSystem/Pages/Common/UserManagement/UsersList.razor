@@ -1,0 +1,185 @@
+﻿@page "/UserList"
+@attribute [Authorize(Policy = "ShowUserList")]
+
+@using Data.Models.Data.ProviderData
+@using ISNAPOO.Core.ViewModels.Identity
+@inherits BlazorBaseComponent
+@inject UserManager<ApplicationUser> userManager
+@inject IApplicationUserService ApplicationUserService
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Списък с потребители</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                            @if (this.GetUserRoles().Any(x => x == "ADMIN"))
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenChangeProviderToUserBtn">Промени център към потребител</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                            }
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-warning btn-outline-warning" @onclick="ChangePasswords">Изпрати парола</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid DataSource="@users" AllowSorting="true" AllowTextWrap="true" EnableAltRow="true" EnableHover="false" AllowSelection="true"
+                            AllowFiltering="true" @ref="refGrid"
+                            AllowPaging="true" AllowReordering="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ApplicationUserVM" RowSelected="RowSelectedHandler" RowDeselected="RowDeselectedHandler"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="true"></GridPageSettings>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="FamilyName" Direction="SortDirection.Ascending"></GridSortColumn>
+                            </GridSortColumns>
+                            <GridSortColumns>
+                                <GridSortColumn Field="FirstName" Direction="SortDirection.Ascending"></GridSortColumn>
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="15px">
+                                <Template>
+                                    @GetRowNumber((context as ApplicationUserVM).Id).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Type="ColumnType.CheckBox" Width="15px"></GridColumn>
+                            <GridColumn Width="25">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button  @onclick="(() => SelectedRow(context as ApplicationUserVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                        </Template>
+                            </GridColumn>
+                            <GridColumn Field="Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="UserName" HeaderText="Потребител" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="Phone" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="Email" HeaderText="Еmail" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="RolesInfo" HeaderText="Роли" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="UserStatusName" HeaderText="Статус" TextAlign="TextAlign.Center" Width="70">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var providerStatus = context as ApplicationUserVM;
+                                            if (providerStatus.IdUserStatus != 0)
+                                            {
+                                                switch (providerStatus.UserStatusName)
+                                                {
+                                                    case "Активен":
+                                                        <label class="form-label-status label label-success">@providerStatus.UserStatusName</label>
+                                                        break;
+                                                    case "Неактивен":
+                                                        <label class="form-label-status label label-danger">@providerStatus.UserStatusName</label>
+                                                        break;
+                                                }       
+                                            }
+                                            
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<SfDialog Width="40%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@IsFilterVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <EditForm id="sF" Model="model" OnValidSubmit="FilterGrid">
+             <DataAnnotationsValidator />
+                <ValidationSummary />
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                            <div class="row">
+                                <div class="col-sm-132">
+                                    <div class="form-group">
+                                        <label>ЦПО/ЦИПО: </label>
+                                        <SfAutoComplete @ref="cpAutoComplete" TValue="int?" @bind-Value="this.model.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="@candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                            <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="MixCPOandCIPONameOwner"></AutoCompleteFieldSettings>
+                                            <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                            <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>          
+                            </div>
+                            <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label">ЕГН/ЛНЧ/ИДН: </label>
+                                    <SfTextBox @bind-Value="@this.model.Indent"></SfTextBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Роля:
+                                    </label>
+                                    <SfMultiSelect @ref="this.sfMultiSelect" TValue="List<string>" TItem="ApplicationRoleVM" Mode="@VisualMode.Default" DataSource="@roleSource" @bind-Value="@this.model.RoleIds">
+                                        <MultiSelectFieldSettings Text="RoleName" Value="Id"></MultiSelectFieldSettings>
+                                    </SfMultiSelect>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Дата на създаване от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.UserCreatedDateFrom" ShowClearButton="true" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Дата на създаване до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.UserCreatedDateTo" ShowClearButton="true" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <button type="submit" class="btn btn-info" form="sF" @onclick="(() =>  { this.IsSearchConfirmed = true;})">Търси</button>
+            <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="(() =>  this.IsFilterVisible = false)">Отказ</button>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<UserModal @ref="userModal" CallbackAfterSubmit="OnUserSubmit" />
+<ToastMsg @ref="toast" />
+<ChangeProviderUserToProviderModal @ref="changeProviderToUserModal" />

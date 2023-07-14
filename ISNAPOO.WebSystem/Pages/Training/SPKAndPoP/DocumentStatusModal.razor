@@ -1,0 +1,90 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="80%" Height="80%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3014" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за история на статуса на документ за ПК</Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card" style="margin-bottom: 0px;">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    <ul class="navbar-nav">
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid DataSource="statusesSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                        AllowTextWrap="true" @ref="statusesGrid" AllowSelection="false" AllowPaging="true" 
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridEvents TValue="DocumentStatusVM" OnToolbarClick="ToolbarClick" />
+                                    <GridColumns>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8%">
+                                            <Template>
+                                                @GetRowNumber(statusesGrid, (context as DocumentStatusVM).Id).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="PersonName" HeaderText="Потребител" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                                        <GridColumn Field="StatusDate" HeaderText="Дата на промяна" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                                        <GridColumn Field="StatusValue" HeaderText="Статус" TextAlign="TextAlign.Center" Width="20%">
+                                            <Template>
+                                                <div class="text-center">
+                                                    @{
+                                                        var doc = context as DocumentStatusVM;
+                                                        switch (doc.StatusValue)
+                                                        {
+                                                            case "Неподаден":
+                                                                <label class="form-label-status label label-warning">@doc.StatusValue</label>
+                                                                break;
+                                                            case "Подаден":
+                                                                <label class="form-label-status label label-primary">@doc.StatusValue</label>
+                                                                break;
+                                                            case "Върнат":
+                                                                <label class="form-label-status label label-danger">@doc.StatusValue</label>
+                                                                break;
+                                                            case "Вписан в Регистъра":
+                                                                <label class="form-label-status label label-success">@doc.StatusValue</label>
+                                                                break;
+                                                            case "Отказан":
+                                                                <label class="form-label-status label label-danger">@doc.StatusValue</label>
+                                                                break;
+                                                            case "Скрит от РИДПК":
+                                                                <label class="form-label-status label label-danger">@doc.StatusValue</label>
+                                                                break;
+                                                        }
+                                                    }
+                                                </div>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="StatusComment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="100%"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+

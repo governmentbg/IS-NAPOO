@@ -1,0 +1,48 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="70%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Позволени действия</Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    <ul class="navbar-nav">
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Content="Добавяне на позволено действие" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewPolicy">Добави</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid DataSource="@policies" AllowSorting="true" EnableAltRow="true" EnableHover="false" AllowSelection="true"
+                                        AllowFiltering="true" @ref="refPolicyGrid" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                                        AllowPaging="true" AllowReordering="true" AllowResizing="true" AllowExcelExport="true" AllowPdfExport="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="10"></GridColumn>
+                                        <GridColumn Field="PolicyCode" HeaderText="Код" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                                        <GridColumn Field="PolicyDescription" HeaderText="Описание" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                                    </GridColumns>
+                                    <GridEvents TValue="PolicyVM" RowSelected="PolicySelectedHandler" RowDeselected="PolicyDeselectedHandler" OnToolbarClick="ToolbarClick" />
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

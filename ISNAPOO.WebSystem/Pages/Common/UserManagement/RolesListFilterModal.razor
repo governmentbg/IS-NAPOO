@@ -1,0 +1,74 @@
+﻿@using ISNAPOO.Core.ViewModels.Identity
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Филтър</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="searchForm">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="card">
+                    <div class="card-block" style="">
+                        
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Код на позволено действие: </label>
+                                        <SfAutoComplete @ref="this.sfAutoCompleteRoleClaimType" TValue="string" TItem="RoleClaim" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                        @bind-Value="this.roleClaim.Type"
+                                                        DataSource="this.roleClaims" AllowFiltering="true">
+                                            <AutoCompleteTemplates TItem="RoleClaim">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="Type" Value="Type"/>
+                                            <AutoCompleteEvents TValue="string" TItem="RoleClaim" Filtering="OnFilterRoleClaimType" ></AutoCompleteEvents>
+                                        <AutoCompleteEvents TItem="RoleClaim" TValue="string" ValueChange="OnValueChangeType"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Описание на позволено действие: </label>
+                                        <SfAutoComplete @ref="this.sfAutoCompleteRoleClaimValue" TValue="string" TItem="RoleClaim" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                        @bind-Value="this.roleClaim.Value"
+                                                        DataSource="this.roleClaims" AllowFiltering="true">
+                                            <AutoCompleteTemplates TItem="RoleClaim">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="Value" Value="Value"/>
+                                            <AutoCompleteEvents TValue="string" TItem="RoleClaim" Filtering="OnFilterRoleClaimValue"></AutoCompleteEvents>
+                                            <AutoCompleteEvents TItem="RoleClaim" TValue="string" ValueChange="OnValueChangeValue"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                   
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="searchForm" @onclick="SearchBtn">Търси</button>
+                            <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" @onclick="ClearBtn">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

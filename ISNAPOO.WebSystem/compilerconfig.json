@@ -1,0 +1,26 @@
+﻿[
+  {
+    "outputFile": "wwwroot/files/assets/scss/style.css",
+    "inputFile": "wwwroot/files/assets/scss/style.scss"
+  },
+  {
+    "outputFile": "wwwroot/files/assets/scss/partials/menu/_pcmenu.css",
+    "inputFile": "wwwroot/files/assets/scss/partials/menu/_pcmenu.scss"
+  },
+  {
+    "outputFile": "wwwroot/files/assets/scss/partials/other/_alert.css",
+    "inputFile": "wwwroot/files/assets/scss/partials/other/_alert.scss"
+  },
+  {
+    "outputFile": "wwwroot/files/assets/scss/partials/responsive/_responsive.css",
+    "inputFile": "wwwroot/files/assets/scss/partials/responsive/_responsive.scss"
+  },
+  {
+    "outputFile": "wwwroot/files/assets/scss/partials/other/_color.css",
+    "inputFile": "wwwroot/files/assets/scss/partials/other/_color.scss"
+  },
+  {
+    "outputFile": "wwwroot/files/assets/scss/partials/_general.css",
+    "inputFile": "wwwroot/files/assets/scss/partials/_general.scss"
+  }
+]

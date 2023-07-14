@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EmploymentContractsResponse xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts/Response">
+  <Identity>
+    <ID xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">ID___1</ID>
+    <TYPE xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">Bulstat</TYPE>
+  </Identity>
+  <EContracts>
+    <EContract xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">
+      <ContractorBulstat>ContractorBulstat1</ContractorBulstat>
+      <ContractorName>ContractorName1</ContractorName>
+      <IndividualEIK>IndividualEIK1</IndividualEIK>
+      <IndividualNames>IndividualNames1</IndividualNames>
+      <StartDate>1900-01-01</StartDate>
+      <LastAmendDate>1900-01-01</LastAmendDate>
+      <EndDate>1900-01-01</EndDate>
+      <Reason>01</Reason>
+      <TimeLimit>1900-01-01</TimeLimit>
+      <EcoCode>EcoCode1</EcoCode>
+      <ProfessionCode>ProfessionCode1</ProfessionCode>
+      <Remuneration>1</Remuneration>
+      <ProfessionName>ProfessionName1</ProfessionName>
+      <EKATTECode>EKATTECode1</EKATTECode>
+    </EContract>
+    <EContract xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">
+      <ContractorBulstat>ContractorBulstat2</ContractorBulstat>
+      <ContractorName>ContractorName2</ContractorName>
+      <IndividualEIK>IndividualEIK2</IndividualEIK>
+      <IndividualNames>IndividualNames2</IndividualNames>
+      <StartDate>0001-01-01</StartDate>
+      <LastAmendDate>0001-01-01</LastAmendDate>
+      <EndDate>0001-01-01</EndDate>
+      <Reason>02</Reason>
+      <TimeLimit>0001-01-01</TimeLimit>
+      <EcoCode>EcoCode2</EcoCode>
+      <ProfessionCode>ProfessionCode2</ProfessionCode>
+      <Remuneration>-79228162514264337593543950335</Remuneration>
+      <ProfessionName>ProfessionName2</ProfessionName>
+      <EKATTECode>EKATTECode2</EKATTECode>
+      <LastTermId>1</LastTermId>
+
+    </EContract>
+    <EContract xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">
+      <ContractorBulstat>ContractorBulstat3</ContractorBulstat>
+      <ContractorName>ContractorName3</ContractorName>
+      <IndividualEIK>IndividualEIK3</IndividualEIK>
+      <IndividualNames>IndividualNames3</IndividualNames>
+      <StartDate>9999-12-31</StartDate>
+      <LastAmendDate>9999-12-31</LastAmendDate>
+      <EndDate>9999-12-31</EndDate>
+      <Reason>03</Reason>
+      <TimeLimit>9999-12-31</TimeLimit>
+      <EcoCode>EcoCode3</EcoCode>
+      <ProfessionCode>ProfessionCode3</ProfessionCode>
+      <Remuneration>79228162514264337593543950335</Remuneration>
+      <ProfessionName>ProfessionName3</ProfessionName>
+      <EKATTECode>EKATTECode3</EKATTECode>
+      <LastTermId>1</LastTermId>
+    </EContract>
+  </EContracts>
+  <Status>
+    <Code xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">1</Code>
+    <Message xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts">Message1</Message>
+  </Status>
+  <ContractsFilter>All</ContractsFilter>
+  <ReportDate>1900-01-01T01:01:01+02:00</ReportDate>
+</EmploymentContractsResponse>

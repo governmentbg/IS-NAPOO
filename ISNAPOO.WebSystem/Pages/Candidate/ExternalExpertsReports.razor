@@ -1,0 +1,88 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @*<li class="nav-item d-none d-sm-inline-block">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewReportHandler">Добави доклад</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                            &nbsp;
+                            </li>*@
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="reportsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="reportsGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ProcedureExternalExpertVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(this.reportsGrid, (context as ProcedureExternalExpertVM).IdProcedureExternalExpert).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10" Visible="!this.hideUploadBtn">
+                                <Template>
+                                    <SfTooltip Content="Прикачи доклад" Position="TooltipPosition.BottomCenter" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => this.AddNewReportHandler(context as ProcedureExternalExpertVM))">
+                                            <i class="fa fa-file-text-o"></i>
+                                        </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdProcedureExternalExpert" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Expert.Person.FullName" HeaderText="Външен експерт" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ProfessionalDirection.DisplayNameAndCode" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="StartedProcedure.ExpertReportDeadline" HeaderText="Краен срок за представяне на доклад" Format="dd.MM.yyyy" TextAlign="TextAlign.Left" Width="40">
+                                <Template>
+                                    @{
+                                        var entry = context as ProcedureExternalExpertVM;
+                                        var dateInfo = entry.StartedProcedure.ExpertReportDeadline.HasValue ? $"{entry.StartedProcedure.ExpertReportDeadline.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @dateInfo
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ReportDate" HeaderText="Дата на прикачване" Format="dd.MM.yyyy" TextAlign="TextAlign.Left" Width="20">
+                                <Template>
+                                    @{
+                                        var entry = context as ProcedureExternalExpertVM;
+                                        var dateInfo = entry.UploadDate.HasValue ? $"{entry.UploadDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @dateInfo
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="30">
+                                <Template>
+                                    @{
+                                        var entry = (context as ProcedureExternalExpertVM);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry.FileName))">@entry.FileName</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ExternalExpertDocumentModal @ref="externalExpertDocumentModal" CallBackAfterDocumentSubmit="UpdateAfterDocumentSubmitAsync" />
+

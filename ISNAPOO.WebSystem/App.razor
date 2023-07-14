@@ -1,0 +1,24 @@
+﻿@using ISNAPOO.WebSystem.Security.Components
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" >
+
+                <Authorizing>
+                    Authorizing.............
+                </Authorizing>
+               
+                <NotAuthorized>
+                    <NotAuthorizedHandler></NotAuthorizedHandler>
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p role="alert">Несъществуващ адрес......</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

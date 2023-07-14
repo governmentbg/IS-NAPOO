@@ -1,0 +1,1402 @@
+﻿@page "/licensing"
+
+@using System.IO;
+
+@using DocuWorkService
+@using ISNAPOO.Core.Contracts.Licensing
+@using ISNAPOO.Core.Services
+@using ISNAPOO.Core.ViewModels.CPO.LicensingProcedureDoc
+@using ISNAPOO.Core.ViewModels.NAPOOCommon
+@using ISNAPOO.Core.ViewModels.SPPOO
+@using ISNAPOO.Core.HelperClasses
+
+@inject Microsoft.JSInterop.IJSRuntime JS
+@inject ILicensingProcedureDocumentCPOService licProcDocCPOService
+@inject IDocuService docuService
+
+<h3>Приложения за лицензиране на ЦПО</h3>
+
+<br />
+
+@*<button class="btn btn-primary" @onclick="@Application_1">Application 1</button>
+
+<button class="btn btn-primary" @onclick="@Application_2">Application 2</button>
+
+<button class="btn btn-primary" @onclick="@Application_3">Application 3</button>
+
+<button class="btn btn-primary" @onclick="@Application_4">Application 4</button>
+
+<button class="btn btn-primary" @onclick="@Application_5">Application 5</button>
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="@Application_6">Application 6</button>
+
+<button class="btn btn-primary" @onclick="@Application_7">Application 7</button>
+
+<button class="btn btn-primary" @onclick="@Application_8">Application 8</button>
+
+<button class="btn btn-primary" @onclick="@Application_9">Application 9</button>
+
+<button class="btn btn-primary" @onclick="@Application_10">Application 10</button>
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="@Application_11">Application 11</button>
+
+<button class="btn btn-primary" @onclick="@Application_13">Application 13</button>
+
+<button class="btn btn-primary" @onclick="@Application_14">Application 14</button>
+
+<button class="btn btn-primary" @onclick="@Application_15">Application 15</button>
+
+<button class="btn btn-primary" @onclick="@Application_16">Application 16</button>
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="@Application_17">Application 17</button>
+
+<button class="btn btn-primary" @onclick="@Application_18">Application 18</button>
+
+<button class="btn btn-primary" @onclick="@Application_19">Application 19</button>
+
+<button class="btn btn-primary" @onclick="@Application_20">Application 20</button>
+
+<button class="btn btn-primary" @onclick="@Application_21">Application 21</button>
+*@
+<br />
+<br />
+
+@*<button class="btn btn-primary" @onclick="@CreateLicensingApplication">Заявление за лицензиране</button>*@
+
+<button class="btn btn-primary" @onclick="@DocuWebServiceTest">DocuWebTest</button>
+
+@code {
+    List<Expert> externalExperts;
+    Expert expert;
+    List<ProfessionalDirectionVM> professionalDirectionVM;
+
+    CPOLicensingApplication1 application1;
+    CPOLicensingApplication2 application2;
+    CPOLicensingApplication3 application3;
+    CPOLicensingApplication4 application4;
+    CPOLicensingApplication5 application5;
+    CPOLicensingApplication6 application6;
+    CPOLicensingApplication7 application7;
+    CPOLicensingApplication8 application8;
+    CPOLicensingApplication9 application9;
+    CPOLicensingApplication10 application10;
+    CPOLicensingApplication11 application11;
+    CPOLicensingApplication13 application13;
+    CPOLicensingApplication14 application14;
+    CPOLicensingApplication15 application15;
+    CPOLicensingApplication16 application16;
+    CPOLicensingApplication17 application17;
+    CPOLicensingApplication18 application18;
+    CPOLicensingApplication19 application19;
+    CPOLicensingApplication20 application20;
+    CPOLicensingApplication21 application21;
+
+    MemoryStream documentStream;
+    CPOMainData cPOMainData;
+    ContactPersonData contactPersonData;
+    PeriodOfOrderCompletion periodOfOrderCompletion;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        this.externalExperts = new List<Expert>();
+
+        this.professionalDirectionVM = new List<ProfessionalDirectionVM>();
+
+        this.application1 = new CPOLicensingApplication1();
+        this.application2 = new CPOLicensingApplication2();
+        this.application3 = new CPOLicensingApplication3();
+        this.application4 = new CPOLicensingApplication4();
+        this.application5 = new CPOLicensingApplication5();
+        this.application6 = new CPOLicensingApplication6();
+        this.application7 = new CPOLicensingApplication7();
+        this.application8 = new CPOLicensingApplication8();
+        this.application9 = new CPOLicensingApplication9();
+        this.application10 = new CPOLicensingApplication10();
+        this.application11 = new CPOLicensingApplication11();
+        this.application13 = new CPOLicensingApplication13();
+        this.application14 = new CPOLicensingApplication14();
+        this.application15 = new CPOLicensingApplication15();
+        this.application16 = new CPOLicensingApplication16();
+        this.application17 = new CPOLicensingApplication17();
+        this.application18 = new CPOLicensingApplication18();
+        this.application19 = new CPOLicensingApplication19();
+        this.application20 = new CPOLicensingApplication20();
+        this.application21 = new CPOLicensingApplication21();
+
+        this.contactPersonData = new ContactPersonData();
+
+        this.cPOMainData = new CPOMainData();
+
+        this.periodOfOrderCompletion = new PeriodOfOrderCompletion();
+    }
+
+
+
+    public async Task DocuWebServiceTest()
+    {
+        var date = DateTime.Parse("17-01-2023 15:41");
+        var doc = await docuService.GetIdentDocument("Раб-391", 0, date);
+    }
+
+    //protected async void Application_1()
+    //{
+    //    externalExperts = new List<Expert>
+    //    {
+    //        new Expert()
+    //        {
+    //            ProfessionalDirection = "Електротехника и енергетика",
+    //            Name = "Стойка Стоева"
+    //        },
+    //        new Expert()
+    //        {
+    //            ProfessionalDirection = "Електротехника и енергетика",
+    //            Name = "Иван Иванов"
+    //        }
+    //    };
+
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Име на ЦПО",
+    //            CompanyName = "\"ЦПО\" ЕООД",
+    //            CityName = "София",
+
+
+    //        };
+
+    //    professionalDirectionVM = new List<ProfessionalDirectionVM>
+    //    {
+    //        new ProfessionalDirectionVM
+    //        {
+    //            Name = "Електротехника и енергетика",
+    //            Code = "522",
+    //            Professions = new List<ProfessionVM>()
+    //            {
+    //                new ProfessionVM()
+    //                {
+    //                    Name = "Електротехник",
+    //                    Code = "522010",
+
+    //                    Specialities = new List<SpecialityVM>()
+    //                    {
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електродомакинска техника",
+    //                            Code = "5220110",
+    //                            VQS_Name = "III"
+    //                        },
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрически машини и апарати",
+    //                            Code = "5220101",
+    //                            VQS_Name = "III"
+    //                        }
+    //                    }
+    //                },
+    //                new ProfessionVM()
+    //                {
+    //                    Name = "Електромонтьор",
+    //                    Code = "522020",
+
+    //                    Specialities = new List<SpecialityVM>()
+    //                    {
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрически машини и апарати",
+    //                            Code = "5220201",
+    //                            VQS_Name = "II"
+    //                        },
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрообзавеждане на производството",
+    //                            Code = "5220204",
+    //                            VQS_Name = "II"
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    };
+
+        //application1 = new CPOLicensingApplication1
+        //    {
+        //        ChiefExpert = "Иван Иванов",
+        //        ApplicationNumber = "00001",
+        //        CPOMainData = cPOMainData,
+        //        ProfessionalDirections = professionalDirectionVM,
+        //        ExternalExperts = externalExperts
+        //    };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_1(application1);
+    //    await FileUtils.SaveAs(JS, "Application1.docx", documentStream.ToArray());
+    //}
+
+    //protected async void Application_2()
+    //{
+
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ОТБОР НА НАДЕЖДАТА",
+    //            CompanyName = "\"СПОРТС МЕНИДЖМЪНТ БЪЛГАРИЯ\" ЕООД",
+    //            CityName = "София"
+    //        };
+
+    //    externalExperts = new List<Expert>
+    //    {
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Търговия на едро и дребно",
+    //            Name = "Иван Иванов"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Счетоводство и данъчно облагане",
+    //            Name = "Стефан Стефанов"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Администрация и управление",
+    //            Name = "Владимир Владимиров"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Секретарски и административни офис дейности",
+    //            Name = "Филип Филипов"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Пътувания, туризъм и свободното време",
+    //            Name = "Петранка Петранкова"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Спорт",
+    //            Name = "Кремена Кременова"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Фризьорски и козметични услуги",
+    //            Name = "Трендафил Трендафилов"
+    //        }
+    //    };
+
+    //    application2 = new CPOLicensingApplication2
+    //        {
+    //            OrderNumber = "00001",
+    //            OrderDate = DateTime.UtcNow.AddDays(-2),
+    //            CPOMainData = cPOMainData,
+    //            ProfessionsCount = 8,
+    //            SpecialtiesCount = 11,
+    //            ExternalExpertCommissionReportTerm = DateTime.UtcNow.AddDays(7),
+    //            ExternalExperts = externalExperts,
+    //            ExpertCommissionName = "Стопанско управление и администрация",
+    //            ExpertCommissionReportTerm = DateTime.UtcNow.AddDays(14),
+    //            ChiefExpert = "Пенка Николова"
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_2(application2);
+    //    await FileUtils.SaveAs(JS, "Application2.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_3()
+    //{
+    //    cPOMainData = new CPOMainData()
+    //        {
+    //            CompanyName = "\"Сайбър Сървисис\" ЕООД",
+    //            CityName = "София"
+    //        };
+
+    //    contactPersonData = new ContactPersonData
+    //        {
+    //            FullName = "Ина Станимирова Пенелова",
+    //            StreetName = "\"Панагюрище\" , номер 19",
+    //            CityName = "София",
+    //            PostCode = "1000"
+    //        };
+
+    //    externalExperts = new List<Expert>
+    //    {
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Секретарски и административни офис дейности",
+    //            Name = "Трифон Трифонов"
+    //        },
+    //         new Expert
+    //        {
+    //            ProfessionalDirection = "Приложна информатика",
+    //            Name = "Мария Маркова"
+    //        },
+    //         new Expert
+    //        {
+    //            ProfessionalDirection = "Сигурност",
+    //            Name = "Калин Калинов"
+    //        },
+    //    };
+
+
+    //    application3 = new CPOLicensingApplication3
+    //        {
+    //            ContactPerson = contactPersonData,
+    //            ContactPersonSirname = "Пенелова",
+    //            ApplicationNumber = "00002",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-10),
+    //            CPOMainData = cPOMainData,
+    //            OrderNumber = "00021",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-7),
+    //            ChiefExpert = "Пенка Николова",
+    //            IntegerTax = "55",
+    //            StringTax = "петдесет и пет",
+    //            ExternalExperts = externalExperts
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_3(application3);
+    //    await FileUtils.SaveAs(JS, "Application3.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_4()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "МАСТЪР КОМЮНИКЕЙШЪН ЕНД КОУЧИНГ",
+    //            CompanyName = "ФОНДАЦИЯ БАЛКАНСКА МЕЖДУНАРОДНА АКАДЕМИЯ",
+    //            CompanyId = "47124912",
+    //            CityName = "София"
+    //        };
+
+    //    expert = new Expert
+    //        {
+    //            Name = "Юлиян Юлиянов",
+    //            EGN = "8910155684",
+    //            IdCardNumber = "687415285",
+    //            IdCardIssueDate = DateTime.UtcNow.AddYears(-7).AddMonths(4).AddDays(13),
+    //            IdCardCityOfIssue = "София",
+    //            AddressByIdCard = "Ул.Трендафил, номер 17",
+    //            ProfessionalDirection = "Търговия на едро и дребно",
+    //            TaxOffice = "София"
+    //        };
+
+    //    application4 = new CPOLicensingApplication4
+    //        {
+    //            ContractNumber = "000102",
+    //            DateOfDraft = DateTime.UtcNow,
+    //            OrderNumber = "001342",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-5),
+    //            CPOMainData = cPOMainData,
+    //            ExternalExpertData = expert,
+    //            ContractTerm = DateTime.UtcNow.AddDays(14)
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_4(application4);
+    //    await FileUtils.SaveAs(JS, "Application4.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_5()
+    //{
+    //    contactPersonData = new ContactPersonData
+    //        {
+    //            FullName = "Тодор Тошев",
+    //            Sirname = "Тошев",
+    //            StreetName = "Незабравка, 14",
+    //            CityName = "София",
+    //            PostCode = "1202"
+    //        };
+
+
+    //    application5 = new CPOLicensingApplication5
+    //        {
+    //            ContactPersonData = contactPersonData,
+    //            IntegerTax = "100",
+    //            StringTax = "Сто",
+    //            OutputNumber = "0001240",
+    //            OutputDate = DateTime.UtcNow.AddDays(-14),
+    //            ChiefExpert = "Пенка Николова",
+    //            TelephoneNumber = "02/952 46 25",
+    //            EmailAddress = "penka.nikolova@napoo.bg"
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_5(application5);
+    //    await FileUtils.SaveAs(JS, "Application5.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_6()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "МАСТЪР КОМЮНИКЕЙШЪН ЕНД КОУЧИНГ",
+    //            CompanyName = "ФОНДАЦИЯ БАЛКАНСКА МЕЖДУНАРОДНА АКАДЕМИЯ",
+    //            CompanyId = "47124912",
+    //            CityName = "София"
+    //        };
+
+    //    List<string> issues = new List<string>
+    //    {
+    //        "Несъответствие 1: Текст на несътветствието.",
+    //        "Несъответствие 2: Текст на несътветствието.",
+    //        "Несъответствие 3: Текст на несътветствието.",
+    //        "Несъответствие 4: Текст на несътветствието.",
+    //    };
+
+    //    application6 = new CPOLicensingApplication6
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            ApplicationNumber = "000058",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-10),
+    //            Issues = issues
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_6(application6);
+    //    await FileUtils.SaveAs(JS, "Application6.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_7()
+    //{
+    //    contactPersonData = new ContactPersonData
+    //        {
+    //            FullName = "Тодор Александров",
+    //            Sirname = "Александров",
+    //            CityName = "София",
+    //            PostCode = "1000"
+    //        };
+
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Кура Домо България",
+    //            CompanyName = "Кура Домо България ЕООД",
+    //            CityName = "София"
+    //        };
+
+    //    List<string> issues = new List<string>
+    //    {
+    //        "Несъответствие 1: Текст на несътветствието.",
+    //        "Несъответствие 2: Текст на несътветствието.",
+    //        "Несъответствие 3: Текст на несътветствието.",
+    //        "Несъответствие 4: Текст на несътветствието.",
+    //    };
+
+    //    application7 = new CPOLicensingApplication7
+    //        {
+    //            ContactPersonData = contactPersonData,
+    //            CPOMainData = cPOMainData,
+    //            ChiefExpert = "Пенка Николова",
+    //            TelephoneNumber = "02/954 45 28",
+    //            Issues = issues
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_7(application7);
+    //    await FileUtils.SaveAs(JS, "Application7.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_8()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Beauty Concept",
+    //            CompanyName = "\"СТУДИО ЕВА\" ЕООД",
+    //            CityName = "Бургас"
+    //        };
+
+    //    application8 = new CPOLicensingApplication8
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            NotificationLetterNumber = "156854",
+    //            NotificationLetterOutputDate = DateTime.UtcNow.AddDays(-5),
+    //            CPOMainData = cPOMainData,
+    //            ApplicationNumber = "6547",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-10),
+    //            ReportNumber = "15154",
+    //            ReportInputDate = DateTime.UtcNow.AddDays(-10),
+    //            DueDate = DateTime.UtcNow.AddDays(-5)
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_8(application8);
+    //    await FileUtils.SaveAs(JS, "Application8.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_9()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Мърфи-М",
+    //            CompanyName = "\"Мърфи-М\" ЕООД",
+    //            CityName = "София"
+    //        };
+
+    //    application9 = new CPOLicensingApplication9
+    //        {
+    //            OrderNumber = "1847",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            CPOMainData = cPOMainData,
+    //            ChiefExpert = "Пенка Николова"
+    //        };
+
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_9(application9);
+    //    await FileUtils.SaveAs(JS, "Application9.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_10()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Мърфи-М",
+    //            CompanyName = "\"Мърфи-М\" ЕООД",
+    //            CityName = "София"
+    //        };
+
+    //    contactPersonData = new ContactPersonData
+    //        {
+    //            FullName = "Владимир Евтимов",
+    //            Sirname = "Евтимов",
+    //            CityName = "София",
+    //            PostCode = "1042"
+    //        };
+
+    //    application10 = new CPOLicensingApplication10
+    //        {
+    //            ContactPersonData = contactPersonData,
+
+    //            OrderNumber = "1847",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            CPOMainData = cPOMainData,
+    //            NotificationLetterNumber = "4654984",
+    //            NotificationLetterOutputDate = DateTime.UtcNow.AddDays(-10),
+    //            ChiefExpert = "Пенка Николова",
+    //            DueDate = DateTime.UtcNow.AddDays(-10)
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_10(application10);
+    //    await FileUtils.SaveAs(JS, "Application10.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_11()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    expert = new Expert
+    //        {
+    //            ProfessionalDirection = "Компютърни науки",
+    //            Name = "Георги Георигиев"
+    //        };
+
+    //    periodOfOrderCompletion = new PeriodOfOrderCompletion
+    //        {
+    //            FromDate = DateTime.UtcNow.AddDays(-15),
+    //            ToDate = DateTime.UtcNow.AddDays(-5)
+    //        };
+
+    //    professionalDirectionVM = new List<ProfessionalDirectionVM>
+    //    {
+    //        new ProfessionalDirectionVM
+    //        {
+    //            Name = "Електротехника и енергетика",
+    //            Code = "522",
+    //            Professions = new List<ProfessionVM>()
+    //            {
+    //                new ProfessionVM()
+    //                {
+    //                    Name = "Електротехник",
+    //                    Code = "522010",
+
+    //                    Specialities = new List<SpecialityVM>()
+    //                    {
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електродомакинска техника",
+    //                            Code = "5220110",
+    //                            VQS_Name = "III"
+    //                        },
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрически машини и апарати",
+    //                            Code = "5220101",
+    //                            VQS_Name = "III"
+    //                        }
+    //                    }
+    //                },
+    //                new ProfessionVM()
+    //                {
+    //                    Name = "Електромонтьор",
+    //                    Code = "522020",
+
+    //                    Specialities = new List<SpecialityVM>()
+    //                    {
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрически машини и апарати",
+    //                            Code = "5220201",
+    //                            VQS_Name = "II"
+    //                        },
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрообзавеждане на производството",
+    //                            Code = "5220204",
+    //                            VQS_Name = "II"
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        },
+    //        new ProfessionalDirectionVM
+    //        {
+    //            Name = "Компютърни науки",
+    //            Code = "481",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Програмист",
+    //                    Code = "481010",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM
+    //                        {
+    //                               Name = "Програмно осигуряване",
+    //                               Code = "4810101",
+    //                               VQS_Name = "II"
+    //                        }
+    //                    }
+    //                },
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Системен програмист",
+    //                    Code = "481020",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM
+    //                        {
+    //                            Name = "Системно програмиране",
+    //                            Code = "4810201",
+    //                            VQS_Name = "III"
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    };
+
+    //    application11 = new CPOLicensingApplication11
+    //        {
+    //            ExternalExpertData = expert,
+    //            CPOMainData = cPOMainData,
+    //            ScoreTable = new Dictionary<int, List<ScoreTableData>>
+    //        {
+    //            {
+    //                1, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "1", MaxValue = 10.00, Value = 10.00 },
+    //                    new ScoreTableData { Id = "1.1.1", MaxValue = 1.00, Value = 1.00 },
+    //                    new ScoreTableData { Id = "1.1.2", MaxValue = 1.00, Value = 1.00 },
+    //                    new ScoreTableData { Id = "1.2.1", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "1.2.2", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "1.2.3", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "1.2.4", MaxValue = 2.00, Value = 2.00 }
+    //                }
+    //            },
+    //            {
+    //                2, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "2", MaxValue = 7.00, Value = 7.00 },
+    //                }
+    //            },
+    //            {
+    //                3, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "3", MaxValue = 10.00, Value = 10.00 },
+    //                    new ScoreTableData { Id = "3.1.1.", MaxValue = 5.00, Value = 5.00 },
+    //                    new ScoreTableData { Id = "3.1.2.", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "3.2.1.", MaxValue = 3.00, Value = 3.00 }
+    //                }
+    //            },
+    //            {
+    //                4, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "4", MaxValue = 5.00, Value = 5.00 },
+    //                    new ScoreTableData { Id = "4.1.1.", MaxValue = 2.00, Value = 1.50 },
+    //                    new ScoreTableData { Id = "4.1.2.", MaxValue = 1.00, Value = 0.99 },
+    //                    new ScoreTableData { Id = "4.1.3.", MaxValue = 1.00, Value = 0.04 },
+    //                    new ScoreTableData { Id = "4.2.1.", MaxValue = 1.00, Value = 0.23 }
+    //                }
+    //            }
+    //        },
+    //            MeanScore = "32.00",
+    //            OrderNumber = "5181",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-5),
+    //            PeriodOfOrderCompletion = periodOfOrderCompletion,
+    //            ProfessionalDirections = professionalDirectionVM
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_11(application11);
+    //    await FileUtils.SaveAs(JS, "Application11.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_13()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    DateTime dayOfMeeting = DateTime.UtcNow;
+
+    //    application13 = new CPOLicensingApplication13
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            ExpertCommissionName = "Здравеопазване и спорт",
+    //            DateOfMeeting = dayOfMeeting,
+    //            DayOfWeek = ((DaysOfWeek)dayOfMeeting.DayOfWeek).ToString(),
+    //            Time = TimeOnly.FromDateTime(dayOfMeeting),
+    //            OrderNumber = "521964",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            CPOMainData = cPOMainData,
+    //            ExpertCommissionMembers = new List<string> { "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов" },
+    //            HeadOfExpertCommission = "Цойка Стоилова"
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_13(application13);
+    //    await FileUtils.SaveAs(JS, "Application13.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_14()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас",
+    //            CompanyId = "951753654"
+    //        };
+
+    //    expert = new Expert
+    //        {
+    //            Name = "Юлиян Юлиянов Вергов",
+    //            EGN = "8910155684",
+    //            IdCardNumber = "687415285",
+    //            IdCardIssueDate = DateTime.UtcNow.AddYears(-7).AddMonths(4).AddDays(13),
+    //            IdCardCityOfIssue = "София",
+    //            AddressByIdCard = "Ул.Трендафил, номер 17",
+    //            ProfessionalDirection = "Търговия на едро и дребно",
+    //            TaxOffice = "София"
+    //        };
+
+    //    application14 = new CPOLicensingApplication14
+    //        {
+    //            ChiefExpert = expert,
+    //            ExpertCommissionName = "Професионално ориентиране",
+    //            OrderNumber = "16818",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-4),
+    //            CPOMainData = cPOMainData,
+    //            DateOfDraft = DateTime.UtcNow,
+    //            ContractNumber = "98416"
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_14(application14);
+    //    await FileUtils.SaveAs(JS, "Application14.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_15()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас",
+    //            CompanyId = "951753654"
+    //        };
+
+    //    expert = new Expert
+    //        {
+    //            Name = "Юлиян Юлиянов",
+    //            EGN = "8910155684",
+    //            IdCardNumber = "687415285",
+    //            IdCardIssueDate = DateTime.UtcNow.AddYears(-7).AddMonths(4).AddDays(13),
+    //            IdCardCityOfIssue = "София",
+    //            AddressByIdCard = "Ул.Трендафил, номер 17",
+    //            ProfessionalDirection = "Търговия на едро и дребно",
+    //            TaxOffice = "София"
+    //        };
+
+    //    application15 = new CPOLicensingApplication15
+    //        {
+    //            ExpertCommissionMember = expert,
+    //            ExpertCommissionName = "Професионално ориентиране",
+    //            OrderNumber = "16818",
+    //            CPOMainData = cPOMainData,
+    //            DateOfDraft = DateTime.UtcNow,
+    //            ContractNumber = "98416",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10)
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_15(application15);
+    //    await FileUtils.SaveAs(JS, "Application15.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_16()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    List<string> meetingAttendance = new List<string>
+    //    {
+    //        "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов"
+    //    };
+
+    //    List<ProfessionalDirectionVM> professionalDirections = new List<ProfessionalDirectionVM>
+    //    {
+    //       new ProfessionalDirectionVM
+    //       {
+    //           Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //           Code = "213",
+    //           Professions = new List<ProfessionVM>
+    //           {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Компютърен график",
+    //                    Code = "213060",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Компютърна графика", Code = "2130601", VQS_Name = "трета" }
+    //                    }
+    //                }
+    //           },
+    //       },
+    //       new ProfessionalDirectionVM
+    //       {
+    //            Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //            Code = "213",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Графичен дизайнер",
+    //                    Code = "213070",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Графичен дизайн", Code = "2130701", VQS_Name = "трета" }
+    //                    }
+    //                },
+    //            }
+    //       },
+    //       new ProfessionalDirectionVM
+    //       {
+    //            Name = "Секретарски и административни офис дейности",
+    //            Code = "346",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Първа професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "4810201", VQS_Name = "трета" }
+    //                        }
+    //                    },
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Втора професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "4810201", VQS_Name = "трета" }
+    //                        }
+    //                    },
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Трета професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "9658198", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Трета специалност", Code = "2985581", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Четвърта специалност", Code = "95194", VQS_Name = "трета" }
+    //                        }
+    //                    }
+    //                },
+    //            },
+    //    };
+
+    //    Dictionary<string, string> expertCommisionScores = new Dictionary<string, string>
+    //    {
+    //        { "Аудио-визуални изкуства и техники; производство на медийни продукти", "5.00" },
+    //        { "Секретарски и административни офис дейности", "15.00" }
+    //    };
+
+    //    DateTime dateOfDraft = DateTime.UtcNow;
+
+    //    application16 = new CPOLicensingApplication16
+    //        {
+    //            ProtcolNumber = "654984",
+    //            ExpertCommissionName = "Обществена сигурност и безопасност",
+    //            DateOfDraft = dateOfDraft,
+    //            Time = TimeOnly.FromDateTime(dateOfDraft),
+    //            DistanceConnectionSoftwareName = "Zoom",
+    //            ChiefOfExpertCommission = "Ягодинка Стойчева",
+    //            CPOMainData = cPOMainData,
+    //            OrderNumber = "198668",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            MeetingAttendance = meetingAttendance,
+    //            ProfessionalDirections = professionalDirections,
+    //            TotalScore = "31.21",
+    //            ReviewResults = "Текст съдърждащ решение на експертна комисия",
+    //            ExpertCommissionScores = expertCommisionScores,
+    //            Protocoler = "Йордан Йорданов"
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_16(application16);
+    //    await FileUtils.SaveAs(JS, "Application16.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_17()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    List<ProfessionalDirectionVM> professionalDirections = new List<ProfessionalDirectionVM>
+    //    {
+    //       new ProfessionalDirectionVM
+    //       {
+    //           Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //           Code = "213",
+    //           Professions = new List<ProfessionVM>
+    //           {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Компютърен график",
+    //                    Code = "213060",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Компютърна графика", Code = "2130601", VQS_Name = "трета" }
+    //                    }
+    //                }
+    //           },
+    //       },
+    //       new ProfessionalDirectionVM
+    //       {
+    //            Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //            Code = "213",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Графичен дизайнер",
+    //                    Code = "213070",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Графичен дизайн", Code = "2130701", VQS_Name = "трета" }
+    //                    }
+    //                },
+    //            }
+    //       },
+    //       new ProfessionalDirectionVM
+    //       {
+    //            Name = "Секретарски и административни офис дейности",
+    //            Code = "346",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Първа професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "4810201", VQS_Name = "трета" }
+    //                        }
+    //                    },
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Втора професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "4810201", VQS_Name = "трета" }
+    //                        }
+    //                    },
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Трета професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "9658198", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Трета специалност", Code = "2985581", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Четвърта специалност", Code = "95194", VQS_Name = "трета" }
+    //                        }
+    //                    }
+    //                },
+    //            },
+    //    };
+
+    //    Dictionary<string, string> expertCommisionScores = new Dictionary<string, string>
+    //    {
+    //        { "Аудио-визуални изкуства и техники; производство на медийни продукти", "5.00" },
+    //        { "Секретарски и административни офис дейности", "15.00" }
+    //    };
+
+    //    application17 = new CPOLicensingApplication17
+    //        {
+    //            ExpertCommissionChairman = "Йорданка Зафирова",
+    //            ExpertCommissionName = "Изкуства",
+    //            OrderNumber = "46818",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            CPOMainData = cPOMainData,
+    //            ApplicationNumber = "4654168",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-9),
+    //            ChiefExpert = "Пенка Николова",
+    //            ProtocolNumber = "585961",
+    //            ProtocolInputDate = DateTime.UtcNow.AddDays(-10),
+    //            TotalScore = "27.69",
+    //            ProfessionalDirections = professionalDirections,
+    //            ExpertCommissionScores = expertCommisionScores
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_17(application17);
+    //    await FileUtils.SaveAs(JS, "Application17.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_18()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    List<ProfessionalDirectionVM> professionalDirections = new List<ProfessionalDirectionVM>
+    //    {
+    //       new ProfessionalDirectionVM
+    //       {
+    //           Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //           Code = "213",
+    //           Professions = new List<ProfessionVM>
+    //           {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Компютърен график",
+    //                    Code = "213060",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Компютърна графика", Code = "2130601", VQS_Name = "трета" }
+    //                    }
+    //                }
+    //           },
+    //       },
+    //       new ProfessionalDirectionVM
+    //       {
+    //            Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //            Code = "213",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Графичен дизайнер",
+    //                    Code = "213070",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Графичен дизайн", Code = "2130701", VQS_Name = "трета" }
+    //                    }
+    //                },
+    //            }
+    //       },
+    //       new ProfessionalDirectionVM
+    //       {
+    //            Name = "Секретарски и административни офис дейности",
+    //            Code = "346",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Първа професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "4810201", VQS_Name = "трета" }
+    //                        }
+    //                    },
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Втора професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "4810201", VQS_Name = "трета" }
+    //                        }
+    //                    },
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Трета професия",
+    //                        Code = "346010",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Първа специалност", Code = "3460101", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Втора специалност", Code = "9658198", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Трета специалност", Code = "2985581", VQS_Name = "трета" },
+    //                            new SpecialityVM { Name = "Четвърта специалност", Code = "95194", VQS_Name = "трета" }
+    //                        }
+    //                    }
+    //                },
+    //            },
+    //    };
+
+    //    application18 = new CPOLicensingApplication18
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            OrderNumber = "54928",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-8),
+    //            ExpertCommissionName = "Здравеопазване и спорт",
+    //            ProtocolNumber = "56481",
+    //            ProtocolInputDate = DateTime.UtcNow.AddDays(-5),
+    //            ExpertCommissionChairmanFullName = "Асен Йорданов",
+    //            ExpertCommissionChairmanSirname = "Йорданов",
+    //            ProfessionsCount = "2",
+    //            SpecialitiesCount = "7",
+    //            ReportNumber = "4861",
+    //            ReportInputDate = DateTime.UtcNow.AddDays(-7),
+    //            ProfessionalDirections = professionalDirections
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_18(application18);
+    //    await FileUtils.SaveAs(JS, "Application18.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_19()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    List<ProfessionalDirectionVM> professionalDirections = new List<ProfessionalDirectionVM>
+    //    {
+    //       new ProfessionalDirectionVM
+    //       {
+    //           Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //           Code = "213",
+    //           Professions = new List<ProfessionVM>
+    //                {
+    //                    new ProfessionVM
+    //                    {
+    //                       Name = "Компютърен график",
+    //                       Code = "213060",
+    //                       Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Компютърна графика", Code = "2130601", VQS_Name = "трета" }
+    //                    }
+    //                },
+    //            }
+    //            },
+    //        new ProfessionalDirectionVM
+    //        {
+    //                Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //                Code = "213",
+    //                Professions = new List<ProfessionVM>
+    //                {
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Графичен дизайнер",
+    //                        Code = "213070",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Графичен дизайн", Code = "2130701", VQS_Name = "трета" }
+    //                        }
+    //                    }
+    //                },
+    //        },
+    //        new ProfessionalDirectionVM
+    //        {
+    //            Name = "Секретарски и административни офис дейности",
+    //            Code = "346",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Офис - мениджър",
+    //                    Code = "346010",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Бизнес - администрация", Code = "3460101", VQS_Name = "трета" },
+    //                        new SpecialityVM { Name = "Системно програмиране", Code = "4810201", VQS_Name = "трета" }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    };
+
+    //    application19 = new CPOLicensingApplication19
+    //        {
+    //            OrderNumber = "194012",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            ExpertCommissionName = "ИМЕ НА ЕКСПЕРТНАТА КОМИСИЯ",
+    //            ReportNumber = "4151",
+    //            ReportInputDate = DateTime.UtcNow.AddDays(-15),
+    //            ApplicationNumber = "74234",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-10),
+    //            CPOMainData = cPOMainData,
+    //            LicenseNumber = "2022121588",
+    //            ProfessionsCount = "9",
+    //            SpecialitiesCount = "10",
+    //            ProfessionalDirections = professionalDirections,
+    //            ChiefExpert = "Пенка Николова"
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_19(application19);
+    //    await FileUtils.SaveAs(JS, "Application19.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_20()
+    //{
+    //    contactPersonData = new ContactPersonData
+    //        {
+    //            FullName = "Владимир Крумов Владимиров",
+    //            Sirname = "Владимиров",
+    //            StreetName = "\"Брегалница\" № 66-68, ет. 1, ап. 1",
+    //            CityName = "София",
+    //            PostCode = "1303"
+    //        };
+
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Пайтек Академи",
+    //            CompanyName = "\"Пайтек Академи\" ООД",
+    //            CityName = "София"
+    //        };
+
+    //    List<ProfessionalDirectionVM> professionalDirections = new List<ProfessionalDirectionVM>
+    //    {
+    //       new ProfessionalDirectionVM
+    //       {
+    //           Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //           Code = "213",
+    //           Professions = new List<ProfessionVM>
+    //                {
+    //                    new ProfessionVM
+    //                    {
+    //                       Name = "Компютърен график",
+    //                       Code = "213060",
+    //                       Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Компютърна графика", Code = "2130601", VQS_Name = "трета" }
+    //                    }
+    //                },
+    //            }
+    //            },
+    //        new ProfessionalDirectionVM
+    //        {
+    //                Name = "Аудио-визуални изкуства и техники; производство на медийни продукти",
+    //                Code = "213",
+    //                Professions = new List<ProfessionVM>
+    //                {
+    //                    new ProfessionVM
+    //                    {
+    //                        Name = "Графичен дизайнер",
+    //                        Code = "213070",
+    //                        Specialities = new List<SpecialityVM>
+    //                        {
+    //                            new SpecialityVM { Name = "Графичен дизайн", Code = "2130701", VQS_Name = "трета" }
+    //                        }
+    //                    }
+    //                },
+    //        },
+    //        new ProfessionalDirectionVM
+    //        {
+    //            Name = "Секретарски и административни офис дейности",
+    //            Code = "346",
+    //            Professions = new List<ProfessionVM>
+    //            {
+    //                new ProfessionVM
+    //                {
+    //                    Name = "Офис - мениджър",
+    //                    Code = "346010",
+    //                    Specialities = new List<SpecialityVM>
+    //                    {
+    //                        new SpecialityVM { Name = "Бизнес - администрация", Code = "3460101", VQS_Name = "трета" },
+    //                        new SpecialityVM { Name = "Системно програмиране", Code = "4810201", VQS_Name = "трета" }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    };
+
+    //    application20 = new CPOLicensingApplication20
+    //        {
+    //            ContactPersonData = contactPersonData,
+    //            CPOMainData = cPOMainData,
+    //            ChiefExpert = "Пенка Николова",
+    //            ProfessionalDirections = professionalDirections
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_20(application20);
+    //    await FileUtils.SaveAs(JS, "Application20.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_21()
+    //{
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Пайтек Академи",
+    //            CompanyName = "\"Пайтек Академи\" ООД",
+    //            CityName = "София"
+    //        };
+
+
+    //    application21 = new CPOLicensingApplication21
+    //        {
+    //            OrderNumber = "168168",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            ExpertCommissionName = "Селско, горско, рибно стопанство и ветеринарна медицина",
+    //            ProtocolNumber = "6519",
+    //            ProtocolInputDate = DateTime.UtcNow.AddDays(-19),
+    //            CPOMainData = cPOMainData,
+    //            App19OrderNumber = "5198",
+    //            App19OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            ExpertCommissionChairman = "Петър Иванов",
+    //            ChiefExpert = "Пенка Николова",
+    //            MemberList = new List<string> { "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов" }
+    //        };
+
+    //    documentStream = licProcDocCPOService.GenerateApplication_21(application21);
+    //    await FileUtils.SaveAs(JS, "Application21.doc", documentStream.ToArray());
+    //}
+
+    //protected async void CreateLicensingApplication()
+    //{
+
+    //}
+}

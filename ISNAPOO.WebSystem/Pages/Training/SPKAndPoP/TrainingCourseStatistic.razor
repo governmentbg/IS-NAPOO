@@ -1,0 +1,35 @@
+﻿@inherits BlazorBaseComponent
+
+<SfGrid DataSource="clientSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+        AllowTextWrap="true" @ref="clientsGrid" AllowSelection="false" AllowPaging="true"
+        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+    <GridEvents TValue="ClientCourseVM" OnToolbarClick="ToolbarClick" />
+    <GridColumns>
+        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="30">
+            <Template>
+                @GetRowNumber(clientsGrid, (context as ClientCourseVM).IdClientCourse).Result
+            </Template>
+        </GridColumn>
+        <GridColumn Field="IdClientCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+        <GridColumn Field="Speciality.Code" HeaderText="Код" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="Speciality.Name" HeaderText="Специалност" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="Speciality.VQS.Name" HeaderText="СПК" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="Course.Program.FrameworkProgram.Name" HeaderText="Рамкова програма" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="Course.TrainingCourseTypeName" HeaderText="Вид на курс" TextAlign="TextAlign.Left"></GridColumn>
+
+        <GridColumn Field="male" HeaderText="Мъже" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="female" HeaderText="Жени" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="bulgarian" HeaderText="Гражданство българско" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="otherNation" HeaderText="Гражданство друго" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="disabled" HeaderText="В нер. пол." TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="to16" HeaderText="до 16" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="between16and29" HeaderText="16-29" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="between30and45" HeaderText="30-45" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field="between46and60" HeaderText="46-60" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="between61and80" HeaderText="61-80" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field="moreThan80" HeaderText="над 80" TextAlign="TextAlign.Left"></GridColumn>
+
+    </GridColumns>
+</SfGrid>

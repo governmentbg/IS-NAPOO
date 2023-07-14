@@ -1,0 +1,88 @@
+﻿@page "/RegulationEightDocumentList"
+
+@inherits BlazorBaseComponent
+
+@attribute [Authorize(Policy = "ShowRegulationEightDocumentList")]
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Документи по Наредба № 8</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewTypeOfRequestedDocumentModalBtn">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="typeOfRequestedDocumentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="typeOfRequestedDocumentsGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="TypeOfRequestedDocumentVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" Width="5">
+                                <Template>
+                                    @this.GetRowNumber(typeOfRequestedDocumentsGrid, (context as TypeOfRequestedDocumentVM).IdTypeOfRequestedDocument).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="9">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(() => this.OpenEditTypeOfRequestedDocumentModalBtn(context as TypeOfRequestedDocumentVM))" class="btn-row"><i class="fa fa-edit"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdTypeOfRequestedDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="DocTypeOfficialNumber" HeaderText="Номер" TextAlign="TextAlign.Left" Width="15"></GridColumn>
+                            <GridColumn Field="DocTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                            <GridColumn Field="Price" HeaderText="Ед. цена" TextAlign="TextAlign.Left" Width="17">
+                                <Template>
+                                    @{
+                                        var type = context as TypeOfRequestedDocumentVM;
+                                        <div class="text-right">
+                                            @(type.Price) лв
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Order" HeaderText="Номер по ред" TextAlign="TextAlign.Left" Width="15"></GridColumn>
+                            <GridColumn Field="HasSerialNumberAsText" HeaderText="Има фабр. номер" TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                            <GridColumn Field="IsDestroyableAsText" HeaderText="Унищожаване" TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                            <GridColumn Field="DocumentStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="20">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var status = context as TypeOfRequestedDocumentVM;
+                                            switch (status.DocumentStatus)
+                                            {
+                                                case "Активен":
+                                                    <label class="form-label-status label label-success" style="width: 60%;">@status.DocumentStatus</label>
+                                                    break;
+                                                case "Неактивен":
+                                                    <label class="form-label-status label label-danger" style="width: 60%;">@status.DocumentStatus</label>
+                                                    break;
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<RegulationEightDocumentModal @ref="regulationEightDocumentModal" CallbackAfterSubmit="UpdateAfterRegulationEightDocumentModalSubmit" />
+

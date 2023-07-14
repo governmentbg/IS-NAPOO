@@ -1,0 +1,62 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    @if (this.IsEditable)
+                    {
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на материално-техническа база" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddPremisesBtn">Добави МТБ</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="premisesSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="premisesGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ValidationPremisesVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10">
+                                <Template>
+                                    @GetRowNumber(premisesGrid, (context as ValidationPremisesVM).IdValidationPremises).Result
+                                </Template>
+                            </GridColumn>@if (this.IsEditable)
+                            {
+                                <GridColumn Width="8" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeletePremisesBtn(context as ValidationPremisesVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdValidationPremises" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="TrainingTypeName" HeaderText="Вид на провежданото валидиране" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.PremisesName" HeaderText="Материално-техническа база" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.ProviderAddress" HeaderText="Адрес" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.Phone" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<SelectValidationPremisesModal @ref="selectValidationPremisesModal" CallbackAfterSubmit="UpdateAfterPremisesSelectAsync" />

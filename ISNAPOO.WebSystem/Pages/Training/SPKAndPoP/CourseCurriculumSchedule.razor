@@ -1,0 +1,154 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                @if (this.IsEditable)
+                {
+                    <div class="card-header">
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на нова тема" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddScheduleBtn">Добави тема</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на МТБ" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddMTBBtn">Добави МТБ</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на преподавател" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddTrainerBtn">Добави преподавател</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Печат на дневник за квалификационен курс" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PrintSchedulePlanBtn">Печат дневник</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Печат на график на професионалното обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PrintScheduleProfessionalTrainingBtn">Печат график</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Изтегляне на бланка за автоматично зареждане на Дневник на курса" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="ScheduleTemplateDownloadBtn">Шаблон за импорт</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Зареждане на Дневник от файл" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="ImportScheduleBtn">Импорт дневник</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Изтриване на избрани теми от дневника" OpensOn="Hover">
+                                        <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" style="text-transform: none;" @onclick="DeleteSelectedSchedulesBtn">Изтрий</button>
+                                    </SfTooltip>
+                                </li>
+                                <label>&nbsp</label>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+                <div class="card-body">
+                    <SfGrid DataSource="curriculumScheduleSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="curriculumScheduleGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="CourseScheduleVM" OnToolbarClick="ToolbarClick" />
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridColumns>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Type="ColumnType.CheckBox" Width="8"></GridColumn>
+                            }
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                                <Template>
+                                    @GetRowNumber(curriculumScheduleGrid, (context as CourseScheduleVM).IdCourseSchedule).Result
+                                </Template>
+                            </GridColumn> 
+                            <GridColumn Width="11" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.EditScheduleBtn(context as CourseScheduleVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                            {
+
+                                <GridColumn Width="11" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteScheduleBtn(context as CourseScheduleVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdCourseSchedule" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ScheduleDateAsStr" HeaderText="Дата" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="TrainingCurriculum.ProfessionalTraining" HeaderText="Р" TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                            <GridColumn Field="TrainingCurriculum.Subject" HeaderText="Предмет" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="TrainingCurriculum.Topic" HeaderText="Тема" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="TrainingScheduleType" HeaderText="Вид" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="Hours" HeaderText="Часове" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="Period" HeaderText="Продължителност (от-до)" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.PremisesName" HeaderText="МТБ" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.FullName" HeaderText="Преподавател" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="8">
+                                    <Template>
+                                        @{
+                                            var ctx = context as CourseScheduleVM;
+                                            var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx.IdCourseSchedule, "CourseSchedule");
+                                            if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                            {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                    <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            }
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CourseCurriculumScheduleModal IsEditable ="@IsEditable" @ref="courseCurriculumScheduleModal" CallbackAfterSubmit="UpdateAfterCurriculumScheduleModalSubmit" />
+<SelectSchedulePremisesModal @ref="selectSchedulePremisesModal" CallbackAfterSubmit="UpdateAfterSelectModalSubmit" />
+<SelectScheduleTrainerModal @ref="selectScheduleTrainerModal" CallbackAfterSubmit="UpdateAfterSelectModalSubmit" />
+<ImportCourseScheduleModal @ref="importCourseScheduleModal" CallbackAfterSave="UpdateAfterImportModalSubmit" />
+

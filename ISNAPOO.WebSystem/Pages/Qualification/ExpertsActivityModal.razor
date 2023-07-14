@@ -1,0 +1,36 @@
+﻿@inherits BlazorBaseComponent
+@using ISNAPOO.Core.ViewModels.Training;
+
+    <SfGrid ID="sfGrid" DataSource="documents" AllowSorting="true" EnableAltRow="true" EnableHover="false"
+            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true">
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+        <GridColumns>
+            @*<GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="45">
+                    <Template>
+                        @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                    </Template>
+                </GridColumn>*@
+            <GridColumn Field="IdClientCourseDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+            <GridColumn Field="DocumentRegNo" HeaderText="Рег. номер" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+            <GridColumn Field="DocumentPrnNo" HeaderText="Фаб. номер" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+            <GridColumn Field="ClientCourse.Course.Program.FrameworkProgram.Name" HeaderText="Рамкова програма" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+            <GridColumn Field="ClientCourse.Course.CourseName" HeaderText="Курс" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+            <GridColumn HeaderText="Статус" TextAlign="TextAlign.Left" Width="10%">
+                <Template>
+                    @dataSourceService.GetKeyValueByIdAsync((context as ClientCourseDocumentVM).IdDocumentStatus).Result.Name
+                </Template>
+            </GridColumn>
+            <GridColumn Field="ClientCourse.Indent" HeaderText="ЕГН" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+            <GridColumn HeaderText="Обучаем" TextAlign="TextAlign.Left" Width="10%">
+                <Template>
+                    @{
+                        var student = (context as ClientCourseDocumentVM).ClientCourse;
+                    }
+                    <span>@student.FirstName @student.FamilyName</span>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="ClientCourse.Course.EndDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+            @*<GridColumn Field="expert" HeaderText="Експерти" TextAlign="TextAlign.Left" Width="10%"></GridColumn>*@
+        </GridColumns>
+    </SfGrid>

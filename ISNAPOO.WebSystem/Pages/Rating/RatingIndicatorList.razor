@@ -1,0 +1,96 @@
+﻿@page "/RatingIndicatorList"
+@using ISNAPOO.Core.ViewModels.Rating;
+@using ISNAPOO.WebSystem.Pages.Rating.Modals;
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ShowRatingIndicatorList")]
+
+@{
+    base.CheckUserActionPermission("ShowRatingIndicatorList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@(this.LicensingType == "CPO" ? "Настройка на индикатори за рейтинг ЦПО" : "Настройка на индикатори за рейтинг ЦИПО")</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="CreateIndicatorModal">Нов индикатор</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="() => {confirmYearModal.OpenModal(this.LicensingType);}">Изчисли точки</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="this.IndicatorGridSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true"
+                            AllowExcelExport="true" AllowPdfExport="true">                      
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as IndicatorVM).IdIndicator).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdIndicator" IsPrimaryKey="true" Visible="false"> </GridColumn>
+                            <GridColumn HeaderText="" Width="3%">
+                                <Template>
+                                    @{
+                                        var ctx = context as IndicatorVM;
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => this.ratingIndicatorModal.OpenModal(ctx, this.LicensingType))">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="" Width="3%">
+                                <Template>
+                                    @{
+                                        var ctx = context as IndicatorVM;
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => DeleteIndicator(ctx))">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Вид на индикатора" Width="40%">
+                                <Template>
+                                    @{
+                                        var ctx = context as IndicatorVM;
+                                        <a>@(ctx.IndicatorDetails != null ? ctx.IndicatorDetails.Name != null ? ctx.IndicatorDetails.Name : "" : "")</a>
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="YearAsString" HeaderText="Година" Width="11%"> </GridColumn>
+                            <GridColumn Field="RangeFrom" HeaderText="Диапазон от" Width="10%" Format="n2" TextAlign="TextAlign.Right"> </GridColumn>
+                            <GridColumn Field="RangeTo" HeaderText="Диапазон до" Width="10%" Format="n2" TextAlign="TextAlign.Right"> </GridColumn>
+                            <GridColumn Field="Points" HeaderText="Точки" Width="10%" TextAlign="TextAlign.Right" Format="n2"> </GridColumn>
+
+                            <GridColumn Field="PointsYes" HeaderText="Точки(ДА)" Width="10%" TextAlign="TextAlign.Right" Format="n2"> </GridColumn>
+                            <GridColumn Field="PointsNo" HeaderText="Точки(НЕ)" Width="10%" TextAlign="TextAlign.Right" Format="n2"> </GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<RatingIndicatorModal @ref="ratingIndicatorModal" CallBackAfterSumbit="ReloadData"></RatingIndicatorModal>
+<ConfirmYearModal @ref="confirmYearModal"></ConfirmYearModal>

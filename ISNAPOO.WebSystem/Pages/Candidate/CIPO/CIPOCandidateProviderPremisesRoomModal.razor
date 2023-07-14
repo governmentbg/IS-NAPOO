@@ -1,0 +1,83 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="70%" EnableResize="true" AllowDragging="true" Height="70%" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за помещение към @mtbName</Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="SubmitRoomHandler" id="submitRoomForm">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Наименование на помещението:
+                                </label>
+                                <InputText class="form-control" @bind-Value="candidateProviderPremisesRoomVM.PremisesRoomName" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на помещението:
+                                </label>
+                                <SfComboBox Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee" TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="candidateProviderPremisesRoomVM.IdPremisesType" DataSource="kvPremisesTypeSource" AllowFiltering="true" AllowCustom="false">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Приблизителна площ (кв. м.):
+                                </label>
+                                <InputNumber class="form-control" @bind-Value="candidateProviderPremisesRoomVM.Area" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Брой работни места:
+                                </label>
+                                <InputNumber class="form-control" @bind-Value="candidateProviderPremisesRoomVM.Workplace" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Кратко описание на оборудването:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="candidateProviderPremisesRoomVM.Equipment" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                            {
+                                <button class="btn btn-info" type="submit" style="margin-right: 5px;" form="submitRoomForm">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

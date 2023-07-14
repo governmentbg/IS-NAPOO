@@ -1,0 +1,198 @@
+﻿@using Data.Models.Data.Role
+@inherits BlazorBaseComponent
+@inject IApplicationUserService ApplicationUserService
+@inject IDataSourceService DataSourceService
+@inject RoleManager<ApplicationRole> roleManager
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="80%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за <span style="font-size: 18px;color: white !important;">@applicationUserVM.FirstName @applicationUserVM.FamilyName</span> </Header>
+        <Content>
+              <div>
+                <ul class="validation-errors">
+					@foreach (var msg in this.validationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <EditForm EditContext="editContext" OnSubmit="SubmitUserHandler" id="submitRoleForm">
+                <div class="modal-body">
+                    <DataAnnotationsValidator />
+                      <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Име:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="applicationUserVM.FirstName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Презиме:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="applicationUserVM.MiddleName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Фамилия:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="applicationUserVM.FamilyName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Идентификатор:
+                                    </label>
+                                    <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="applicationUserVM.IdIndentType" AllowCustom="false" ShowClearButton="true" DataSource="@kvIndentTypeSource" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="IdentValueChangedHandler" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        @this.identType:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="applicationUserVM.IndentTypeName" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Потребителско име:
+                                    </label>
+                                    <InputText Readonly="true" class="form-control" @bind-Value="applicationUserVM.UserName" />
+                                </div>
+                               
+                            </div>
+
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Телефон:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="applicationUserVM.Phone" />
+                                </div>
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        E-mail:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="applicationUserVM.Email" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Статус:
+                                    </label>
+                                    <SfComboBox @bind-Value="applicationUserVM.IdUserStatus" CssClass="form-control customPad" TItem="KeyValueVM" ShowClearButton="false" AllowCustom="false" TValue="int" DataSource="@keys">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="OpenRole">Добави роля</button>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="RemoveRole">Премахни роля</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <SfGrid ID="roleGrid" DataSource="@applicationUserVM.Roles" AllowSorting="true" EnableAltRow="true" EnableHover="false" AllowSelection="true"
+                                    AllowFiltering="true" @ref="refGrid"
+                                    AllowPaging="true" AllowReordering="true" AllowResizing="true" AllowExcelExport="true" AllowPdfExport="true">
+                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                                <GridSortSettings>
+                                    <GridSortColumns>
+                                        <GridSortColumn Field="Name" Direction="SortDirection.Ascending"></GridSortColumn>
+                                    </GridSortColumns>
+                                </GridSortSettings>
+                                <GridColumns>
+                                    <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="10"></GridColumn>
+                                    <GridColumn Field="Name" HeaderText="Код" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                                    <GridColumn Field="RoleName" HeaderText="Роля на потребител" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+
+                    </div>
+
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @ModifyDateStr</div>
+
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @applicationUserVM.CreateUserName</div>
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от:  @applicationUserVM.ModifyUserName</div>
+
+                    </div>
+                </div>
+
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.isRoleAdmin == true)
+                            {
+                                <button class="btn btn-info" @onclick="LoginLikeUser">Влез като потребител</button>
+                            }
+                            &nbsp;
+                            <button class="btn btn-info" type="submit" form="submitRoleForm">Запиши</button>
+                            &nbsp;
+                            @if (applicationUserVM.Id != null)
+                            {
+                                <button class="btn btn-info" @onclick="ChangePassword">Нулиране на парола</button>
+                            }
+                            &nbsp;
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<RoleSelectorModal @ref="roleSelectorModal" CallbackAfterSelect="GetSelectedRolesVM"></RoleSelectorModal>
+<ToastMsg @ref="toast"></ToastMsg>

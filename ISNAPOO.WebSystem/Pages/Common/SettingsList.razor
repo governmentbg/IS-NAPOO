@@ -1,0 +1,245 @@
+﻿@page "/SettingsList"
+@attribute [Authorize(Policy = "ShowSettingsList")]
+@using ISNAPOO.Core.Contracts.Common
+@using ISNAPOO.Core.ViewModels.Common
+
+
+@inject ISettingService SettingService
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Настройки</h6>
+            <div class="card">
+                <div class="card-header">
+
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="defaultGrid" AllowTextWrap="true" DataSource="@settings" AllowSorting="true" AllowFiltering="true" @ref="settingsGrid" AllowPaging=true
+                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="SettingVM"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(settingsGrid, (context as SettingVM).idSetting).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="25">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button @onclick="(() => SelectedRow(context as SettingVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="idSetting" IsPrimaryKey="true" Visible="false" HeaderText="ID" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="SettingName" HeaderText="Настройка" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="SettingDescription" HeaderText="Описание" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="SettingValue" HeaderText="Стойност" TextAlign="TextAlign.Center" Width="60"></GridColumn>
+                            <GridColumn Field="SettingClass" HeaderText="Тип" TextAlign="TextAlign.Center" Width="60"></GridColumn>
+                            <GridColumn Field="SettingIntCode" HeaderText="Код" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SfDialog @ref="@sfFilter" Target="#target" Width="500px" EnableResize=true AllowDragging="true" IsModal="false" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@IsVisibleAddModal" CssClass="@dialogClass">
+    
+    <DialogTemplates>
+        <Header>
+           Филтър
+        </Header>
+        <Content>
+            <EditForm Model="model" OnValidSubmit="Search">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Име:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.SettingName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Код:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.SettingIntCode" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Описание:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="model.SettingDescription" />
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label>
+                                        Стойност:
+                                    </label>
+                                    <InputText @bind-Value="model.SettingValue" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-info" type="submit">Запиши</button>
+                <button type="button" class="btn btn-outline-secondary" @onclick="@Cancel">Отказ</button>
+            </EditForm>
+        </Content>
+    </DialogTemplates>    
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<SettingModal @ref="settingModal" CallbackAfterSave="UpdateAfterSave"></SettingModal>
+
+@code {
+
+
+    private bool IsVisibleAddModal { get; set; } = false;
+    SfDialog sfFilter;
+    private string dialogClass = "";
+    SettingVM model = new SettingVM();
+
+
+    SettingModal settingModal = new SettingModal();
+    IEnumerable<SettingVM> settings;
+    SfGrid<SettingVM> settingsGrid;
+
+    private EditContext EC { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.sfFilter = new SfDialog();
+
+        this.settings = await this.SettingService.GetAllSettingsAsync(model);
+
+         EC = new EditContext(model);
+
+        @*this.settingsGrid = new SfGrid<SettingVM>();*@
+    }
+
+    private async Task SelectedRow(SettingVM model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewSettingsData", false);
+        if (!hasPermission) { return; }
+        
+        this.settingModal.OpenModal(model);
+    }
+    private async Task<Task> UpdateAfterSave(SettingVM setting)
+    {
+
+        this.settings = await this.SettingService.GetAllSettingsAsync(model);
+
+        return Task.CompletedTask;
+    }
+
+    private async Task Search()
+    {
+
+        this.IsVisibleAddModal = false;               
+        this.settings = await this.SettingService.GetAllSettingsAsync(model);
+
+        await this.ShowSuccessAsync("Записът е успешен!");
+    }
+
+    private async Task SaveModal()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageSettingsData", false);
+        if (!hasPermission) { return; }
+
+        model = await this.settingModal.SaveFromParent();
+        EC = new EditContext(model);
+       
+        
+         EC.Validate(); 
+        int i = 0;
+    }
+    
+    private void ShowFilter()
+    {
+        this.IsVisibleAddModal = true;
+    }
+
+    private void Cancel()
+    {
+        this.IsVisibleAddModal = false;
+    }
+     protected async Task ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+        {
+            if (args.Item.Id == "defaultGrid_pdfexport")
+            {
+                int temp = settingsGrid.PageSettings.PageSize;
+                settingsGrid.PageSettings.PageSize = settings.Count();
+                await settingsGrid.Refresh();
+                PdfExportProperties ExportProperties = new PdfExportProperties();
+
+                List<GridColumn> ExportColumns = new List<GridColumn>();
+#pragma warning disable BL0005
+                ExportColumns.Add(new GridColumn() { HeaderText = " ", Width = "30" });
+                ExportColumns.Add(new GridColumn() { Field = "SettingName", HeaderText = "Настройка", Width = "180", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "SettingDescription", HeaderText = "Описание", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "SettingValue", HeaderText = "Стойност", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "SettingClass", HeaderText = "Тип", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "SettingIntCode", HeaderText = "Код", Width = "80", TextAlign = TextAlign.Left });
+#pragma warning restore BL0005
+
+                ExportProperties.Columns = ExportColumns;
+                ExportProperties.PageOrientation = PageOrientation.Landscape;
+                ExportProperties.IncludeTemplateColumn = true;
+                PdfTheme Theme = new PdfTheme();
+                PdfThemeStyle RecordThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Regular, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+
+                PdfThemeStyle HeaderThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Bold, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+                Theme.Record = RecordThemeStyle;
+                Theme.Header = HeaderThemeStyle;
+
+                ExportProperties.Theme = Theme;
+                ExportProperties.FileName = $"Settings_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.pdf";
+
+                await this.settingsGrid.ExportToPdfAsync(ExportProperties);
+                settingsGrid.PageSettings.PageSize = temp;
+                await settingsGrid.Refresh();
+            }
+            else if (args.Item.Id == "defaultGrid_excelexport")
+            {
+                ExcelExportProperties ExportProperties = new ExcelExportProperties();
+                ExportProperties.FileName = $"Settings_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.xlsx";
+                await this.settingsGrid.ExportToExcelAsync(ExportProperties);
+            }
+        }
+        public void PdfQueryCellInfoHandler(PdfQueryCellInfoEventArgs<SettingVM> args)
+        {
+            if (args.Column.HeaderText == " ")
+            {
+                args.Cell.Value = GetRowNumber(settingsGrid, args.Data.idSetting).Result.ToString();
+            }
+        }
+}

@@ -1,0 +1,73 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="55%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" ZIndex="3014" CloseOnEscape="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Настройване на принтера и документа за отпечатване
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+
+                    <div class="filterSection mainBGColor">
+                        <div class="col-12">
+                            1. Настройка на принтера
+                        </div>
+                    </div>
+                    <div>
+                        <ul><li>Уверете се, че бланката за печат е поставена правилно в отделението за хартия на принтера.</li></ul>
+                    </div>
+
+                    <div class="filterSection mainBGColor">
+                        <div class="col-12">
+                            2. Конфигуриране на документа
+                        </div>
+                    </div>
+
+                    <div>
+                        <ul>
+                            <li>Уверете се, че размерът на хартията на генерирания документ и този на бланката съвпадат.</li>
+                            <li>Генерираният документ на Word съдържа текстови полета. Те позволяват текстът да бъде лесно разместван, при възникнала неточност в позицията му при печат. За да преместите текстово поле, щракнете върху даден текст. По този начин ще изберете полето. След това можете да регулирате позицията му, като задържите с мишката върху контура на текстовото поле и го преместите на желаното място.</li>
+
+                            <li>
+                                На места документът съдържа таблици, те могат да бъдат преместени по следния начин: <br />
+
+
+                                <ol>
+                                    <li>Когато е избрана таблицата, щракнете върху раздела Layout (Оформление) и след това щракнете върху Properties (Свойства).</li>
+                                    <li>
+                                        Щракнете върху раздела Table (Таблица), за да приложите настройките към цялата таблица:
+                                        <ul>
+                                            <li>Можете да позиционирате таблицата по-прецизно като щракнете върху Positioning (Позициониране) и след това изберете опции в диалоговия прозорец Table Positioning (Позициониране на таблица). Ако преместването на таблицата с мишката не върши работа, използвайте този метод.</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">OK</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+
+</SfDialog>
+<style>
+    ul {
+        padding-left: 20px;
+        list-style-type: disc;
+        margin-bottom: 0;
+    }
+</style>

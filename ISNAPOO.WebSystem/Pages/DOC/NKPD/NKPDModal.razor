@@ -1,0 +1,149 @@
+﻿@inject INKPDService NKPDService
+@inject IKeyValueService KeyValueService
+@inherits BlazorBaseComponent
+
+<SfDialog IsModal="true" ShowCloseIcon="true" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Height="auto" Width="70%" ZIndex="2000">
+    <DialogTemplates>
+        <Header>Създаване на нов запис</Header>
+        <Content>
+            <EditForm id="submitFormNKPD" Model="nKPDVM" OnValidSubmit="OnSubmitHandler">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Наименование:</label>
+                                        <InputText class="form-control" @bind-Value="nKPDVM.Name" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Код:</label>
+                                        <InputText class="form-control" @bind-Value="nKPDVM.Code" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Код на клас:</label>
+                                        <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" Placeholder="Код на клас" DataSource="keyValuesClassCode" @bind-Value="nKPDVM.IdClassCode" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" />
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Код на подклас:</label>
+                                        <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" Placeholder="Код на подклас" DataSource="keyValuesSubClassCode" @bind-Value="nKPDVM.IdSubclassCode" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" />
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Код на група:</label>
+                                        <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" Placeholder="Код на група" DataSource="keyValuesGroupCode" @bind-Value="nKPDVM.IdGroupCode" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" />
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Код на единична група:</label>
+                                        <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" Placeholder="Код на единична група" DataSource="keyValuesIndividualGroupCode" @bind-Value="nKPDVM.IdIndividualGroupCode" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" />
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Код на образователно и квалификационно ниво:</label>
+                                        <InputText class="form-control" @bind-Value="nKPDVM.EducationLevelCode" />
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="submitFormNKPD">Запиши</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="Close">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    ToastMsg toast;
+
+    bool isVisible = false;
+    NKPDVM nKPDVM = new NKPDVM();
+    IEnumerable<KeyValueVM> keyValuesClassCode = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> keyValuesSubClassCode = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> keyValuesGroupCode = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> keyValuesIndividualGroupCode = new List<KeyValueVM>();
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    public async Task Open()
+    {
+        this.keyValuesClassCode = await this.KeyValueService.GetAllNKPDClassValuesViaKeyTypeIntCodeAsync("NKPDClassCode");
+        this.keyValuesSubClassCode = await this.KeyValueService.GetAllNKPDClassValuesViaKeyTypeIntCodeAsync("NKPDSubclasscode");
+        this.keyValuesGroupCode = await this.KeyValueService.GetAllNKPDClassValuesViaKeyTypeIntCodeAsync("NKPDGroupCode");
+        this.keyValuesIndividualGroupCode = await this.KeyValueService.GetAllNKPDClassValuesViaKeyTypeIntCodeAsync("NKPDIndividualGroupCode");
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+
+    private void Close()
+    {
+        this.isVisible = false;
+    }
+
+    private async Task OnSubmitHandler()
+    {
+            this.SpinnerShow();
+        int result = await this.NKPDService.CreateNKPDAsync(this.nKPDVM);
+
+        if (result == 1)
+        {
+            this.ShowSuccessAsync("Записът e успешeн!");
+            await this.OnSubmit.InvokeAsync();
+        }
+    }
+
+    private void ChangeKeyValue()
+    {
+
+    }
+}

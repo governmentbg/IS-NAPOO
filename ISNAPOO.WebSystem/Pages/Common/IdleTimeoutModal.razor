@@ -1,0 +1,20 @@
+﻿
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="4000" CloseOnEscape="true">
+    <DialogTemplates>
+        <Header>Внимание!!</Header>
+        <Content>
+            <h6>Вашата сесия ще изтече след 20 секунди! Искате ли да останете в системата?</h6>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float-">
+                        <button type="button" class="btn btn-info" @onclick="resetTimeout" data-bs-dismiss="modal">Да</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="LogoutUser">Не</button>
+
+                    </div>
+                    </div>
+                </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

@@ -1,0 +1,138 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Филтър на заявления за лицензиране на @this.title</Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">@("Име на " + this.title):</label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.ProviderName" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">УИН: </label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.UIN" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Юридическо лице: </label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.ProviderOwner" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row align-items-baseline">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Населено място на административния офис на @this.title: </label>
+                                        <SfAutoComplete @ref="this.sfAutoCompleteLocationCorrespondence" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                        @bind-Value="this.applicationListFilterVM.IdLocation"
+                                                        DataSource="this.locationCorrespondenceSource" AllowFiltering="true">
+                                            <AutoCompleteTemplates TItem="LocationVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                            <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Адрес за кореспонденция с административния офис на @this.title: </label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.ProviderAddressCorrespondence" />
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Телефон: </label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.ProviderPhoneCorrespondence" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">E-mail: </label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.ProviderEmailCorrespondence" />
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">№ на лицензия: </label>
+                                        <SfTextBox @bind-Value="this.applicationListFilterVM.LicenceNumber" />
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Дата на лицензия: </label>
+                                        <SfDatePicker TValue="DateTime?" @bind-Value="this.applicationListFilterVM.LicenceDate" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Статус на заявлението: </label>
+                                        <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvApplicationStatusesSource" AllowCustom="false" @bind-Value="this.applicationListFilterVM.IdApplicationStatus">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Вид на заявлението: </label>
+                                        <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvTypeApplicationsSource" AllowCustom="false" @bind-Value="this.applicationListFilterVM.IdTypeApplication">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Водещ експерт: </label>
+                                        <SfComboBox ShowClearButton="true" TValue="int?" TItem="ExpertVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.napooExpertsSource" AllowCustom="false" @bind-Value="this.applicationListFilterVM.IdNAPOOExpert">
+                                            <ComboBoxFieldSettings Text="Person.FullName" Value="IdExpert" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="searchForm" @onclick="SearchBtn">Търси</button>
+                            <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" @onclick="ClearBtn">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

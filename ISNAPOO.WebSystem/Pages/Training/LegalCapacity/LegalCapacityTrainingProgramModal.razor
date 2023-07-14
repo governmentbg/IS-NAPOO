@@ -1,0 +1,87 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<ProgramVM>
+
+<SfDialog @bind-Visible="isVisible" Width="95%" Height="95%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <SfTab EnablePersistence="true" LoadOn="ContentLoad.Init" @bind-SelectedItem="selectedTab">
+                <TabEvents Selecting="Select" />
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Програма за обучение"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <TrainingProgram @ref="trainingProgram" ProgramVM="this.programVM" ShowLegalCapacityOrdinanceType="this.showLegalCapacityOrdinanceType" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.programVM.IdProgram != 0 && !this.showLegalCapacityOrdinanceType">
+                        <ChildContent>
+                            <TabHeader Text="Учебен план и учебни програми"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <TrainingCurriculum @ref="trainingCurriculum" ProgramVM="this.programVM" HideBtnsWhenSPK="this.hideBtnsWhenSPK" CallbackAfterCurriculumModalSubmit="UpdateAfterCurriculumSubmit" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    @if (this.programVM.IdProgram != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.programVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.programVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.programVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.programVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.programVM.IdProgram != 0)
+                            {
+                                <button class="btn btn-info" style="margin-right: 30px;" type="submit" @onclick="(async () => await this.CreateUpcomingCourseBtn())">Създай курс</button>
+                            }
+                            @if (!this.hideBtnsConcurrentModal)
+                            {
+                                <button class="btn btn-info" style="margin-right: 5px;" type="submit" @onclick="(async () => await this.SubmitBtn())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<LegalCapacityUpcomingTrainingCourseModal @ref="upcomingTrainingCourseModal" />
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

@@ -1,0 +1,151 @@
+﻿@using ISNAPOO.Core.ViewModels.Control
+@using Syncfusion.Blazor.Spinner
+@using System.Timers
+<CascadingValue Value="@this">
+    @inherits LayoutComponentBase
+
+
+    <PageTitle>ISNAPOO.WebSystem</PageTitle>
+
+    @Body
+
+
+    <SfSpinner @bind-Visible="@SpinnerVisible" CssClass="e-spin-overlay" Size="50">
+    </SfSpinner>
+
+    <ToastMsg @ref="toast"></ToastMsg>
+    <IdleTimeoutModal @ref="TimeoutModal"></IdleTimeoutModal>
+    <ConcurrencyDialog @ref="concurrencyDialog" />
+    <NotificationModal @ref="notificationModal" CallbackAfterNotificationCreated="NotificationCreatedHandler" />
+    <SfDialogProvider></SfDialogProvider>
+</CascadingValue>
+
+@code {
+
+
+
+    public ToastMsg toast = new ToastMsg();
+    public ConcurrencyDialog concurrencyDialog = new ConcurrencyDialog();
+    public IdleTimeoutModal TimeoutModal = new IdleTimeoutModal();
+    public NotificationModal notificationModal = new NotificationModal();
+    public bool SpinnerVisible { get; set; } = false;
+    public virtual ConfirmDialog ConfirmDialog { get; set; }
+
+    Timer timerObj { get; set; }
+
+    [Inject]
+    public AuthenticationStateProvider Authentication { get; set; }
+
+    [CascadingParameter]
+    public Task<AuthenticationState> authStateCascadingParameter { get; set; }
+
+    [Parameter]
+    public EventCallback CallBackAfterNotificationCreated { get; set; }
+
+
+    [Inject]
+    public IJSRuntime JSRuntime { get; set; }
+    [Inject]
+    public IDataSourceService dataSourceService { get; set; }
+
+    [Inject]
+    public ILogger<MainLayout> Logger { get; set; }
+
+
+
+
+
+    public int idleTime;
+
+    public void SpinnerShow()
+    {
+        this.SpinnerVisible = true;
+        StateHasChanged();
+    }
+
+    public void SpinnerHide()
+    {
+        this.SpinnerVisible = false;
+        StateHasChanged();
+    }
+
+    public void ConcurrencyShow(ConcurrencyInfo concurrencyInfo)
+    {
+        this.concurrencyDialog.PersonFullName = concurrencyInfo.FullName;
+        this.concurrencyDialog.showConcurrencyDialog = true;
+        this.concurrencyDialog.Refresh();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //Logger.LogInformation("OnAfterRenderAsync at:" + DateTime.Now.ToString());
+        //var setting = await dataSourceService.GetSettingByIntCodeAsync("IdleTimeout");
+
+        //timerObj = new Timer(Int32.Parse(setting.SettingValue) * 60 * 1000);
+        //timerObj.Elapsed += UpdateTimer;
+        //timerObj.AutoReset = false;
+
+        //await JSRuntime.InvokeVoidAsync("timeOutCall", DotNetObjectReference.Create(this));
+    }
+
+    [JSInvokable]
+    public void TimerInterval()
+    {
+        // Logger.LogInformation("TimerInterval at:" + DateTime.Now.ToString());
+        timerObj.Stop();
+        timerObj.Start();
+    }
+    private void UpdateTimer(Object source, ElapsedEventArgs e)
+    {
+        InvokeAsync(async () =>
+        {
+            // Log out when the user is inactive.
+            var authstate = await Authentication.GetAuthenticationStateAsync();
+
+            Logger.LogInformation("UpdateTimer at:" + DateTime.Now.ToString());
+
+
+            if (authstate.User.Identity.IsAuthenticated)
+            {
+                await TimeoutModal.openModal();
+            }
+        });
+    }
+
+    //private void UpdateTimer(Object source, ElapsedEventArgs e)
+    //{
+    //    Logger.LogInformation("UpdateTimer at:" + DateTime.Now.ToString());
+    //    InvokeAsync(() =>
+    //    {
+    //        // Log out when the user is inactive.
+    //        //var authstate = await Authentication.GetAuthenticationStateAsync();
+    //        var authstate = authStateCascadingParameter.Result;
+
+
+    //        if (authstate.User.Identity.IsAuthenticated)
+    //        {
+    //            Logger.LogInformation("User.Identity.IsAuthenticated TRUE at:" + DateTime.Now.ToString());
+    //            Logger.LogInformation("authstate.User:" + authstate.User.Identity.Name);
+    //            TimeoutModal.openModal().RunSynchronously();
+    //        }
+    //        else 
+    //        {
+    //            Logger.LogInformation("User.Identity.IsAuthenticated FALSE at:" + DateTime.Now.ToString());
+    //            this.toast.sfSuccessToast.Content = "Вашата сесися в системата изтече.";
+    //            //this.toast.sfSuccessToast.ShowAsync().RunSynchronously();
+    //        }
+
+
+    //    });
+    //}
+
+    public async Task OpenNotificationModal(bool openFromSPPOOModule = false, List<int> personIds = null, List<ProcedureDocumentVM> procedureDocuments = null, List<FollowUpControlDocumentVM> followUpControlDocuments = null) 
+    {
+        await this.notificationModal.OpenModal(new NotificationVM(), true, personIds, procedureDocuments, followUpControlDocuments);
+    }
+
+    public async Task NotificationCreatedHandler() 
+    {
+        await this.CallBackAfterNotificationCreated.InvokeAsync();
+    }
+}   

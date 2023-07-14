@@ -1,0 +1,56 @@
+﻿@page "/CertificateList"
+
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Заявления за лицензиране</h6>
+            <div class="card">
+               @* <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                         
+                        </ul>
+                    </nav>
+                </div>
+				*@
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="candidateProviders" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="45">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Заявление за лицензиране" OpensOn="Hover" Width="100px">
+                                        <button @onclick="(async () => await SelectedRow(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-file-text-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="LocationCorrespondence.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="ProviderAddressCorrespondence" HeaderText="Адрес за кореспонденция" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="PersonNameCorrespondence" HeaderText="Лице за контакт" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="ProviderPhoneCorrespondence" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ProviderEmailCorrespondence" HeaderText="E-mail" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="TypeApplication" HeaderText="Вид" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<CertificateModal @ref="modal"></CertificateModal>

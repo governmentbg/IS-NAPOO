@@ -1,0 +1,160 @@
+﻿@page "/ControlDocumentList"
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Налични документи в ЦПО</h6>
+            <div class="card">
+                @*  <div class="card-header">
+                <nav class="navbar navbar-expand  ">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                <li class="nav-item d-none d-sm-inline-block">
+                &nbsp;
+                </li>
+                </ul>
+                </nav>
+                </div>*@
+                <div class="card-body">
+                    @if (this.UserProps.IdCandidateProvider == 0)
+                    {
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="form-group required">
+                                    <label class="control-label">ЦПО: </label>
+                                    <SfAutoComplete @ref="this.cpAutoComplete" TValue="int?" @bind-Value="this.idCandidateProvider" TItem="CandidateProviderVM" DataSource="this.candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="CPONameAndOwner"></AutoCompleteFieldSettings>
+                                        <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <p>
+                                        <button type="button" class="btn btn-primary" @onclick="(async () => await this.LoadDataForCandidateProviderBtn())">Зареди данни</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <SfGrid DataSource="requestDocumentManagementsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                    AllowTextWrap="true" @ref="requestDocumentManagementsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                                    AllowExcelExport="true" AllowPdfExport="true">
+                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel">
+                                    <GridFilterColumns>
+                                        <GridFilterColumn Field="DocumentYear" MatchCase="true" Operator="Operator.Equal" Value="@(DateTime.Now.Year.ToString())"></GridFilterColumn>
+                                    </GridFilterColumns>
+                                </GridFilterSettings>
+                                <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                <GridEvents TValue="RequestDocumentManagementControlModel" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" />
+                                <GridColumns>
+                                    <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                        <Template>
+                                            @GetRowNumber(requestDocumentManagementsGrid, (context as RequestDocumentManagementControlModel).EntityId).Result
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Width="10">
+                                        <Template>
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(() => OpenDocumentSerialNumberModal(context as RequestDocumentManagementControlModel))"><i class="fa fa-search-plus"></i></button>
+                                            </SfTooltip>
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="EntityId" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn Field="Provider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="35"></GridColumn>
+                                    <GridColumn Field="Provider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                    <GridColumn Field="TypeOfRequestedDocument.NumberWithName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                    <GridColumn Field="DocumentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="19"></GridColumn>
+                                    <GridColumn Field="ReceivedCount" HeaderText="Получени" TextAlign="TextAlign.Left" Width="23">
+                                        <Template>
+                                            @{
+                                                var ctx = context as RequestDocumentManagementControlModel;
+                                                var countAsStr = $"{ctx.ReceivedCount} бр.";
+
+                                                <div class="text-right">
+                                                    @countAsStr
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="HandedOverCount" HeaderText="Предадени" TextAlign="TextAlign.Left" Width="23">
+                                        <Template>
+                                            @{
+                                                var ctx = context as RequestDocumentManagementControlModel;
+                                                var countAsStr = $"{ctx.HandedOverCount} бр.";
+
+                                                <div class="text-right">
+                                                    @countAsStr
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="PrintedCount" HeaderText="Издадени" TextAlign="TextAlign.Left" Width="23">
+                                        <Template>
+                                            @{
+                                                var ctx = context as RequestDocumentManagementControlModel;
+                                                var countAsStr = $"{ctx.PrintedCount} бр.";
+
+                                                <div class="text-right">
+                                                    @countAsStr
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="CancelledCount" HeaderText="Анулирани" TextAlign="TextAlign.Left" Width="23">
+                                        <Template>
+                                            @{
+                                                var ctx = context as RequestDocumentManagementControlModel;
+                                                var countAsStr = $"{ctx.CancelledCount} бр.";
+
+                                                <div class="text-right">
+                                                    @countAsStr
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="DestroyedCount" HeaderText="Унищожени" TextAlign="TextAlign.Left" Width="25">
+                                        <Template>
+                                            @{
+                                                var ctx = context as RequestDocumentManagementControlModel;
+                                                var countAsStr = $"{ctx.DestroyedCount} бр.";
+
+                                                <div class="text-right">
+                                                    @countAsStr
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="AvailableCount" HeaderText="Налични" TextAlign="TextAlign.Left" Width="23">
+                                        <Template>
+                                            @{
+                                                var ctx = context as RequestDocumentManagementControlModel;
+                                                var countAsStr = $"{ctx.AvailableCount} бр.";
+
+                                                <div class="text-right">
+                                                    @countAsStr
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NAPOOTypeOfRequestedDocumentReferenceModal @ref="napooTypeOfRequestedDocumentReferenceModal" />

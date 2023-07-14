@@ -1,0 +1,455 @@
+﻿@using ISNAPOO.Core.Contracts.Licensing
+@using ISNAPOO.Core.ViewModels.CPO.LicensingProcedureDoc
+@using ISNAPOO.Core.ViewModels.NAPOOCommon
+
+@inject IDataSourceService DataSourceService
+@inject Microsoft.JSInterop.IJSRuntime JsRuntime
+@inject IFrameworkProgramService FrameworkProgramService
+@inject ITemplateDocumentService TemplateDocumentService
+@inject ILicensingProcedureDocumentCPOService licProcDocCPOService
+@inject IFrameworkProgramFormEducationService FrameworkProgramFormEducationService
+@inject IApplicationUserService ApplicationUserService
+@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="80%" EnableResize=true AllowDragging="true"
+          IsModal="true" CloseOnEscape="false" ZIndex="2000" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Данни за рамкова програма <span style="font-size: 18px;color: white !important;">@this.model.Name</span></Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="submitFormFrameworkProgram">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Рамкова програма:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид рамкова програма:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="typeFrameworkPrograms" AllowFiltering="true" @bind-Value="model.IdTypeFrameworkProgram">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    СПК:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="spkValue" AllowFiltering="true" @bind-Value="model.IdVQS">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                            <!-- text input -->
+                        </div>
+                        @*&nbsp;&nbsp;*@
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Квалификационно равнище:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="qualificationLevels" AllowFiltering="true" @bind-Value="model.IdQualificationLevel">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Форма на обучение:
+                                </label>
+                                <SfMultiSelect TValue="int[]" CssClass="dropdown-menu" TItem="KeyValueVM" Mode="@VisualMode.Default" DataSource="@formEducations" @bind-Value="model.FormEducationIds">
+                                    <MultiSelectEvents TItem="KeyValueVM" TValue="int[]" OnValueSelect="@OnValueSelecthandler" OnValueRemove="@OnValueRemoveHandler"></MultiSelectEvents>
+                                    <MultiSelectFieldSettings Text="Name" Value="IdKeyValue"></MultiSelectFieldSettings>
+                                </SfMultiSelect>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Продължителност на обучение:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="trainingPeriods" AllowFiltering="true" @bind-Value="model.IdTrainingPeriod">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Минимално образователно равнище:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="minimumLevelEducations" AllowFiltering="true" @bind-Value="model.IdMinimumLevelEducation">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Минимално квалификационно равнище:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.MinimumLevelQualification" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Мин. брой задължителни учебни часове:
+                                </label>
+                                <InputNumber class="form-control" @bind-Value="model.SectionА" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Брой избираеми учебни часове:
+                                </label>
+                                <InputNumber class="form-control" @bind-Value="model.SectionB" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Макс. % часове А1:
+                                </label>
+                                <InputNumber class="form-control" @bind-Value="model.SectionА1" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Мин. % часове за практическо обучение:
+                                </label>
+                                <InputNumber class="form-control" @bind-Value="model.Practice" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Завършване и удостоверяване на професионалното обучение:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.model.CompletionVocationalTraining"
+                                                     maxlength="1000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.model.CompletionVocationalTraining != null ? this.model.CompletionVocationalTraining.Length : 0)/1000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Пояснителни бележки:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.model.ExplanatoryNotes"
+                                                     maxlength="1000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.model.ExplanatoryNotes != null ? this.model.ExplanatoryNotes.Length : 0)/1000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Статус:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="this.statusesSource" AllowFiltering="true" @bind-Value="model.IdStatus">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @model.CreationDate.ToString("dd.MM.yyyy")</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @model.ModifyDate.ToString("dd.MM.yyyy")</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="float-right">
+                        <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" style="margin-right: 30px;" @onclick="SendNotificationAsync" disabled="@(this.model.IdFrameworkProgram == 0)">Изпрати известие</button>
+                        <button type="submit" class="btn btn-info" form="submitFormFrameworkProgram">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+    public override bool IsContextModified => this.editContext.IsModified();
+
+    ToastMsg toast;
+
+    SfDialog sfDialog;
+    private string dialogClass = "";
+    FrameworkProgramVM model = new FrameworkProgramVM();
+    IEnumerable<KeyValueVM> spkValue;
+    IEnumerable<KeyValueVM> typeFrameworkPrograms;
+    IEnumerable<KeyValueVM> qualificationLevels;
+    IEnumerable<KeyValueVM> formEducations;
+    IEnumerable<KeyValueVM> trainingPeriods;
+    IEnumerable<KeyValueVM> minimumLevelEducations;
+    IEnumerable<KeyValueVM> statusesSource;
+
+
+    bool isSubmitClicked = false;
+    private List<int> selectedFormEducations { get; set; }
+
+    [Parameter]
+    public EventCallback<FrameworkProgramVM> CallbackAfterSave { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        this.editContext = new EditContext(this.model);
+        selectedFormEducations = new List<int>();
+    }
+
+    public async void OpenModal(FrameworkProgramVM _model)
+    {
+        selectedFormEducations = new List<int>();
+        this.isVisible = true;
+
+        this.spkValue = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("VQS");
+        this.typeFrameworkPrograms = (await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("TypeFrameworkProgram")).Where(x => x.DefaultValue1 == null).ToList();
+        this.qualificationLevels = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("QualificationLevel");
+        this.formEducations = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("FormEducation");
+        this.trainingPeriods = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("TrainingPeriod");
+        this.minimumLevelEducations = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("MinimumLevelEducation");
+
+        this.statusesSource = (await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("StatusTemplate")).Where(x => !string.IsNullOrEmpty(x.DefaultValue1) && x.DefaultValue1 == "FrameworkProgram");
+
+        this.spkValue = this.spkValue.OrderBy(x => x.Order).ToList();
+        this.typeFrameworkPrograms = this.typeFrameworkPrograms.OrderBy(x => x.Order).ToList();
+        this.qualificationLevels = this.qualificationLevels.OrderBy(x => x.Order).ToList();
+        this.formEducations = this.formEducations.OrderBy(x => x.Order).ToList();
+        this.trainingPeriods = this.trainingPeriods.OrderBy(x => x.Order).ToList();
+        this.minimumLevelEducations = this.minimumLevelEducations.OrderBy(x => x.Order).ToList();
+
+        this.selectedFormEducations.AddRange(_model.FrameworkProgramFormEducations.Select(x => x.IdFormEducation));
+        _model.FormEducationIds = this.selectedFormEducations.ToArray();
+
+
+        this.model = _model;
+        if (this.model.IdFrameworkProgram == 0)
+        {
+            var kvActiveStatus = await this.DataSourceService.GetKeyValueByIntCodeAsync("StatusTemplate", "Active");
+            this.model.IdStatus = kvActiveStatus.IdKeyValue;
+        }
+
+        this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(model.IdModifyUser);
+        this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(model.IdCreateUser);
+        this.editContext = new EditContext(this.model);
+
+        this.StateHasChanged();
+    }
+
+    public async Task<FrameworkProgramVM> SaveFromParent()
+    {
+        return this.model;
+    }
+
+    private async Task<int> Save()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageFPData", false);
+        if (!hasPermission) { return 0; }
+        model.FormEducationNames = String.Join(", ", formEducations.Where(fe => model.FormEducationIds.Contains(fe.IdKeyValue)).Select(x => x.Name));
+        this.editContext = new EditContext(this.model);
+        this.editContext.EnableDataAnnotationsValidation();
+
+        this.isSubmitClicked = true;
+        var result = 0;
+
+        bool isValid = this.editContext.Validate();
+        if (isValid)
+        {
+
+            this.SpinnerShow();
+
+
+            result = await this.FrameworkProgramService.UpdateFrameworkProgramAsync(this.model);
+
+
+            this.model = await this.FrameworkProgramService.GetFrameworkProgramByIdAsync(this.model.IdFrameworkProgram);
+            this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(model.IdModifyUser);
+            this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(model.IdCreateUser);
+            var aa = await this.FrameworkProgramFormEducationService.GetAllFrameworkProgramsFormEducationsByIdAsync(this.model.IdFrameworkProgram);
+
+            model.FrameworkProgramFormEducations = aa.ToList();
+
+            this.selectedFormEducations.Clear();
+            this.selectedFormEducations.AddRange(model.FrameworkProgramFormEducations.Select(x => x.IdFormEducation));
+            model.FormEducationIds = this.selectedFormEducations.ToArray();
+            await this.ShowSuccessAsync("Записът е успешен");
+        }
+
+        if (result > 0)
+        {
+            if (this.model.IdFrameworkProgram == 0)
+            {
+                this.model.IdFrameworkProgram = result;
+            }
+
+            await CallbackAfterSave.InvokeAsync(this.model);
+            this.StateHasChanged();
+        }
+
+        return result;
+    }
+    private async Task SendNotificationAsync()
+    {
+        await this.LoadDataForPersonsToSendNotificationToAsync("FrameworkProgram", this.model.IdFrameworkProgram);
+
+        if (!this.personIds.Any())
+        {
+            await this.ShowErrorAsync("Няма планирани програми за обучение от ЦПО за избраната рамкова програма!");
+        }
+        else
+        {
+            await this.OpenSendNotificationModal(true, this.personIds);
+        }
+    }
+
+
+    private void OnValueSelecthandler(SelectEventArgs<KeyValueVM> args)
+    {
+        var idFormEducation = args.ItemData.IdKeyValue;
+        for (int i = 0; i < this.selectedFormEducations.Count(); i++)
+        {
+            if (selectedFormEducations.Contains(idFormEducation))
+            {
+                continue;
+            }
+
+            selectedFormEducations.Add(idFormEducation);
+            this.model.FormEducationIds = selectedFormEducations.ToArray();
+            return;
+        }
+    }
+
+    private void OnValueRemoveHandler(RemoveEventArgs<KeyValueVM> args)
+    {
+        var idFormEducation = args.ItemData.IdKeyValue;
+        for (int i = 0; i < this.selectedFormEducations.Count(); i++)
+        {
+            if (selectedFormEducations.Contains(idFormEducation))
+            {
+                selectedFormEducations.Remove(idFormEducation);
+                this.model.FormEducationIds = selectedFormEducations.ToArray();
+                return;
+            }
+
+            continue;
+        }
+    }
+
+
+    //private async void Print()
+    //{
+    //    var applicationTypeTemplate = await this.DataSourceService.GetKeyValueByIntCodeAsync("ApplicationTypeTemplate", "Application13");
+    //    //var applicationTypeTemplate = await this.DataSourceService.GetKeyValueByIntCodeAsync("ProcedureDocumentType", "Application13");
+    //    var module = await this.DataSourceService.GetKeyValueByIntCodeAsync("ModuleTemplate", "CPOLicensing");
+
+    //    TemplateDocumentVM templateDocumentVM = new TemplateDocumentVM();
+
+    //    templateDocumentVM.IdModule = module.IdKeyValue;
+    //    templateDocumentVM.IdApplicationType = applicationTypeTemplate.IdKeyValue;
+
+    //    var templateDocumentList = await this.TemplateDocumentService.GetAllTemplateDocumentsAsync(templateDocumentVM);
+
+    //    var cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ПРИМИС",
+    //            CompanyName = "Сдружение за защита на българските производители и търговци",
+    //            CityName = "Бургас"
+    //        };
+
+    //    DateTime dayOfMeeting = DateTime.UtcNow;
+
+    //    var application13 = new CPOLicensingApplication13
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            ExpertCommissionName = "Здравеопазване и спорт",
+    //            DateOfMeeting = dayOfMeeting,
+    //            DayOfWeek = ((DaysOfWeek)dayOfMeeting.DayOfWeek).ToString(),
+    //            Time = TimeOnly.FromDateTime(dayOfMeeting),
+    //            OrderNumber = "521964",
+    //            CPOMainData = cPOMainData,
+    //            ExpertCommissionMembers = new List<string> { "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов" },
+    //            HeadOfExpertCommission = "Цойка Стоилова"
+    //        };
+
+    //    var documentStream = licProcDocCPOService.GenerateApplication_13(application13);
+    //    await FileUtils.SaveAs(JsRuntime, "Application13.doc", documentStream.ToArray());
+    //}
+}

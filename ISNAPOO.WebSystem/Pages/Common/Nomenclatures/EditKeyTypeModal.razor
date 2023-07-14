@@ -1,0 +1,175 @@
+﻿@inject IJSRuntime JsRuntime
+@inject IKeyTypeService KeyTypeService
+@inject IKeyValueService KeyValueService
+@inject IDataSourceService Datasourceservice
+@inject IApplicationUserService ApplicationUserService
+@inherits BlazorBaseComponent
+
+<SfDialog Width="60%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@IsVisible">
+    <DialogTemplates>
+        <Header>
+            Данни за номенклатура - <span style="font-size: 18px;color: white !important;">@($"{validationModel.KeyTypeName}")</span>
+        </Header>
+        <Content>
+            <SfTab @bind-SelectedItem="selectedTab">
+                <TabEvents Selected="SelectedEventHandler"></TabEvents>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Номенклатура"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <EditForm Model="validationModel" OnValidSubmit="SubmitHandler">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+                                <div class="card">
+                                    <div class="card-block" style="">
+                                        <p>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Наименование: </label>
+                                                        <InputText class="form-control" @bind-Value="validationModel.KeyTypeName"></InputText>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Код: </label>
+                                                        <InputText class="form-control" @bind-Value="validationModel.KeyTypeIntCode"></InputText>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Описание: </label>
+                                                        <InputTextArea class="form-control" @bind-Value="validationModel.Description"></InputTextArea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="new-task">
+                                                        <div class="to-do-list">
+                                                            <div class="checkbox-fade fade-in-primary">
+                                                                <label class="form-label">
+                                                                    <input type="checkbox" @bind-value="validationModel.IsSystem" checked="@(validationModel.IsSystem ? "checked" : null)">
+                                                                    <span class="cr">
+                                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                                    </span> <span>Системна</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <div class="row">
+                                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @validationModel.CreationDate.ToString("dd.MM.yyyy")</div>
+
+                                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @validationModel.ModifyDate.ToString("dd.MM.yyyy")</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @validationModel.CreatePersonName</div>
+
+                                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @validationModel.ModifyPersonName</div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <div class="text-right">
+                                                <button class="btn btn-info" type="submit">Запиши</button>
+                                                <button type="button" class="btn btn-outline-secondary" @onclick="@Cancel">Отказ</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Стойности"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <NomenclaturesValuesList @ref="keyValuesList"></NomenclaturesValuesList>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+@code {
+    ToastMsg toast;
+
+    KeyTypeVM validationModel = new KeyTypeVM();
+    NomenclaturesValuesList keyValuesList = new NomenclaturesValuesList();
+    int selectedTab = 0;
+
+    bool IsVisible = false;
+
+    [Parameter]
+    public EventCallback OnEditSubmit { get; set; }
+
+    public void OpenModal(KeyTypeVM model)
+    {
+        this.selectedTab = 0;
+        this.validationModel = model;
+        this.validationModel.ModifyPersonName = this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.validationModel.IdModifyUser).Result;
+        this.validationModel.CreatePersonName = this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.validationModel.IdCreateUser).Result;
+        this.IsVisible = true;
+        this.StateHasChanged();
+    }
+
+    private void Cancel()
+    {
+        this.IsVisible = false;
+        this.StateHasChanged();
+    }
+
+    private async Task SelectedEventHandler()
+    {
+        if (this.selectedTab == 1)
+        {
+            KeyValueVM valueVM = new KeyValueVM();
+            valueVM.IdKeyType = this.validationModel.IdKeyType;
+
+            IEnumerable<KeyValueVM> keyValues = await this.KeyValueService.GetAllAsync(valueVM);
+            this.keyValuesList.Open(keyValues, valueVM.IdKeyType);
+        }
+    }
+
+    private async Task SubmitHandler()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+        this.SpinnerShow();
+        string msg = await this.KeyTypeService.UpdateKeyTypeAsync(this.validationModel);
+
+        if (msg.Contains("успешeн"))
+        {
+            await this.ShowSuccessAsync(msg);
+            await this.OnEditSubmit.InvokeAsync();
+            await this.Datasourceservice.ReloadKeyType();
+        }
+        else
+        {
+            await this.ShowErrorAsync(msg);
+            await toast.sfErrorToast.ShowAsync();
+        }
+    }
+}

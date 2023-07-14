@@ -1,0 +1,166 @@
+﻿@using Syncfusion.Blazor.RichTextEditor
+
+@inherits BlazorBaseComponent
+
+<SfDialog EnableResize="true" AllowDragging="true" Width="1200px" Height="1200px" IsModal="true" ShowCloseIcon="true" ZIndex="4000" CloseOnEscape="false" @bind-Visible="this.isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler" Opened="@DialogOpen"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за Единица резултат от учене (ЕРУ)
+        </Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm EditContext="editContext">
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Шифър на ЕРУ: </label>
+                                        <InputText readonly="@IsReadOnly" class="form-control" @bind-Value="model.Code"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-10">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование на ЕРУ: </label>
+                                        <InputText readonly="@IsReadOnly" class="form-control" @bind-Value="model.Name"></InputText>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид професионална подготовка: </label>
+                                        <SfComboBox Readonly="@IsReadOnly" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="@professionalTraining" AllowFiltering="true" @bind-Value="model.IdProfessionalTraining" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Ниво по НКР: </label>
+                                        <SfComboBox Readonly="@IsReadOnly" TValue="int" TItem="KeyValueVM" PopupHeight="230px" @onfocusout="() => {IsNKR = true; ChangeBoth();}" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="@nkrValue" AllowFiltering="true" @bind-Value="model.IdNKRLevel" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Ниво по ЕКР: </label>
+                                        <SfComboBox Readonly="@IsReadOnly" TValue="int" TItem="KeyValueVM" PopupHeight="230px" @onfocusout="() => ChangeBoth()" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="@ekrValue" AllowFiltering="true" @bind-Value="model.IdEKRLevel" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">РУ, Знания, умения, компетентности, Средства за оценяване, Условия за провеждане на оценяването, Критерии за оценяване:</label>
+                                        <SfRichTextEditor Readonly="@IsReadOnly" @ref="sfRichTextEditor" @bind-Value="model.RUText">
+                                            <RichTextEditorToolbarSettings Enable="@IsEnable" Items="@Tools" />
+                                        </SfRichTextEditor>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <AuthorizeView Context="IsOnlyView" Policy="ManageDOCData">
+                                <div hidden="@IsReadOnly" class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Специалност:
+                                            </label>
+                                            <SfComboBox TValue="int" TItem="SpecialityVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="@SpecialityValue" DataSource="specialitySource" AllowFiltering="true">
+                                                <ComboBoxEvents TValue="int" TItem="SpecialityVM"></ComboBoxEvents>
+                                                <ComboBoxFieldSettings Text="ComboBoxName" Value="IdSpeciality" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <p>
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OnAddSpecialityClick">Добави</button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </AuthorizeView>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <SfGrid ID="defaultGrid" @ref="specialityGrid" DataSource="addedSpecialitys" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                                        <GridTemplates>
+                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                <span>Няма намерени резултати.</span>
+                                            </EmptyRecordTemplate>
+                                        </GridTemplates>
+                                        <GridColumns>
+                                            <GridColumn Width="10px">
+                                                <Template Context="specialityContext">
+                                                    <AuthorizeView Context="IsOnlyView" Policy="ManageDOCData">
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" hidden="@IsReadOnly" @onclick="(() => DeleteRowSpeciality(specialityContext as SpecialityVM))"><i class="fa fa-trash-o"></i></button>
+                                                        </SfTooltip>
+                                                    </AuthorizeView>
+                                                </Template>
+                                            </GridColumn>
+                                            <GridColumn Field="ComboBoxName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                                            <GridColumn Field="Profession.ComboBoxName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                                            <GridColumn Field="Profession.ProfessionalDirection.DisplayNameAndCode" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div hidden="@IsReadOnly" class="col-sm-4">
+                    <div class="float-right">
+                        <AuthorizeView Policy="ManageDOCData">
+                            <button type="button" class="btn btn-info" @onclick="SubmitHandler">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="CancelClickedHandler">Отказ</button>
+                        </AuthorizeView>
+                    </div>
+                </div>
+            </div>
+
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+

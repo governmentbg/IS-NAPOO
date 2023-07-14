@@ -1,0 +1,106 @@
+﻿@page "/TrainedPeopleList"
+
+@inherits BlazorBaseComponent
+
+@using ISNAPOO.WebSystem.Pages.Registers.DocumentsFromCPO
+@using ISNAPOO.Core.ViewModels.Training
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Регистър на обучаваните лица</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="this.clientsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="this.clientsGrid" AllowSelection="false" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler"  OnToolbarClick="ToolbarClick" TValue="ClientCourseVM" />
+                        <GridColumns>
+                            <GridColumn Field="IdClientCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn AllowFiltering="false" HeaderText=" " AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="15px">
+                                <Template>
+                                    @GetRowNumber(this.clientsGrid, (context as ClientCourseVM).IdClientCourse).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="20px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button id="btn" @onclick="(() => this.OpenViewClientBtn(context as ClientCourseVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Course.CandidateProvider.LicenceNumber" HeaderText="Лицензия" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="FullName" HeaderText="Име на курсист" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.Program.Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.Program.Speciality.ComboBoxName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.CourseName" HeaderText="Курс" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.timeSpan" HeaderText="Период на провеждане" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.Location.LocationName" HeaderText="Населено място" Width="40px"></GridColumn>
+                            <GridColumn Field="Course.TrainingCourseTypeName" HeaderText="Вид на обучение" Width="40px"></GridColumn>
+                            <GridColumn Field="FinishedTypeName" HeaderText="Статус на завършване" Width="40px">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var status = context as ClientCourseVM;
+
+                                            switch (status.FinishedTypeName)
+                                            {
+                                                case "Завършил с документ":
+                                                    <label class="form-label label label-success">@status.FinishedTypeName</label>
+                                                    break;
+                                                case "Прекъснал по уважителни причини":
+                                                    <label class="form-label label label-info">@status.FinishedTypeName</label>
+                                                    break;
+                                                case "Прекъснал по неуважителни причини":
+                                                    <label class="form-label label label-danger">@status.FinishedTypeName</label>
+                                                    break;
+                                                case "Завършил курса, но не положил изпита":
+                                                    <label class="form-label label label-warning">@status.FinishedTypeName</label>
+                                                    break;
+                                                case "Придобил СПК по реда на чл.40 от ЗПОО":
+                                                    <label class="form-label label label-success">@status.FinishedTypeName</label>
+                                                    break;
+                                                case "Издаване на дубликат":
+                                                    <label class="form-label label label-info">@status.FinishedTypeName</label>
+                                                    break;                            
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="20px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Документи на курсиста" OpensOn="Hover">
+                                        <button id="btn" @onclick="(() => this.OpenViewClientDocumenttBtn(context as ClientCourseVM))" class="btn-row"><i class="fa fa-folder-open"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="20px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Данни за курса" OpensOn="Hover">
+                                        <button id="btn" @onclick="(() => this.OpenViewClientCourseBtn(context as ClientCourseVM))" class="btn-row"><i class="fa fa-university"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<DocumentsFromCPOModal @ref="documentsFromCPOModal" />
+<DocumentsFromCPOFilter @ref="filterModal" CallbackAfterSubmit="OnFilterModalSubmit" />
+<CurrentCourseClientModal @ref="currentCourseClientModal" IsEditable="false" />
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />

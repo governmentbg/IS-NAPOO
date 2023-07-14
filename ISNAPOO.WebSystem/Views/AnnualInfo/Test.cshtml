@@ -1,0 +1,13 @@
+﻿@using ISNAPOO.WebSystem.Controllers
+@model AnnualInfoViewModelResult
+Параметри
+ID:@Model.IdCandidateProvider
+Година:@Model.Year
+Резултат:@Model.Message
+@foreach (var msg in Model.ListErrorMessages)
+{
+    <br/>@msg
+}
+
+
+

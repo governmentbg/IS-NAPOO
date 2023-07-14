@@ -1,0 +1,56 @@
+﻿@page "/EventLogList"
+@using ISNAPOO.Core.ViewModels.Common
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Логове на действията</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterEventModalBtn">Филтър</button>
+                            </li>
+ @*                           <li class="nav-item d-none d-sm-inline-block">
+                                <input type="text" @bind-value="@ApplicantUin" />
+                                <button type="button" class="btn btn-info btn-primary" @onclick="SearchRequestPayments">Търси</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>*@
+                        </ul>
+                    </nav>
+                </div>
+                <SfGrid ID="eventLogsGrid" AllowTextWrap="true" DataSource="eventLogs" AllowSorting="true" AllowFiltering="true" @ref="eventLogsGrid" AllowPaging=true
+                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="EventLogVM"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                @GetRowNumber(eventLogsGrid, (context as EventLogVM).idEventLog).Result
+                                </Template>
+                            </GridColumn>
+                        <GridColumn Field="idEventLog" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field="EventDate" HeaderText="Дата на действието" TextAlign="TextAlign.Center" Width="20"></GridColumn>
+                        <GridColumn Field="PersonName" HeaderText="Потребител" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="CurrentMenu" HeaderText="Модул" TextAlign="TextAlign.Center" Width="30"></GridColumn>
+                        <GridColumn Field="EventAction" HeaderText="Действие" TextAlign="TextAlign.Center" Width="23"></GridColumn>
+                        <GridColumn Field="EntityName" HeaderText="Таблица" TextAlign="TextAlign.Center" Width="30"></GridColumn>                       
+                        <GridColumn Field="EntityID" HeaderText="Обект на действието" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                        <GridColumn Field="EventMessage" HeaderText="Допълнителна информация" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="IP" HeaderText="IP адрес" TextAlign="TextAlign.Center" Width="30"></GridColumn>
+                        <GridColumn Field="BrowserInformation" HeaderText="Браузър" TextAlign="TextAlign.Center" Width="30"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+</div>
+<EventLogFilterModal @ref="eventLogFilterModal" CallbackAfterSubmit="OnFilterModalSubmit"/>
+@*CallbackAfterSubmit="OnFilterModalSubmit" />*@

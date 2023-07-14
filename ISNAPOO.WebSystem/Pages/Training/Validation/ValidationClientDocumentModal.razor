@@ -1,0 +1,192 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" Width="65%" EnableResize=true AllowDragging="true"
+          IsModal="true" CloseOnEscape="false" ZIndex="3000" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Добавяне на документ</Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="submitFormFrameworkProgram">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на документа:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="requiredDocumentTypesSource" AllowFiltering="true" @bind-Value="model.IdCourseRequiredDocumentType">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        @if (this.model.IdCourseRequiredDocumentType != 0 
+                        && !this.filteredDiplomaDocIds.Any(x => x == this.model.IdCourseRequiredDocumentType) 
+                        && this.model.IdCourseRequiredDocumentType != this.kvProfesionalQualificationType.IdKeyValue)
+                        {
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на документа:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.model.DocumentDate"></SfDatePicker>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (this.model.IdCourseRequiredDocumentType != 0)
+                    {
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Описание на документа:
+                                    </label>
+                                    <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                         ondrop="5"
+                                                         rows="2"
+                                    @bind-Value="this.model.Description"
+                                                         maxlength="255">
+                                    </CustomInputTextArea>
+                                    <div style="float:right">
+                                        <label>
+                                            @(
+                                                this.model.Description != null ? this.model.Description.Length : 0
+                                                )/255
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (!this.filteredDocIds.Any(x => x == this.model.IdCourseRequiredDocumentType))
+                        {
+                            <div class="row">
+                                @if (this.model.IdCourseRequiredDocumentType != this.kvProfesionalQualificationType.IdKeyValue)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Завършено образование:
+                                            </label>
+                                            <SfComboBox TValue="int?" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                        DataSource="formEducationsSource" AllowFiltering="true" @bind-Value="model.IdEducation">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (!this.filteredDiplomaDocIds.Any(x => x == this.model.IdCourseRequiredDocumentType))
+                                {
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Квалификационно ниво:
+                                            </label>
+                                            <SfComboBox TValue="int?" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                        DataSource="qualificationLevelsSource" AllowFiltering="true" @bind-Value="model.IdMinimumQualificationLevel">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Регистрационен номер на документа:
+                                        </label>
+                                        <InputText class="form-control" @bind-Value="this.model.DocumentRegNo" />
+                                    </div>
+                                </div>
+                                @if (!this.filteredDiplomaDocIds.Any(x => x == this.model.IdCourseRequiredDocumentType))
+                                {
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Фабричен номер на документа:
+                                            </label>
+                                            <InputText class="form-control" @bind-Value="this.model.DocumentPrnNo" />
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Дата на издаване:
+                                        </label>
+                                        <SfDatePicker TValue="DateTime?" ShowClearButton="true" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.model.IssueDocumentDate"></SfDatePicker>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <label>
+                            Прикачен файл:
+                        </label>
+                        <div class="row e-upload" style="margin-left:0px">
+                            <div class="col-sm-6">
+                                @if (!string.IsNullOrEmpty(this.model.UploadedFileName))
+                                {
+                                    <button type="button" class="btn-row" @onclick="(() => OnRemove(this.model.FileName))"><i class="fa fa-trash-o"></i></button>
+                                    <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.model.FileName</a></span>
+                                }
+                                else
+                                {
+                                    <label>
+                                        Няма прикачен файл
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <SfUploader @ref="uploader" AutoUpload="false" AllowMultiple="false" Enabled="this.model.IdValidationClientRequiredDocument != 0" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                        <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                    </SfUploader>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-righ" style="display:inline-flex">
+                            @if (this.model.IdCourseRequiredDocumentType != 0 && (requiredDocumentTypesSource
+                            .Where(x => x.KeyValueIntCode == "ComparisonTable" || x.KeyValueIntCode == "SumTable" || x.KeyValueIntCode == "ClientFormular" || x.KeyValueIntCode == "InformationCard")
+                            .Any(y => y.IdKeyValue == this.model.IdCourseRequiredDocumentType)))
+                            {
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Протокол" OpensOn="Hover">
+                                    <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="async () => await GenerateApplication()">Печат</button>
+                                </SfTooltip>
+                            }
+                            <button type="submit" class="btn btn-info" form="submitFormFrameworkProgram">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog" CallbackDelete="ConfirmDeleteCallback"></ConfirmDialog>

@@ -1,0 +1,119 @@
+﻿@page "/RequestDocumentManagement"
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Получаване на документи</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenUploadProtocolModalBtn">Прикачи протокол</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid DataSource="requestDocumentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="requestDocumentsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="RequestDocumentManagementVM" OnToolbarClick="ToolbarClick" QueryCellInfo="CellInfoHandler" />
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="10"></GridColumn>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(requestDocumentsGrid, (context as RequestDocumentManagementVM).IdRequestDocumentManagement).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                     <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button @onclick="(async () => await this.EditRequest(context as RequestDocumentManagementVM))" class="btn-row"><i class="fa fa-edit"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdRequestDocumentManagement" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="TypeOfRequestedDocument.NumberWithName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="65"></GridColumn>
+                            <GridColumn Field="DocumentSeriesName" HeaderText="Серия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="DocumentCount" HeaderText="Брой" TextAlign="TextAlign.Left" Width="20">
+                                <Template>
+                                    @{
+                                        var ctx = context as RequestDocumentManagementVM;
+
+                                        <div class="text-center">
+                                            @($"{ctx.DocumentCount} бр.")
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ReceiveDocumentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                            <GridColumn Field="DocumentDate" HeaderText="Дата на получаване" TextAlign="TextAlign.Left" Width="40" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as RequestDocumentManagementVM;
+
+                                        @($"{ctx.DocumentDate.Value.ToString("dd.MM.yyyy")} г.")
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="DocumentRequestReceiveTypeName" HeaderText="Получен от" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ProviderRequestDocument.RequestNumber" HeaderText="По заявка №" TextAlign="TextAlign.Left" Width="40">
+                                <Template>
+                                    @{
+                                        var ctx = context as RequestDocumentManagementVM;
+                                        if (ctx.ProviderRequestDocument is not null)
+                                        {
+                                            @($"{ctx.ProviderRequestDocument.RequestNumber}/ {ctx.ProviderRequestDocument.RequestDate.Value.ToString("dd.MM.yyyy")} г.")
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProviderPartner.ProviderOwner" HeaderText="От друго ЦПО" TextAlign="TextAlign.Left" Width="45">
+                                <Template>
+                                    @{
+                                        var providerInfo = context as RequestDocumentManagementVM;
+
+                                        if (providerInfo.CandidateProviderPartner != null)
+                                        {
+                                            @($"ЦПО към {providerInfo.CandidateProviderPartner.ProviderOwner}")
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="20">
+                                <Template Context="docCtx">
+                                    @if ((docCtx as RequestDocumentManagementVM).HasUploadedProtocol)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с прикачен протокол" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DownloadProtocolBtn(docCtx as RequestDocumentManagementVM))"><i class="fa fa-file-o"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CPORequestDocumentManagementModal @ref="cpoRequestDocumentManagementModal" CallbackAfterModalSubmit="UpdateAfterModalSubmit" />
+<UploadRequestProtocolModal @ref="uploadRequestProtocolModal" CallbackAfterSubmit="UpdateAfterModalSubmit" />

@@ -1,0 +1,115 @@
+﻿@page "/CourseList"
+@inherits BlazorBaseComponent
+@using ISNAPOO.Core.ViewModels.Training
+
+<div class="content-header">
+    <div class="container-fluid">
+        <h6 class="page-title-left">Регистър на курсове</h6>
+        <div class="card">
+            <div class="card-header">
+                <nav class="navbar navbar-expand  ">
+                    <!-- Left navbar links -->
+                    <ul class="navbar-nav">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="card-body">
+                <SfGrid DataSource="courses" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                        AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                    <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CourseVM" />
+                    <GridColumns>
+                        <GridColumn Field="IdCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn AllowFiltering="false" HeaderText=" " AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="30">
+                            <Template>
+                                @GetRowNumber(sfGrid, (context as CourseVM).IdCourse).Result
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Width="50">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                    <button @onclick="(() => openModal(context as CourseVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Width="50">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                    <button @onclick="(() => OpenChecking(context as CourseVM))" class="btn-row"><i class="fa fa-check-square-o"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия"></GridColumn>
+                        <GridColumn Field="CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="Program.Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="Program.Speciality.CodeAndName" HeaderText="Специалност" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="TrainingCourseTypeName" HeaderText="Вид на обучение" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="CourseName" HeaderText="Наименование на курс" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="AssignTypeName" HeaderText="Основен източник на финансиране"></GridColumn>
+                        <GridColumn Field="FormEducationName" HeaderText="Форма на обучение"></GridColumn>
+                        <GridColumn Field="MandatoryHours" HeaderText="Задължителни уч. ч.">
+                            <Template>
+                                <div class="text-right">
+                                    @{
+                                        var ctx = context as CourseVM;
+                                        @ctx.MandatoryHours
+                                        ;
+                                    }
+                                </div>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="SelectableHours" HeaderText="Избираеми уч. ч.">
+                            <Template>
+                                <div class="text-right">
+                                    @{
+                                        var ctx = context as CourseVM;
+                                        @ctx.SelectableHours
+                                        ;
+                                    }
+                                </div>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="StatusName" HeaderText="Статус на курса" TextAlign="TextAlign.Center">
+                            <Template>
+                                <div class="text-center">
+                                    @{
+                                        var ctx = context as CourseVM;
+                                        switch (ctx.StatusName)
+                                        {
+                                            case "Текущ":
+                                                <label class="form-label-status label label-success">@ctx.StatusName</label>
+                                                break;
+                                            case "Предстоящ":
+                                                <label class="form-label-status label label-primary">@ctx.StatusName</label>
+                                                break;
+                                            case "Приключил":
+                                                @if (!ctx.IsArchived)
+                                                {
+                                                    <label class="form-label-status label label-warning">@ctx.StatusName</label>
+                                                }
+                                                break;
+                                        }
+
+                                        if (ctx.IsArchived)
+                                        {
+                                            <label class="form-label-status label label-danger">Архивиран</label>
+                                        }
+                                    }
+                                </div>
+                            </Template>
+                        </GridColumn>
+
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CourseFilter @ref="filterModal" CallbackAfterSubmit="Filter"></CourseFilter>
+<CourseCheckingsList @ref="courseCheckingsList"></CourseCheckingsList>
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />

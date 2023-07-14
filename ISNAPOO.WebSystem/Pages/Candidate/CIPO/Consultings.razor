@@ -1,0 +1,61 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="card" style="margin-bottom: 0px;">
+    <div class="card-block" style="">
+        <p>
+            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenActiveLicenceChange && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation)
+            {
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Вид на услугата:
+                            </label>
+                            <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.idConsultingType" DataSource="this.kvConsultingTypeSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <p>
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="(async () => await this.AddConsultingTypeBtn())">Добави</button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row">
+                <div class="col-sm-12">
+                    <label class="text-gray"><b>Видове услуги:</b></label>
+                    <SfGrid DataSource="this.consultingsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="this.consultingsGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="CandidateProviderConsultingVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(this.consultingsGrid, (context as CandidateProviderConsultingVM).IdCandidateProviderConsulting).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%" HeaderText=" " Visible="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenActiveLicenceChange && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.DeleteConsultingTypeBtn(context as CandidateProviderConsultingVM))"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidateProviderConsulting" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ConsultingTypeValue" HeaderText="Вид на услугата" TextAlign="TextAlign.Left" Width="90%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </p>
+    </div>
+</div>
+
+

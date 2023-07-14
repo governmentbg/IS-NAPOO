@@ -1,0 +1,147 @@
+﻿@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.DOC
+@using ISNAPOO.Core.ViewModels.DOC
+
+
+@inject IDOCService docService
+@inject IJSRuntime JsRuntime
+
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="900px" Height="900px" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="@IsVisibleImportModal" CssClass="@dialogClass" ZIndex="2000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+
+    <DialogTemplates>
+        <Header>
+            Импорт на Държавен образователен стандарт
+        </Header>
+        <Content>
+            <label>
+                Прикачен файл:
+            </label>
+            <div class="row e-upload" style="margin-left:0px">
+                <div class="col-sm-8">
+                    @if (model.HasUploadedFile)
+                    {
+                        <span class="align-text-bottom"><a href="#" class="link-primary">@model.FileName</a></span>
+                    }
+                    else
+                    {
+                        <label>
+                            Няма прикачен файл
+                        </label>
+                    }
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <SfUploader @ref="@sfUpload" AutoUpload="false" AllowMultiple="false" Enabled="true">
+                            <UploaderEvents ValueChange="OnChange"></UploaderEvents>
+                        </SfUploader>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@ImportDOCAync">Импорт</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@Cancel">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    ToastMsg toast;
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+    private bool IsVisibleImportModal { get; set; } = false;
+    SfDialog sfDialog;
+    SfUploader sfUpload;
+    private string dialogClass = "";
+    DocVM model = new DocVM();
+    MemoryStream excelStream;
+
+    [Parameter]
+    public EventCallback<DocVM> CallbackAfterSave { get; set; }
+
+    public async Task OpenModal()
+    {
+        this.model = new DocVM();
+        this.IsVisibleImportModal = true;
+        this.StateHasChanged();
+    }
+
+    private void Cancel()
+    {
+        sfUpload.ClearAllAsync();
+        this.model = new DocVM();
+        this.IsVisibleImportModal = false;
+        this.StateHasChanged();
+    }
+
+    private async Task ImportDOCAync()
+    {
+        ResultContext<DocVM> resultContext = new ResultContext<DocVM>();
+
+        if (string.IsNullOrEmpty(this.model.UploadedFileName) || this.model.UploadedFileName == "#")
+        {
+            toast.sfErrorToast.Content = "Моля, качете файл преди да импортирате!";
+            toast.sfErrorToast.ShowAsync();
+        }
+        else
+        {
+            resultContext = await this.docService.ImportDOCAsync(resultContext, this.model.UploadedFileStream, this.model.UploadedFileName);
+            sfUpload.ClearAllAsync();
+
+            if (resultContext.HasErrorMessages)
+            {
+                excelStream = await docService.CreateExcelWithErrors(resultContext);
+                await JsRuntime.SaveAs($"Errors_DOS_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.xlsx", excelStream.ToArray());
+            }
+
+            if (resultContext.HasMessages)
+            {
+                if (resultContext.ListMessages.Count == 1 && resultContext.ListMessages.First().Contains("Файлът"))
+                {
+                    toast.sfErrorToast.Content = string.Join(Environment.NewLine, resultContext.ListMessages);
+                    await toast.sfErrorToast.ShowAsync();
+                }
+                else
+                {
+                    toast.sfSuccessToast.Content = string.Join(Environment.NewLine, resultContext.ListMessages);
+                    await toast.sfSuccessToast.ShowAsync();
+                }
+            }
+
+            this.model = new DocVM();
+            this.IsVisibleImportModal = false;
+            await CallbackAfterSave.InvokeAsync(this.model);
+        }
+
+        this.StateHasChanged();
+    }
+
+    private async Task OnChange(UploadChangeEventArgs args)
+    {
+        if (args.Files.Count == 1)
+        {
+            this.model.UploadedFileName = args.Files[0].FileInfo.Name;
+            this.model.UploadedFileStream = args.Files[0].Stream;
+            this.StateHasChanged();
+        }
+
+    }
+
+
+
+
+}

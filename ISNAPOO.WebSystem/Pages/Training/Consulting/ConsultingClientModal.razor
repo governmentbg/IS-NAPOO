@@ -1,0 +1,94 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<ClientCourseVM>
+
+<SfDialog @bind-Visible="isVisible" Width="97%" Height="97%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2010" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за консултирано лице <span style="color: #ffffff;">@this.consultingClientVM.FullName</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <SfTab EnablePersistence="false" LoadOn="ContentLoad.Dynamic" @bind-SelectedItem="this.selectedTab">
+                <TabEvents Selecting="Select" />
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Данни за консултирано лице"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ConsultingClientInformation @ref="consultingClientInformation" ConsultingClientVM="this.consultingClientVM" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.consultingClientVM.IdConsultingClient != 0">
+                        <ChildContent>
+                            <TabHeader Text="Документи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ConsultingClientDocumentsList @ref="consultingClientDocumentsList" ConsultingClientVM="this.consultingClientVM" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.consultingClientVM.IdConsultingClient != 0">
+                        <ChildContent>
+                            <TabHeader Text="Резултат от консултирането"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ConsultingClientFinishedData @ref="consultingClientFinishedData" ConsultingClientVM="this.consultingClientVM" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.consultingClientVM.IdConsultingClient != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.consultingClientVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.consultingClientVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.consultingClientVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.consultingClientVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.hideBtnsConcurrentModal && this.consultingClientVM.IsArchived == false)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

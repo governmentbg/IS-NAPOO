@@ -1,0 +1,132 @@
+﻿@using ISNAPOO.Core.ViewModels.CPO.ProviderData
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" style="margin-right: 30px;" @onclick="SendNotificationAsync">Изпрати известие към ЦПО</button>
+                            </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Взимане на документ по данни от деловодна система" OpensOn="Hover">
+                                    <button class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.OpenGetDocModal())">Добави документ</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="documentGrid" DataSource="addedDocumentsSource" AllowSorting="true" AllowFiltering="true" AllowPaging=false AllowTextWrap="true" AllowSelection="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridTemplates>
+                            <EmptyRecordTemplate Context="emptyRecord">
+                                <span>Няма намерени резултати.</span>
+                            </EmptyRecordTemplate>
+                        </GridTemplates>
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="5px"></GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <button @onclick="(() => GetDocument(context as ProcedureDocumentVM))" class="btn-row"><i class="fa fa-file-o"></i></button>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    @{
+                                        var doc = context as ProcedureDocumentVM;
+                                        if (doc.IsFromDS)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(() => DeleteDocument(doc))"><i class="fa fa-trash-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="gridRowCounter" HeaderText="" TextAlign="TextAlign.Left" Width="10px" AllowFiltering="false" AllowSorting="false"></GridColumn>
+                            <GridColumn Field="DocumentTypeNameDescription" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                            <GridColumn Field="DS_DocNumber" HeaderText="№ на работен документ" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="DS_DATEOnly" HeaderText="Дата" Format="dd.MM.yyyy" TextAlign="TextAlign.Left" Width="30px"></GridColumn>
+                            <GridColumn Field="DS_OFFICIAL_DocNumber" HeaderText="№ на документ" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="DS_OFFICIAL_DATEOnly" HeaderText="Дата" Format="dd.MM.yyyy" TextAlign="TextAlign.Left" Width="30px"></GridColumn>
+                           
+                        </GridColumns>
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridEvents TValue="ProcedureDocumentVM" RowSelected="DocumentSelectedHandler" RowDeselected="DocumentDeselectedHandler" />
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" Width="40%" AllowDragging="true" IsModal="true" ZIndex="3001" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Добави документ</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.errorMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.errorMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm Model="this.newProcedureDoc">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                № на документ:
+                            </label>
+                            <InputText class="form-control" @bind-Value="newProcedureDoc.ApplicationNumber" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Серия:
+                            </label>
+                            <InputNumber class="form-control" @bind-Value="newProcedureDoc.DeloSerial" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Дата:
+                            </label>
+                            <SfDatePicker @bind-Value="this.newProcedureDoc.ApplicationDate" Format="dd.MM.yyyy" CssClass="form-control" TValue="DateTime?" />
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float-right">
+                        <button class="btn btn-info" type="submit" @onclick="Submit" form="saveForm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+

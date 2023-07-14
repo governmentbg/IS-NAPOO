@@ -1,0 +1,152 @@
+﻿@using DocuServiceReference
+@using DocuWorkService
+@using ISNAPOO.Core.Contracts.Control
+@using ISNAPOO.Core.ViewModels.Control
+
+
+@inherits BlazorBaseComponent
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @if (this.IsEditable)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Взимане на документ по данни от деловодна система" OpensOn="Hover">
+                                        <button disabled="@(!this.isUserInRoleNAPOO || this.Model.IdFollowUpControl == 0)" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.OpenGetDocModal())">Добави документ</button>
+                                    </SfTooltip>
+                                </li>
+
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" style="margin-right: 30px;" @onclick="SendNotificationAsync"> Изпрати известие към @CpoOrCipo</button>
+                                    @**@
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@documentsSource" AllowSorting="true" EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true"
+                            @ref="sfGrid" AllowPaging=true AllowReordering=true AllowTextWrap="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="3%"></GridColumn>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as FollowUpControlDocumentVM).IdFollowUpControlDocument).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button class="btn-row" @onclick="(() => GetDocument(context as FollowUpControlDocumentVM))"><i class="fa fa-file-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    @{
+                                        var doc = context as FollowUpControlDocumentVM;
+                                        if (doc.IsFromDS && this.IsEditable)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(() => DeleteDocument(context as FollowUpControlDocumentVM))"><i class="fa fa-trash-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdFollowUpControlDocument" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Visible=false></GridColumn>
+                            <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="18%"></GridColumn>
+                            <GridColumn Field="DS_DocNumber" HeaderText="№ на работен документ" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="DS_DATE" HeaderText="Дата" TextAlign="TextAlign.Left" Width="14%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlDocumentVM;
+                                        var date = ctx.DS_DATE.HasValue ? $"{ctx.DS_DATE.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="DS_OFFICIAL_DocNumber" HeaderText="№ на документ" TextAlign="TextAlign.Left" Width="20%">
+                            </GridColumn>
+                            <GridColumn Field="DS_OFFICIAL_DATE" HeaderText="Дата" TextAlign="TextAlign.Left" Width="14%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlDocumentVM;
+                                        var date = ctx.DS_OFFICIAL_DATE.HasValue ? $"{ctx.DS_OFFICIAL_DATE.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                        <GridEvents TValue="FollowUpControlDocumentVM" RowSelected="DocumentSelectedHandler" RowDeselected="DocumentDeselectedHandler" />
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" Width="40%" AllowDragging="true" IsModal="true" ZIndex="3001" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Добави документ</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.errorMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.errorMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm Model="editContext">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                № на документ:
+                            </label>
+                            <InputText Enabled="@(this.isUserInRoleNAPOO)" class="form-control" @bind-Value="NewDoc.ApplicationNumber" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Дата:
+                            </label>
+                            <SfDatePicker Enabled="@(this.isUserInRoleNAPOO)" @bind-Value="this.NewDoc.ApplicationDate" Format="dd.MM.yyyy" CssClass="form-control" TValue="DateTime?" />
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float-right">
+                        <button class="btn btn-info" type="submit" @onclick="Submit" form="saveForm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    }

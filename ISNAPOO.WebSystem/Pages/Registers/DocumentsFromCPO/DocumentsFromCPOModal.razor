@@ -1,0 +1,264 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="90%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за обучавано лице, на което е издаден документ за ПК - <span style="color: #fff">@this.model.FullName</span>
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <EditForm EditContext="this.editContext">
+                        <SfAccordion>
+                            <AccordionItems>
+                                <AccordionItem Expanded="true">
+                                    <HeaderTemplate>
+                                        Информация за <span style="color: #01a9ac !important;">@this.model.CPONameOwnerGrid</span>
+                                    </HeaderTemplate>
+                                    <ContentTemplate>
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        № на лицензия:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.LicenceNumber" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>
+                                                        ЦПО:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.CPONameOwnerGrid" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Лице за контакт:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.ProviderPerson" />
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Населено място:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Location" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Адрес за кореспонденция с административния офис на ЦПО:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.ProviderAddress" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Телефон:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.ProviderPhone" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        E-mail:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.ProviderEmail" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Expanded="true">
+                                    <HeaderTemplate>
+                                        Информация за обучаваното лице: <span style="color: #01a9ac !important;">@this.model.FullName</span>
+                                    </HeaderTemplate>
+                                    <ContentTemplate>
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Име:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.FirstName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Презиме:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.SecondName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Фамилия:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.FamilyName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Пол:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.SexValue" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        ЕГН/ЛНЧ/ИДН:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Indent" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Гражданство:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.NationalityValue" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Expanded="true">
+                                    <HeaderTemplate>
+                                        @((MarkupString)this.thirdHeader)
+                                    </HeaderTemplate>
+                                    <ContentTemplate>
+                                        <div class="row">
+                                            @if (this.model.IsCourse)
+                                            {
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Курс:
+                                                        </label>
+                                                        <SfTextBox Enabled="false" @bind-value="this.model.CourseName" />
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="col-sm-5">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Вид:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.TrainingTypeName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Професия:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Profession" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Специалност:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Speciality" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Период на провеждане:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Period" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Населено място:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Location" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Expanded="true">
+                                    <HeaderTemplate>
+                                        Информация за документ за ПК: <span style="color: #01a9ac !important;">@this.model.DocumentRegNo</span>
+                                    </HeaderTemplate>
+                                    <ContentTemplate>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Вид на документа:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.DocumentTypeName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Номер на документа:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.DocumentRegNo" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        Дата на документа:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.DocumentDateAsStr" />
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <label>
+                                                </label>
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори документа" OpensOn="Hover">
+                                                    <button type="button" @onclick="(async () => await this.DownloadDocumentFileBtn())" class="btn-row"><i class="fa fa-file-o"></i></button>
+                                                </SfTooltip>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <label>
+                                                        Статус на документа:
+                                                    </label>
+                                                    <SfTextBox Enabled="false" @bind-value="this.model.Status" />
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                            </AccordionItems>
+                        </SfAccordion>
+                    </EditForm>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

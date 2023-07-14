@@ -1,0 +1,281 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-header">
+            <nav class="navbar navbar-expand  ">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item d-none d-sm-inline-block">
+                        <button style="margin-right: 5px;" hidden="@(!this.isFinished)" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.ExportPersonalFile())">Печат личен картон</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="card-body" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Идентификатор:
+                            </label>
+                            <SfComboBox Enabled="this.IsEditEnabled" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ClientCourseVM.IdIndentType" DataSource="kvIndentTypeSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="IdentValueChangedHandler" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                @this.identType:
+                            </label>
+                            <SfTextBox Enabled="this.IsEditEnabled" @bind-Value="this.ClientCourseVM.Indent" OnChange="IndentChanged" />
+                        </div>
+                    </div>
+                    @if (this.ClientCourseVM.IdClientCourse == 0 && this.ClientCourseVM.IdIndentType.HasValue && !string.IsNullOrEmpty(this.ClientCourseVM.Indent))
+                    {
+                        <div class="col-sm-1">
+                            <div class="form-group">
+                                <label class="control-label">
+                                </label>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="@this.content" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="CheckForExistingClientAsync"><i class="fa fa-search-plus"></i></button>
+                                </SfTooltip>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Име:
+                            </label>
+                            <InputText disabled="@(!this.IsEditEnabled)" class="form-control" @bind-Value="this.ClientCourseVM.FirstName" />
+                        </div>
+                    </div>
+                    @if (this.ClientCourseVM.IdIndentType == this.kvEGN.IdKeyValue)
+                    {
+                        <div class="col-sm-4">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Презиме:
+                                </label>
+                                <InputText disabled="@(!this.IsEditEnabled)" class="form-control" @bind-Value="this.ClientCourseVM.SecondName" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Презиме:
+                                </label>
+                                <InputText disabled="@(!this.IsEditEnabled)" class="form-control" @bind-Value="this.ClientCourseVM.SecondName" />
+                            </div>
+                        </div>
+                    }
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Фамилия:
+                            </label>
+                            <InputText disabled="@(!this.IsEditEnabled)" class="form-control" @bind-Value="this.ClientCourseVM.FamilyName" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Дата на раждане:
+                            </label>
+                            <div>
+                                <SfDatePicker Enabled="this.IsEditEnabled && this.ClientCourseVM.IdIndentType != this.kvEGN.IdKeyValue" TValue="DateTime?" @bind-Value="this.ClientCourseVM.BirthDate" Format="dd.MM.yyyy" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Пол:
+                            </label>
+                            <SfComboBox Enabled="this.IsEditEnabled && this.ClientCourseVM.IdIndentType != this.kvEGN.IdKeyValue" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ClientCourseVM.IdSex" DataSource="kvSexSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Гражданство:
+                            </label>
+                            <SfComboBox Enabled="this.IsEditEnabled" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ClientCourseVM.IdNationality" DataSource="kvNationalitySource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxTemplates TItem="KeyValueVM">
+                                    <ItemTemplate Context="kvCtx">
+                                        @{
+                                            var kv = kvCtx as KeyValueVM;
+                                            if (kv.Name == "България")
+                                            {
+                                                <div style="border-bottom: 1px solid gray; margin-bottom: 10px;">
+                                                    <span>@kv.Name</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                @kv.Name
+                                            }
+                                        }
+                                    </ItemTemplate>
+                                </ComboBoxTemplates>
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Месторождение (държава):
+                            </label>
+                            <SfComboBox Enabled="this.IsEditEnabled" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ClientCourseVM.IdCountryOfBirth" DataSource="kvNationalitySource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxTemplates TItem="KeyValueVM">
+                                    <ItemTemplate Context="kvCtx">
+                                        @{
+                                            var kv = kvCtx as KeyValueVM;
+                                            if (kv.Name == "България")
+                                            {
+                                                <div style="border-bottom: 1px solid black; margin-bottom: 10px;">
+                                                    <span>@kv.Name</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                @kv.Name
+                                            }
+                                        }
+                                    </ItemTemplate>
+                                </ComboBoxTemplates>
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="CountryOfBirthValueChangeHandler" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    @if (this.ClientCourseVM.IdCountryOfBirth == this.kvBGNationality.IdKeyValue)
+                    {
+                        <div class="col-sm-5">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Месторождение (населено място):
+                                </label>
+                                <SfAutoComplete Enabled="this.IsEditEnabled" @ref="autoCompleteLocation" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                            @bind-Value="this.ClientCourseVM.IdCityOfBirth" CssClass="form-control customPad"
+                                            DataSource="locationSource" AllowFiltering="true">
+                                    <AutoCompleteTemplates TItem="LocationVM">
+                                        <NoRecordsTemplate>
+                                            Няма намерени резултати.
+                                        </NoRecordsTemplate>
+                                    </AutoCompleteTemplates>
+                                    <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                    <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterCityOfBirth"></AutoCompleteEvents>
+                                </SfAutoComplete>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Адрес:
+                            </label>
+                            <SfTextBox Enabled="this.IsEditEnabled" @bind-Value="this.ClientCourseVM.Address" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Телефон:
+                            </label>
+                            <SfTextBox Enabled="this.IsEditEnabled" @bind-Value="this.ClientCourseVM.Phone" />
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">
+                                E-mail адрес:
+                            </label>
+                            <SfTextBox Enabled="this.IsEditEnabled" @bind-Value="this.ClientCourseVM.EmailAddress" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Финансиране:
+                            </label>
+                            <SfComboBox Enabled="this.IsEditEnabled" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ClientCourseVM.IdAssignType" DataSource="kvAssingSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Дата на включване:
+                            </label>
+                            <div>
+                                <SfDatePicker Enabled="this.IsEditEnabled" TValue="DateTime?" @bind-Value="this.ClientCourseVM.CourseJoinDate" Format="dd.MM.yyyy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="new-task">
+                            <div class="to-do-list">
+                            </div>
+                            <div class="to-do-list">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" disabled="@(!this.IsEditEnabled)" @bind-value="this.ClientCourseVM.IsDisabledPerson" checked="@(this.ClientCourseVM.IsDisabledPerson ? "checked" : null)">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Лице с увреждания</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="to-do-list">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" disabled="@(!this.IsEditEnabled)" @bind-value="this.ClientCourseVM.IsDisadvantagedPerson" checked="@(this.ClientCourseVM.IsDisadvantagedPerson ? "checked" : null)">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Лице в неравностойно положение</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="to-do-list">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" disabled="@(!this.IsEditEnabled)" @bind-value="this.ClientCourseVM.IsContactAllowed" checked="@(this.ClientCourseVM.IsContactAllowed ? "checked" : null)">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Съгласие за използване на информацията за контакт от НАПОО</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="to-do-list">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</EditForm>

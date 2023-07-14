@@ -1,0 +1,187 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Професия / Специалност / СПК: </label>
+                            <InputText class="form-control" @bind-Value="this.professionSpecialityAndSPKValue" disabled />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Програма за обучение: </label>
+                            <InputText class="form-control" @bind-Value="this.CourseVM.Program.ProgramName" disabled />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Вид на курса: </label>
+                            <InputText class="form-control" @bind-Value="this.CourseVM.TrainingCourseTypeName" disabled />
+                        </div>
+                    </div>
+                    @if (!this.EntryFroomLegalCapacityModule && this.CourseVM.Program is not null && this.CourseVM.Program.FrameworkProgram is not null)
+                    {
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Рамкова програма: </label>
+                                <InputText class="form-control" @bind-Value="this.CourseVM.Program.FrameworkProgram.Name" disabled />
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Допълнителни бележки: </label>
+                            <InputTextArea rows="4" class="form-control" @bind-Value="this.CourseVM.Program.ProgramNote" disabled />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group required">
+                            <label class="control-label">Наименование на курса: </label>
+                            <SfTextBox @bind-Value="this.CourseVM.CourseName" Enabled="@IsEditable" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">Форма на обучение: </label>
+                            <SfComboBox Enabled="@IsEditable" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="formEducationSource" AllowCustom="false" @bind-Value="this.CourseVM.IdFormEducation">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">Основна учебна база: </label>
+                            <SfComboBox Enabled="@IsEditable" ShowClearButton="true" TValue="int?" TItem="CandidateProviderPremisesVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="premisesSource" AllowCustom="false" @bind-Value="this.CourseVM.IdCandidateProviderPremises">
+                                <ComboBoxFieldSettings Text="PremisesName" Value="IdCandidateProviderPremises" />
+                                <ComboBoxEvents TItem="CandidateProviderPremisesVM" TValue="int?" ValueChange="PremisesSelectedHandler" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    @if (this.CourseVM.CandidateProviderPremises is not null)
+                    {
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Населено място: </label>
+                                <SfTextBox @bind-Value="this.CourseVM.CandidateProviderPremises.Location.DisplayJoinedNames" Enabled="false" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Населено място: </label>
+                                <SfTextBox @bind-Value="this.emptyPremises" Enabled="false" />
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">Вид на курса: </label>
+                            <SfComboBox Enabled="@IsEditable" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="measureTypeSource" AllowCustom="false" @bind-Value="this.CourseVM.IdMeasureType">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="OnMeasureTypeSelected" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">Основен източник на финансиране: </label>
+                            <SfComboBox Enabled="@(this.CourseVM.IdMeasureType != null && this.IsEditable)" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="assignTypeSource" AllowCustom="false" @bind-Value="this.CourseVM.IdAssignType">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>Задължителни учебни часове: </label>
+                            <InputNumber  class="form-control" @bind-Value="this.CourseVM.MandatoryHours" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>Избираеми учебни часове: </label>
+                            <InputNumber class="form-control" @bind-Value="this.CourseVM.SelectableHours" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">Цена (в лева за един курсист): </label>
+                            <InputNumber disabled="@(!IsEditable)" class="form-control" min="0" @bind-Value="this.CourseVM.Cost" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Брой обучаеми в неравностойно положение (параграф 1 – т. 4а от ЗНЗ): </label>
+                            <InputNumber disabled="@(!IsEditable)" class="form-control" min="0" @bind-Value="this.CourseVM.DisabilityCount" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Други пояснения: </label>
+                            <InputTextArea disabled="@(!IsEditable)" rows="4" class="form-control" @bind-Value="this.CourseVM.AdditionalNotes" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>Крайна дата за записване: </label>
+                            <SfDatePicker Enabled="@IsEditable" @bind-Value="this.CourseVM.SubscribeDate" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">Дата за започване на курса: </label>
+                            <SfDatePicker Enabled="@IsEditable" @bind-Value="this.CourseVM.StartDate" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">Дата за завършване на курса: </label>
+                            <SfDatePicker Enabled="@IsEditable" @bind-Value="this.CourseVM.EndDate" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>@this.theoryExamLabelTitle </label>
+                            <SfDatePicker Enabled="@IsEditable" @bind-Value="this.CourseVM.ExamTheoryDate" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>@this.practiceExamLabelTitle </label>
+                            <SfDatePicker Enabled="@IsEditable" @bind-Value="this.CourseVM.ExamPracticeDate" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</EditForm>

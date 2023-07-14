@@ -1,0 +1,89 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                @if (this.IsEditable)
+                {
+                    <div class="card-header">
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на преподавател" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddTrainerBtn">Добави преподавател</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+                <div class="card-body">
+                    <SfGrid DataSource="trainersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="trainersGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="TrainerCourseVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8%">
+                                <Template>
+                                    @GetRowNumber(trainersGrid, (context as TrainerCourseVM).IdTrainerCourse).Result
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="8%" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteTrainerBtn(context as TrainerCourseVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdTrainerCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="TrainingTypeName" HeaderText="Вид на провежданото обучение" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.EducationValue" HeaderText="ОКС" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.EducationSpecialityNotes" HeaderText="Специалност по диплома" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                            <GridColumn Field="TrainerDocuments" HeaderText="Документи" TextAlign="TextAlign.Center" Width="40%">
+                                <Template>
+                                    @{
+                                        var trainer = context as TrainerCourseVM;
+                                        foreach (var kvp in trainer.TrainerDocuments.OrderBy(x => x.Value[0]))
+                                        {
+                                            var idDoc = kvp.Key;
+                                            var docData = kvp.Value;
+                                            if (docData.Count > 1)
+                                            {
+                                                <div style="line-height: 14px;">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="@docData[1]" OpensOn="Hover">
+                                                        <a href="#" class="btn-row-link" @onclick="(async () => await this.DownloadTrainerUploadedDocumentAsync(idDoc))">@(docData[0])</a>
+                                                    </SfTooltip>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div style="line-height: 14px;">
+                                                    <a href="#" class="btn-row-link" @onclick="(async () => await this.DownloadTrainerUploadedDocumentAsync(idDoc))">@(docData[0])</a>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SelectCourseTrainerModal @ref="selectCourseTrainerModal" CallbackAfterSubmit="UpdateAfterTrainerSelectAsync" />

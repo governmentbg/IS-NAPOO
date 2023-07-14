@@ -1,0 +1,113 @@
+﻿
+<SfDialog @bind-Visible="this.showConfirmDialog" Width="30%" EnableResize="true"
+          AllowDragging="true" Height="30%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Внимание!</Header>
+        <Content>
+            @ConfirmMessages.UnsavedChanges
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-primary" @onclick="@(() => { this.showConfirmDialog = false; CancelHandler(); })">Да</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="(() => this.showConfirmDialog = false)">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SfDialog @bind-Visible="this.showPermitedActionDialog" Width="30%" EnableResize="true"
+          AllowDragging="true" Height="30%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Внимание!</Header>
+        <Content>
+            @ConfirmMessages.PermitedAction
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="(() => this.showPermitedActionDialog = false)">Добре</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SfDialog @bind-Visible="this.showDeleteConfirmDialog" Width="30%" EnableResize="false"
+          AllowDragging="true" Height="30%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="false" @onkeyup="Enter">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Внимание!</Header>
+        <Content>
+            @ConfirmMessages.Delete
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-primary ml-1" @onclick="(() => DeleteHandler())">Да</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal"  @onclick="(() => this.showDeleteConfirmDialog = false)">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+
+
+@code {
+
+    protected DialogEffect AnimationEffect = DialogEffect.Zoom;
+
+    public bool showConfirmDialog = false;
+
+    public bool showDeleteConfirmDialog = false;
+
+    public bool showPermitedActionDialog = false;
+
+
+
+    [Parameter]
+    public EventCallback<bool> CallbackCancel { get; set; }
+
+    [Parameter]
+    public EventCallback CallbackDelete { get; set; }
+
+    protected async void DeleteHandler()
+    {
+        this.showDeleteConfirmDialog = false;
+        await CallbackDelete.InvokeAsync();
+    }
+
+    protected async void CancelHandler()
+    {
+        await CallbackCancel.InvokeAsync(true);
+    }
+
+    public void Enter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == "NumpadEnter")
+        {
+            DeleteHandler();
+        }
+    }
+}
+

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>TechnoLogica.RegiX.NapooStudentDocumentsAdapter.Mocks</RootNamespace>
+    <Authors>Dimitar Mitev</Authors>
+    <Company>TechnoLogica</Company>
+    <Description>Mocks for NapooStudentDocumentsAdapter</Description>
+    <Version Condition=" '$(Major)$(Minor)$(Patch)' == '' ">1.0.0.0</Version>
+    <Version Condition=" '$(Major)$(Minor)$(Patch)' != '' ">$(Major).$(Minor).$(Patch).0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="XMLData\*\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RegiX.Adapters.Mocks" Version="1.0.43" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RegiX.NapooStudentDocumentsAdapter\RegiX.NapooStudentDocumentsAdapter.csproj" />
+  </ItemGroup>
+
+</Project>
+

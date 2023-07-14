@@ -1,0 +1,88 @@
+﻿@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.WebSystem.Pages.Control
+@inherits BlazorBaseComponent
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" Width="75%" EnableResize="true" AllowDragging="true" Height="75%" IsModal="true" ZIndex="1600" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за годишна информация за дейността на </Header>
+        <Content>
+            <SfGrid ID="sfGrid" DataSource="followUpControlSource" EnableAltRow="true" EnableHover="false" AllowTextWrap="true" @ref="sfGrid">
+                <GridColumns>
+                    <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                        <Template>
+                            @GetRowNumber(sfGrid, (context as FollowUpControlVM).IdFollowUpControl).Result
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="IdFollowUpControl" IsPrimaryKey="true" Visible="false"></GridColumn>
+                    <GridColumn Width="6%">
+                        <Template>
+                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори данни за последващ контрол" OpensOn="Hover">
+                                <button @onclick="(() => OpenFollowUpControl(context as FollowUpControlVM))" class="btn-row"><i class="fa fa-flag-checkered"></i></button>
+                            </SfTooltip>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="FollowUpControlTypeName" HeaderText="Вид на последващия контрол" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                    <GridColumn Field="ControlTypeName" HeaderText="Вид на проверката" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                    <GridColumn Field="ControlStartDate" HeaderText="Срок за проверката от" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                        <Template>
+                            @{
+                                var ctx = context as FollowUpControlVM;
+                                var date = ctx.ControlStartDate.HasValue ? $"{ctx.ControlStartDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                @date
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="ControlEndDate" HeaderText="Срок за проверката до" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                        <Template>
+                            @{
+                                var ctx = context as FollowUpControlVM;
+                                var date = ctx.ControlEndDate.HasValue ? $"{ctx.ControlEndDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                @date
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="TermImplRecommendation" HeaderText="Срок за изпълнение на препоръки" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                        <Template>
+                            @{
+                                var ctx = context as FollowUpControlVM;
+                                var date = ctx.TermImplRecommendation.HasValue ? $"{ctx.TermImplRecommendation.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                @date
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="8%">
+                        <Template>
+                            <div class="text-center">
+                                @{
+                                    var ctx = context as FollowUpControlVM;
+                                    if (ctx.IdStatus != 0)
+                                    {
+                                        switch (ctx.StatusName)
+                                        {
+                                            case "Текуща":
+                                                <label class="form-label-status label label-success">@ctx.StatusName</label>
+                                                break;
+                                            case "Предстояща":
+                                                <label class="form-label-status label label-warning">@ctx.StatusName</label>
+                                                break;
+                                            case "Приключила":
+                                                <label class="form-label-status label label-danger">@ctx.StatusName</label>
+                                                break;
+                                            case "Анулирана":
+                                                <label class="form-label-status label label-danger">@ctx.StatusName</label>
+                                                break;
+                                        }
+                                    }
+                                }
+                            </div>
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+<FollowUpControlReadonlyModal @ref="followUpControlModal" LicenseType="@this.LicensingType" IsEditable="false"></FollowUpControlReadonlyModal>
+

@@ -1,0 +1,87 @@
+﻿@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+
+@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" Width="65%" EnableResize=true AllowDragging="true"
+          IsModal="true" CloseOnEscape="false" ZIndex="3000" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Добавяне на документ</Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="submitFormFollowUpControlUploadedFile">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание на документа:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="2"
+                                                     @bind-Value="this.model.Description"
+                                                     maxlength="255">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.model.Description != null ? this.model.Description.Length : 0)/255</label></div>
+                            </div>
+                        </div>
+                    </div>
+                                    Прикачен файл:
+                            
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-6">
+                            @if (!string.IsNullOrEmpty(this.model.UploadedFileName))
+                            {
+                                <button type="button" class="btn-row" @onclick="(() => OnRemove(this.model.FileName))"><i class="fa fa-trash-o"></i></button>
+                                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.model.FileName</a></span>
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader @ref="uploader" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="float-right">
+                        <button type="submit" class="btn btn-info" form="submitFormFollowUpControlUploadedFile">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

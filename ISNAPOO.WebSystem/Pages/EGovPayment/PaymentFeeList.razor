@@ -1,0 +1,211 @@
+﻿@using ISNAPOO.Core.ViewModels.EGovPayment;
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        @if (this.isJustForWatch == false)
+                        {
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Такса за разглеждане на заявление за издаване на лицензия" OpensOn="Hover">
+                                    <button disabled="@isDisabledExamAppBtn" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@( ()=>OpenPaymentFeeModal("FirstLicenzing"))">Разглеждане на заявление</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Такса за откриване на процедура за издаване на лицензия" OpensOn="Hover">
+                                    <button disabled="@isDisabledInitProcBtn" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@( ()=>OpenPaymentFeeModal("StartProcedure"))">Откриване на процедура</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Такса за издаване на лицензия" OpensOn="Hover">
+                                    <button disabled="@isDisableIssuingLicBtn" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@( ()=>OpenPaymentFeeModal("IssuingLicense"))">Издаване на лицензия</button>
+                                </SfTooltip>
+                            </li>
+                        </ul>
+                        }
+                    </nav>
+                </div>
+                <div class="card-body">
+                <SfGrid DataSource="payments" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                        AllowTextWrap="true" @ref="paymentFeesGrid" AllowSelection="false" AllowPaging="true">                  
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                    <GridColumns>
+                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                            <Template>
+                                @GetRowNumber(paymentFeesGrid, (context as PaymentVM).IdPayment).Result
+                            </Template>
+                        </GridColumn>
+                            @if (this.isJustForWatch == false)
+                            {
+                                <GridColumn Width="10">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Код за плащане" OpensOn="Hover">
+                                            <button @onclick="@( ()=>ShowPaymentCode(context as PaymentVM))" class="btn-row"><i class="fa fa-lock"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="ReceiptId" HeaderText="Номер на заявка в pay.egov.bg" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                        <GridColumn Field="CreationDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="20">
+                            <Template>
+                                @{
+                                    var ctx = context as PaymentVM;
+                                    var date = ctx.CreationDate.ToString("dd.MM.yyyy") + "г.";
+                                    @date
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="ServiceProviderName" HeaderText="Получател" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                        <GridColumn Field="PaymentReason" HeaderText="Основание за плащане" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                            <GridColumn Field="ObligationType" HeaderText="Вид на задължението" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                        <GridColumn Field="PaymentAmount" HeaderText="Сума" TextAlign="TextAlign.Right" Width="15">
+                            <Template>
+                                @{
+                                    var ctx = context as PaymentVM;
+                                    string amount = $"{ctx.PaymentAmount:0.00}";
+                                    @amount
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="ExpirationDate" HeaderText="Дата на изтичане" TextAlign="TextAlign.Left" Width="30">
+                            <Template>
+                                @{
+                                    var ctx = context as PaymentVM;
+                                    var expDateFormat = ctx.ExpirationDate;
+                                    @expDateFormat
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="PaymentStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="40">
+                            <Template>
+                                <div class="text-center">
+                                    @{
+                                        var payment = context as PaymentVM;
+
+                                        switch (payment.PaymentStatusIntCode)
+                                        {
+                                            case "pending":
+                                                <label class="form-label label label-warning">@payment.PaymentStatus</label>
+                                                break;
+                                            case "authorized":
+                                                <label class="form-label label label-success">@payment.PaymentStatus</label>
+                                                break;
+                                            case "ordered":
+                                                <label class="form-label label label-success">@payment.PaymentStatus</label>
+                                                break;
+                                            case "paid":
+                                                <label class="form-label label label-success">@payment.PaymentStatus</label>
+                                                break;
+                                            case "expired":
+                                                <label class="form-label label label-danger">@payment.PaymentStatus</label>
+                                                break;
+                                            case "canceled":
+                                                <label class="form-label label label-danger">@payment.PaymentStatus</label>
+                                                break;
+                                            case "suspended":
+                                                <label class="form-label label label-danger">@payment.PaymentStatus</label>
+                                                break;
+                                            case "inprocess":
+                                                <label class="form-label label label-info">@payment.PaymentStatus</label>
+                                                break;
+                                        }
+                                    }
+                                </div>
+                            </Template>
+                        </GridColumn>
+                            @if (this.isJustForWatch == false)
+                            {
+                                    <GridColumn Width="10">
+                                        <Template>
+                                            <div class="text-center">
+                                                @{
+                                                    var payment = context as PaymentVM;
+
+                                                    if (payment.PaymentStatusIntCode == "pending")
+                                                    {
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Плащане" OpensOn="Hover">
+                                                            <a href='@this.loginURLForPayEGov' target="_blank" class="btn-row"><i class="fa fa-credit-card"></i></a>
+                                                        </SfTooltip>
+                                                    }
+                                                }
+                                            </div>
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Width="10">
+                                        <Template>
+                                            <div class="text-center">
+                                                @{
+                                                    var payment = context as PaymentVM;
+
+                                                    if (payment.PaymentStatusIntCode == "pending")
+                                                    {
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Плащане с код" OpensOn="Hover">
+                                                            <a href='@this.loginWithCodeURLForPayEGov' target="_blank" class="btn-row"><i class="fa fa-keyboard-o"></i></a>
+                                                        </SfTooltip>
+                                                    }
+                                                }
+                                            </div>
+                                        </Template>
+                                    </GridColumn>                                                    
+                                    <GridColumn Width="10">
+                                        <Template>
+                                            @{
+                                                var payment = context as PaymentVM;
+
+                                                if (payment.PaymentStatusIntCode == "pending")
+                                                {
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отказване на заявка" OpensOn="Hover">
+                                                        <button @onclick="@( ()=>SuspendPaymentRequest(context as PaymentVM))" class="btn-row"><i class="fa fa-times-circle"></i></button>
+                                                    </SfTooltip>
+                                                }
+                                            }                                     
+                                        </Template>
+                                    </GridColumn>
+                            }
+                            <GridColumn Field="IdPayment" IsPrimaryKey="true" Visible="false"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<PaymentFeeModal @ref="paymentFeeModal" CallbackAfterSubmit="LoadPaymentsDataAsync"></PaymentFeeModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+<SfDialog @bind-Visible="this.showCodeDialog" Width="30%" EnableResize="true"
+          AllowDragging="true" Height="30%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Код за плащане</Header>
+        <Content>
+            <p style="text-align:center;font-size:2vw;">@AccessCode</p>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="(() => this.showCodeDialog = false)">Затвори</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

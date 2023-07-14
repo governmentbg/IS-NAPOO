@@ -1,0 +1,42 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="50%" EnableResize="true" AllowDragging="true" Height="75%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@(TypeOfCheking)</Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid ID="sfGrid" @ref="sfGrid" DataSource="consultedClientsGridSource" EnableAltRow="true" EnableHover="false" AllowTextWrap="true" AllowExcelExport="true" AllowPdfExport="true"
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                                    <GridEvents TValue="ConsultedClients" OnToolbarClick="ToolbarClick"></GridEvents>
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"/>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"/>
+                                    <GridColumns>
+                                        <GridColumn Field="Identifier" HeaderText="Индикатор" />
+                                        <GridColumn Field="Count" HeaderText="Данни" HeaderTextAlign="TextAlign.Right" TextAlign="TextAlign.Right" />
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

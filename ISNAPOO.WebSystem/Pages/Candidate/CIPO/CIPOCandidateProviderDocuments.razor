@@ -1,0 +1,85 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="card">
+        <div class="card-header">
+            <nav class="navbar navbar-expand">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav float">
+                    @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                    {
+                        <li class="nav-item d-none d-sm-inline-block float-none">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewDocumentClickHandler" disabled="@(this.DisableAllFields)">Нов документ</button>
+                        </li>
+                        <li class="nav-item d-none d-sm-inline-block">
+                            &nbsp;
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <SfGrid DataSource="documentsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="documentsGrid" AllowSelection="true" AllowPaging="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn Width="5%" Visible="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => DeleteDocument(context as CandidateProviderDocumentsGridData))" disabled="@(this.DisableAllFields)">
+                                            <i class="fa fa-trash-o"></i>
+                                        </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="15%">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as CandidateProviderDocumentsGridData);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            if (entry.FileName is not null)
+                                            {
+                                                var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                                foreach (var item in files)
+                                                {
+                                                    <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                                    <br />
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @entry.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="10%" Format="dd.MM.yyyy">
+                                <Template>
+                                        @{
+                                        var ctx = context as CandidateProviderDocumentsGridData;
+                                        var date = !string.IsNullOrEmpty(ctx.CreationDate) ? $"{ctx.CreationDate} г." : string.Empty;
+                                            @date
+                                        }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="10"></GridColumn>
+                            <GridColumn Field="IsAdditionalDocumentText" HeaderText="Допълнителен документ" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CIPOCandidateProviderDocumentModal @ref="candidateProviderDocumentModal" CallbackAfterModalSubmit="OnDocumentModalSubmit" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+

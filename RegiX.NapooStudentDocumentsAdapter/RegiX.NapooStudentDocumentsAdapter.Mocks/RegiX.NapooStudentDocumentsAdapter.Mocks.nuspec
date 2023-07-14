@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <description>$description$</description>
+    <dependencies>
+      <dependency id="RegiX.Adapters.Mocks" version="1.0.43"/>
+      <dependency id="RegiX.NapooStudentDocumentsAdapter" version="$(Major).$(Minor).$(Patch)"/>
+    </dependencies>
+    <contentFiles>
+      <files include="any/any/XMLData/$title$/*.xml" buildAction="Content" copyToOutput="true" flatten="false" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="XMLData\$title$\*.xml" target="contentFiles\any\any\XMLData\$title$" />
+  </files>
+</package>

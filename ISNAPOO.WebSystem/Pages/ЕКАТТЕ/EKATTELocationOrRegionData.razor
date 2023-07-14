@@ -1,0 +1,20 @@
+﻿@inject ILocationService LocationService
+
+@if (locationVM != null)
+{
+    <h3>@locationVM.LocationName</h3>
+}
+
+@code {
+    LocationVM locationVM = new LocationVM();
+    int locationId;
+
+    [Parameter]
+    public int? EntityId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        this.locationId = this.EntityId ?? default(int);
+        this.locationVM = await this.LocationService.GetLocationByIdAsync(this.locationId);
+    }
+}

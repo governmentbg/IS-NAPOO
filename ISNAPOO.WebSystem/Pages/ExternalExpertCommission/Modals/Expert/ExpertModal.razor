@@ -1,0 +1,390 @@
+﻿@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using ISNAPOO.WebSystem.Pages.ExternalExpertCommission.Modals.ExpertProfessionalDirection
+@using ISNAPOO.Core.ViewModels.Common
+@using System.IO
+
+@inherits BlazorBaseComponent
+
+
+<SfDialog Target="#target" @ref="sfDialog" Width="75%" Height="702px" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за <span style="font-size: 18px;color: white !important;">@(!string.IsNullOrEmpty(this.resultContextPerson.ResultContextObject.Title) ? this.resultContextPerson.ResultContextObject.Title : string.Empty) @this.Name</span>
+        </Header>
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.validationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <SfTab @bind-SelectedItem="selectedTab">
+                <TabEvents Selected="SelectedEventHandler" Selecting="Select"></TabEvents>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Данни за експерта"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <EditForm EditContext="editContext" OnSubmit="Save" id="mainForm">
+                                <div class="modal-body">
+                                    @*<div class="row">
+                                    <div class="col-sm-1">
+                                    <!-- text input -->
+                                    <div class="form-group required">
+                                    <label class="control-label">
+                                    Титла:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="this.Nickname" />
+                                    </div>
+                                    </div>
+                                    </div> *@
+                                    <div class="row">
+                                        <div class="col-sm-1">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Титла:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.Title" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group required">
+                                                <label class="control-label">
+                                                    Име:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.FirstName" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Презиме:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.SecondName" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group required">
+                                                <label class="control-label">
+                                                    Фамилия:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.FamilyName" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Идентификатор:
+                                                </label>
+                                                <SfComboBox Enabled="this.IsEditable" TValue="int?" ShowClearButton="true" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.resultContextPerson.ResultContextObject.IdIndentType" AllowCustom="false" DataSource="@kvIndentTypeSource" AllowFiltering="true">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                    <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="IdentValueChangedHandler" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    @this.identType:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @onfocusout="() => IsEGNValid()" @bind-Value="this.resultContextPerson.ResultContextObject.Indent" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Номер на ЛК:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.PersonalID" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Дата на издаване:
+                                                </label>
+                                                <SfDatePicker Enabled="this.IsEditable" TValue="DateTime?" CssClass="form-control customPad" @bind-Value="this.resultContextPerson.ResultContextObject.PersonalIDDateFrom" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Издадена от:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.PersonalIDIssueBy" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Данъчна служба:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.TaxOffice" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Дата на раждане:
+                                                </label>
+                                                <SfDatePicker Enabled="this.IsEditable" TValue="DateTime?" CssClass="form-control customPad" @bind-Value="this.resultContextPerson.ResultContextObject.BirthDate" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Пол:
+                                                </label>
+                                                <SfComboBox Enabled="this.IsEditable" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.resultContextPerson.ResultContextObject.IdSex" DataSource="@kvSexSource" AllowCustom="false" AllowFiltering="true">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-7">
+                                            <div class="form-group">
+                                                <label class="control-label">Населено място: </label>
+                                                <SfAutoComplete Enabled="this.IsEditable" @ref="sfAutoCompleteLocationCorrespondence" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                                @bind-Value="this.resultContextPerson.ResultContextObject.IdLocation"
+                                                                DataSource="locationSource" AllowFiltering="true" CssClass="form-control customPad">
+                                                    <AutoCompleteTemplates TItem="LocationVM">
+                                                        <NoRecordsTemplate>
+                                                            Няма намерени резултати.
+                                                        </NoRecordsTemplate>
+                                                    </AutoCompleteTemplates>
+                                                    <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                                    <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence" ValueChange="AutoCompleteLocationCorrespondenceValueChanged"></AutoCompleteEvents>
+                                                </SfAutoComplete>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Пощенски код:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.PostCode" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-7">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Адрес:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.Address" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Телефон:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.Phone" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    E-mail:
+                                                </label>
+                                                <InputText disabled="@(!this.IsEditable)" class="form-control" @bind-Value="this.resultContextPerson.ResultContextObject.Email" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="new-task">
+                                                <div class="to-do-list">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input disabled="@(!this.IsEditable)" type="checkbox" @bind-value="this.resultContextPerson.ResultContextObject.IsSignContract" checked="@(this.resultContextPerson.ResultContextObject.IsSignContract ? "checked" : null)">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Сключва се договор</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="to-do-list">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input disabled="@(!this.IsEditable)" type="checkbox" @bind-value="this.resultContextPerson.ResultContextObject.IsContractRegisterDocu" checked="@(this.resultContextPerson.ResultContextObject.IsContractRegisterDocu ? "checked" : null)">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Договорът се регистрира в деловодната система</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </ContentTemplate>
+                    </TabItem>
+                    @if (!IsNewModal)
+                    {
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Служител на НАПОО"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <ExpertNAPOOList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="expertNAPOOList"></ExpertNAPOOList>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Външен експерт за ПН"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <ExpertProfessionalDirectionsList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="expertProfessionalDirectionsList"></ExpertProfessionalDirectionsList>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Участие в ЕК"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <ParticipationCommisionList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="participationInCommisionList" parExpertVM="model"></ParticipationCommisionList>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="РГ/Рецензенти ДОС"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <ExpertDOCList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="expertDOCList"></ExpertDOCList>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Документи"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <ExpertDocumentsList Disabled="@Disabled" IsRegister="this.IsRegister" IsEditable="this.IsEditable" @ref="expertDocumentsList"></ExpertDocumentsList>
+                            </ContentTemplate>
+                        </TabItem>
+                    }
+                    else
+                    {
+                        @if (IsNewModal && LicensingType == "NapooEmployees")
+                        {
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Служител на НАПОО"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <ExpertNAPOOList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="expertNAPOOList"></ExpertNAPOOList>
+                                </ContentTemplate>
+                            </TabItem>
+                        }
+                        @if (IsNewModal && LicensingType == "ExternalExperts")
+                        {
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Външен експерт за ПН"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <ExpertProfessionalDirectionsList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="expertProfessionalDirectionsList"></ExpertProfessionalDirectionsList>
+                                </ContentTemplate>
+                            </TabItem>
+                        }
+                        @if (IsNewModal && LicensingType == "ExpertCommissions")
+                        {
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Участие в ЕК"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <ParticipationCommisionList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="participationInCommisionList" parExpertVM="model"></ParticipationCommisionList>
+                                </ContentTemplate>
+                            </TabItem>
+                        }
+                        @if (IsNewModal && LicensingType == "DocWorkGroup")
+                        {
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="РГ/Рецензенти ДОС"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <ExpertDOCList CallbackAfterSave="UpdateAfterChange" IsRegister="this.IsRegister" IsEditable="this.IsEditable" Disabled="@Disabled" @ref="expertDOCList"></ExpertDOCList>
+                                </ContentTemplate>
+                            </TabItem>
+                        }
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Документи"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <ExpertDocumentsList Disabled="@Disabled" IsRegister="this.IsRegister" IsEditable="this.IsEditable" @ref="expertDocumentsList"></ExpertDocumentsList>
+                            </ContentTemplate>
+                        </TabItem>
+                    }
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row" style="display: @(this.selectedTab == 0 ? "flex;" : "none;")">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="d-inline-flex flex-row-reverse">
+
+                            <button type="button" class="btn btn-outline-secondary mx-1" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                            <button type="submit" class="btn btn-info mx-1" hidden="@(this.IsRegister && !this.IsEditable)" form="mainForm">Запиши</button>
+                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изпращане на e-mail до експерта с информация за потребителски акаунт" OpensOn="Hover">
+                                <button class="btn btn-warning mx-1" disabled="@IsMailDisable" hidden="@this.IsRegister" @onclick="@SendMail">Изпрати e-mail</button>
+                            </SfTooltip>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<style>
+    .btn-outline-warning.disabled, .btn-outline-warning:disabled {
+        color: #fd7e14;
+    }
+
+    .btn-warning.disabled, .btn-warning:disabled {
+        border-color: #fd7e14;
+    }
+</style>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

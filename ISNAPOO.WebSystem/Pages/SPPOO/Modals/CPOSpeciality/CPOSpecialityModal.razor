@@ -1,0 +1,310 @@
+﻿@using ISNAPOO.Core.Contracts.Candidate
+@using Syncfusion.XlsIO
+
+@inject ICandidateProviderService candidateProviderService
+@inject IJSRuntime JsRuntime 
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="IsVisible" Width="90%"
+          EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>Обучаващи ЦПО</Header>
+        <Content>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid @ref="sfGrid" DataSource="candidateProviderVMs" AllowSorting="true" AllowTextWrap="true" AllowFiltering="true"
+                            AllowPaging="true" AllowSelection="true" Toolbar="@(new List<string>() { "ExcelExport", "CsvExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+
+                        <GridPageSettings PageCount="50" PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CandidateProviderVM"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Width="10%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as CandidateProviderVM))" class="btn-row"> <i class="fa fa-search-plus"></i> </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Visible=false></GridColumn>
+                            <GridColumn Field="ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="30%">
+                                <HeaderTemplate>
+                                    <b>Юридическо лице</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="30%">
+                                <HeaderTemplate>
+                                    <b>Населено място</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="ProviderAddressCorrespondence" HeaderText="Адрес за кореспонденция" TextAlign="TextAlign.Left" Width="40%">
+                                <HeaderTemplate>
+                                    <b>Адрес за кореспонденция</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="PersonNameCorrespondence" HeaderText="Лице за контакт" TextAlign="TextAlign.Left" Width="35%">
+                                <HeaderTemplate>
+                                    <b>Лице за контакт</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="ProviderPhoneCorrespondence" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="25%">
+                                <HeaderTemplate>
+                                    <b>Телефон</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="ProviderEmailCorrespondence" HeaderText="E-mail" TextAlign="TextAlign.Left" Width="25%">
+                                <HeaderTemplate>
+                                    <b>E-mail</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="LicenceNumber" HeaderText="Номер на лицензия" TextAlign="TextAlign.Left" Width="25%">
+                                <HeaderTemplate>
+                                    <b>Номер на лицензия</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+
+            </div>
+
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+<CPOSpecialityCandidateSpecialitiesModal @ref="candidateSpecialitiesModal"></CPOSpecialityCandidateSpecialitiesModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+@code {
+
+    IEnumerable<CandidateProviderVM> candidateProviderVMs;
+    SfGrid<CandidateProviderVM> sfGrid = new SfGrid<CandidateProviderVM>();
+    DialogEffect AnimationEffect = DialogEffect.Zoom;
+
+    [Parameter]
+    public EventCallback<string> OnSubmit { get; set; }
+    CPOSpecialityCandidateSpecialitiesModal candidateSpecialitiesModal = new CPOSpecialityCandidateSpecialitiesModal();
+
+    public bool IsVisible { get; set; } = false;
+    private string fileName = $"Register_CPO_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}";
+
+    public async Task OpenModal(int entityId, string entityType, string codeAndArea, int areaId, string codeAndProffessionalDirection, int proffessionalDirectionId, string codeAndProffession, int proffessionId)
+    {
+        var candidateProviders = await candidateProviderService.GetAllActiveCandidateProvidersSpecialitiesAsync("LicensingCPO");
+        candidateProviders = candidateProviders.Where(c => c.CandidateProviderSpecialities.Count > 0).OrderBy(a => a.ProviderOwner);
+        if (entityType == "Area")
+        {
+            this.candidateProviderVMs = candidateProviders.Where(c => c.CandidateProviderSpecialities.Any(s => s.Speciality.Profession.ProfessionalDirection.IdArea == areaId));
+        }
+        else if (entityType == "Professional direction")
+        {
+            this.candidateProviderVMs = candidateProviders.Where(c => c.CandidateProviderSpecialities.Any(s => s.Speciality.Profession.IdProfessionalDirection == proffessionalDirectionId));
+        }
+        else if (entityType == "Profession")
+        {
+            this.candidateProviderVMs = candidateProviders.Where(c => c.CandidateProviderSpecialities.Any(s => s.Speciality.IdProfession == proffessionId));
+        }
+        else if (entityType == "Speciality")
+        {
+            this.candidateProviderVMs = candidateProviders.Where(c => c.CandidateProviderSpecialities.Any(s => s.IdSpeciality == entityId));
+        }
+
+        IsVisible = true;
+        this.StateHasChanged();
+    }
+    private async Task SelectedRow(CandidateProviderVM model)
+    {
+       // bool hasPermission = await CheckUserActionPermission("ViewRegisterERUData", false);
+       // if (!hasPermission) { return; }
+
+        this.candidateSpecialitiesModal.OpenModal(model);
+    }
+
+    protected async Task ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Id == "sfGrid_pdfexport")
+        {
+            int temp = sfGrid.PageSettings.PageSize;
+            sfGrid.PageSettings.PageSize = candidateProviderVMs.Count();
+            await sfGrid.Refresh();
+            PdfExportProperties ExportProperties = new PdfExportProperties();
+                List<GridColumn> ExportColumns = new List<GridColumn>();
+#pragma warning disable BL0005
+                ExportColumns.Add(new GridColumn() { HeaderText = " ", Width = "30" });
+                ExportColumns.Add(new GridColumn() { Field = "ProviderOwner", HeaderText = "Юридическо лице", Width = "80", Format = "d", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "Location.LocationName", HeaderText = "Населено място", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "ProviderAddressCorrespondence", HeaderText = "Адрес за кореспонденция", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "PersonNameCorrespondence", HeaderText = "Лице за контакт", Width = "180", Format = "d", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "ProviderPhoneCorrespondence", HeaderText = "Телефон", Width = "180", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "ProviderEmailCorrespondence", HeaderText = "E-mail", Width = "180", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "LicenceNumber", HeaderText = "Номер на лицензия", Width = "180", TextAlign = TextAlign.Left });
+#pragma warning restore BL0005
+                ExportProperties.Columns = ExportColumns;
+            ExportProperties.PageOrientation = PageOrientation.Landscape;
+            ExportProperties.IncludeTemplateColumn = true;
+            PdfTheme Theme = new PdfTheme();
+            PdfThemeStyle RecordThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Regular, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+
+            PdfThemeStyle HeaderThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Bold, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+            Theme.Record = RecordThemeStyle;
+            Theme.Header = HeaderThemeStyle;
+
+            ExportProperties.Theme = Theme;
+            ExportProperties.FileName = fileName + ".pdf";
+
+            await this.sfGrid.ExportToPdfAsync(ExportProperties);
+            sfGrid.PageSettings.PageSize = temp;
+            await sfGrid.Refresh();
+        }
+        else if (args.Item.Id == "sfGrid_excelexport")
+        {
+            ExcelExportProperties ExportProperties = new ExcelExportProperties();
+            ExportProperties.FileName = fileName + ".xlsx";
+            await this.sfGrid.ExportToExcelAsync(ExportProperties);
+        }
+        else
+        {
+           var result = CreateExcelCurriculumValidationErrors();
+           await this.JsRuntime.SaveAs(fileName + ".csv", result.ToArray());
+        }
+    }
+      public MemoryStream CreateExcelCurriculumValidationErrors()
+        {
+            using (ExcelEngine excelEngine = new ExcelEngine())
+            {
+                IApplication application = excelEngine.Excel;
+                application.DefaultVersion = ExcelVersion.Excel2016;
+
+                IWorkbook workbook = application.Workbooks.Create(1);
+                IWorksheet sheet = workbook.Worksheets[0];
+
+                sheet.Range["A1"].ColumnWidth = 120;
+                sheet.Range["A1"].Text = "Юридическо лице";
+                sheet.Range["B1"].ColumnWidth = 120;
+                sheet.Range["B1"].Text = "Населено място";
+                sheet.Range["C1"].ColumnWidth = 120;
+                sheet.Range["C1"].Text = "Адрес за кореспонденция";
+                sheet.Range["D1"].ColumnWidth = 120;
+                sheet.Range["D1"].Text = "Лице за контакт";
+                sheet.Range["E1"].ColumnWidth = 120;
+                sheet.Range["E1"].Text = "Телефон";
+                sheet.Range["F1"].ColumnWidth = 120;
+                sheet.Range["F1"].Text = "E-mail";
+                sheet.Range["G1"].ColumnWidth = 120;
+                sheet.Range["G1"].Text = "№ на лицензия";
+
+                IRange range = sheet.Range["A1"];
+                IRichTextString boldText = range.RichText;
+                IFont boldFont = workbook.CreateFont();
+
+                boldFont.Bold = true;
+                boldText.SetFont(0, sheet.Range["A1"].Text.Length, boldFont);
+
+                IRange range2 = sheet.Range["B1"];
+                IRichTextString boldText2 = range2.RichText;
+                IFont boldFont2 = workbook.CreateFont();
+
+                boldFont2.Bold = true;
+                boldText2.SetFont(0, sheet.Range["B1"].Text.Length, boldFont2);
+
+                IRange rangeC = sheet.Range["C1"];
+                IRichTextString boldTextC = rangeC.RichText;
+                IFont boldFontC = workbook.CreateFont();
+
+                boldFontC.Bold = true;
+                boldTextC.SetFont(0, sheet.Range["C1"].Text.Length, boldFontC);
+
+                IRange rangeD = sheet.Range["D1"];
+                IRichTextString boldTextD = rangeD.RichText;
+                IFont boldFontD = workbook.CreateFont();
+
+                boldFontD.Bold = true;
+                boldTextD.SetFont(0, sheet.Range["D1"].Text.Length, boldFontD);
+
+                IRange rangeE = sheet.Range["E1"];
+                IRichTextString boldTextE = rangeE.RichText;
+                IFont boldFontE = workbook.CreateFont();
+
+                boldFontE.Bold = true;
+                boldTextE.SetFont(0, sheet.Range["E1"].Text.Length, boldFontE);
+
+                IRange rangeF = sheet.Range["F1"];
+                IRichTextString boldTextF = rangeF.RichText;
+                IFont boldFontF = workbook.CreateFont();
+
+                boldFontF.Bold = true;
+                boldTextF.SetFont(0, sheet.Range["F1"].Text.Length, boldFontF);
+
+                IRange rangeG = sheet.Range["G1"];
+                IRichTextString boldTextG = rangeG.RichText;
+                IFont boldFontG = workbook.CreateFont();
+
+                boldFontG.Bold = true;
+                boldTextG.SetFont(0, sheet.Range["G1"].Text.Length, boldFontG);
+
+
+                var rowCounter = 2;
+                foreach (var item in candidateProviderVMs)
+                {
+                    sheet.Range[$"A{rowCounter}"].Text = item.ProviderOwner;
+                    sheet.Range[$"A{rowCounter}"].WrapText = true;
+                    sheet.Range[$"A{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    sheet.Range[$"A{rowCounter}"].RowHeight = 10;
+                    sheet.Range[$"B{rowCounter}"].Text = item.Location.LocationName;
+                    sheet.Range[$"B{rowCounter}"].WrapText = true;
+                    sheet.Range[$"B{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    sheet.Range[$"C{rowCounter}"].Text = item.ProviderAddressCorrespondence;
+                    sheet.Range[$"C{rowCounter}"].WrapText = true;
+                    sheet.Range[$"C{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    sheet.Range[$"D{rowCounter}"].Text = item.PersonNameCorrespondence;
+                    sheet.Range[$"D{rowCounter}"].WrapText = true;
+                    sheet.Range[$"D{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    sheet.Range[$"E{rowCounter}"].Text = item.ProviderPhoneCorrespondence;
+                    sheet.Range[$"E{rowCounter}"].WrapText = true;
+                    sheet.Range[$"E{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    sheet.Range[$"F{rowCounter}"].Text = item.ProviderEmailCorrespondence;
+                    sheet.Range[$"F{rowCounter}"].WrapText = true;
+                    sheet.Range[$"F{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    sheet.Range[$"G{rowCounter}"].Text = item.LicenceNumber;
+                    sheet.Range[$"G{rowCounter}"].WrapText = true;
+                    sheet.Range[$"G{rowCounter}"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                    rowCounter++;
+                }
+
+               
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream, "      ", System.Text.Encoding.UTF8);
+                    return stream;
+                }
+            }
+        }
+    public void PdfQueryCellInfoHandler(PdfQueryCellInfoEventArgs<CandidateProviderVM> args)
+    {
+        if (args.Column.HeaderText == " ")
+        {
+            args.Cell.Value = GetRowNumber(sfGrid, args.Data.IdCandidate_Provider).Result.ToString();
+        }
+    }
+}

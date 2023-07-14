@@ -1,0 +1,419 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using System.IO
+@using System.ComponentModel.DataAnnotations
+@using ISNAPOO.WebSystem.Resources
+@using global::Data.Models.Data.ExternalExpertCommission
+
+@inject Microsoft.JSInterop.IJSRuntime JsRuntime
+@inject IExpertDocumentService expertDocumentService
+@inject IUploadFileService uploadService
+@inject ILocService LocService
+@inject IDataSourceService DataSourceService
+@inject IExpertService expertService
+@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" Width="650px" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Данни за документ за експерт <span style="font-size: 18px;color: white !important;">@this.person.FullName</span></Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="submitFormExpertDocument">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на документа:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="model.IdDocumentType" DataSource="@kvDocumentTypeSource" AllowCustom="false" AllowFiltering="true">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (model.HasUploadedFile)
+                            {
+                                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@model.FileName</a></span>
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                        <div class="col-sm-4" style="text-align: right;">
+                            @*bitbucket*@
+                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                <button type="button" class="btn-row" disabled="@(!model.HasUploadedFile)" @onclick="OnRemoveClick"><i class="fa fa-trash-o"></i></button>
+                            </SfTooltip>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader AutoUpload="false" AllowMultiple="false" @ref="sfUploaderDoc">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove" FileSelected="OnFileSelected"
+                                                    OnClear="OnClear"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-info" form="submitFormExpertDocument">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+    public override bool IsContextModified => this.editContext.IsModified();
+
+    ToastMsg toast;
+
+    private string dialogClass = "";
+    private bool isSubmitClicked = false;
+    private bool isUploadSuccessful = false;
+    ExpertDocumentVM model = new ExpertDocumentVM();
+    PersonVM person = new PersonVM();
+
+    SfUploader sfUploaderDoc = new SfUploader();
+
+    IEnumerable<KeyValueVM> kvDocumentTypeSource;
+
+    [Parameter]
+    public EventCallback<ExpertDocumentVM> CallbackAfterSave_ExpDocument { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.editContext = new EditContext(this.model);
+    }
+
+    public async void OpenModalExpertDocument(ExpertDocumentVM _model)
+    {
+        this.isVisible = true;
+        if (_model.IdExpertDocument != 0)
+        {
+            this.model = await this.expertDocumentService.GetExpertDocumentByIdAsync(_model.IdExpertDocument);
+        }
+        else
+        {
+            this.model = _model;
+        }
+        var expert = await expertService.GetExpertByIdAsync(this.model.IdExpert);
+        this.person = expert.Person;
+        this.kvDocumentTypeSource = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ExpertDocumentType");
+
+        this.editContext = new EditContext(this.model);
+
+        this.StateHasChanged();
+    }
+
+    private async Task<int> Save()
+    {
+        if (this.loading)
+        {
+            return 0;
+        }
+
+        try
+        {
+            this.loading = true;
+
+            bool hasPermission = await CheckUserActionPermission("ManageExpertsData", false);
+            if (!hasPermission) { return 0; }
+
+            this.SpinnerShow();
+            List<Syncfusion.Blazor.Inputs.FileInfo> listFiles = await this.sfUploaderDoc.GetFilesDataAsync();
+
+            if (!string.IsNullOrWhiteSpace(this.model.FileName))
+            {
+                //this.model.FileNameSelected = this.model.FileName;
+            }
+            //else if (listFiles.Count > 0)
+            //{
+            //    this.model.FileNameToValidate = listFiles[0].Name;
+            //}
+            else
+            {
+                this.model.FileNameSelected = string.Empty;
+            }
+
+            this.editContext = new EditContext(this.model);
+            this.editContext.EnableDataAnnotationsValidation();
+
+            this.isSubmitClicked = true;
+            var result = 0;
+
+
+            bool isValid = this.editContext.Validate();
+            if (isValid)
+            {
+                result = await this.expertDocumentService.UpdateExpertDocumentAsync(this.model);
+            }
+
+            if (result > 0)
+            {
+                this.StateHasChanged();
+                await this.CallbackAfterSave_ExpDocument.InvokeAsync(this.model);
+            }
+
+            this.isSubmitClicked = false;
+
+            this.ShowSuccessAsync("Записът e успешeн!");
+
+            return result;
+        }
+        finally
+        {
+            this.loading = false;
+        }
+    }
+
+
+    private void OnFileSelected(SelectedEventArgs args)
+    {
+        this.model.FileNameSelected = args.FilesData[0].Name;
+    }
+
+    private void OnClear(ClearingEventArgs args)
+    {
+        this.model.FileNameSelected = string.Empty;
+    }
+
+    private async Task OnChange(UploadChangeEventArgs args)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageExpertsData", false);
+        if (!hasPermission) { return; }
+
+        this.isUploadSuccessful = false;
+
+        var resultSave = 0;
+
+        if (args.Files.Count == 1)
+        {
+            //this.model.FileNameToValidate = args.Files[0].FileInfo.Name;
+
+            this.editContext = new EditContext(this.model);
+            this.editContext.EnableDataAnnotationsValidation();
+            bool isValid = this.editContext.Validate();
+
+            if (!isValid)
+            {
+                this.model.FileNameSelected = string.Empty;
+            }
+
+            if (isValid)
+            {
+                if (this.model.IdExpertDocument > 0)
+                {
+                    //resultSave = this.model.IdExpertDocument;
+
+                    //FieldIdentifier fieldIdentifier = this.editContext.Field("IdDocumentType");
+                    //if (this.editContext.IsModified(fieldIdentifier))
+                    //{
+                    //    resultSave = await this.expertDocumentService.UpdateExpertDocumentAsync(this.model);
+                    //}
+
+                    //if (resultSave > 0)
+                    //{
+                    bool isConfirmed = true;
+
+                    var resCheck = await this.uploadService.CheckIfExistUploadedFileAsync<ExpertDocument>(this.model.IdExpertDocument);
+                    if (resCheck)
+                    {
+                        string msg = "За избраният документ вече има прикачен файл. Искате ли да го подмените?";
+                        isConfirmed = await this.ShowConfirmDialogAsync(msg);
+                    }
+
+                    if (isConfirmed)
+                    {
+                        var fileName = args.Files[0].FileInfo.Name;
+
+                        var result = await this.expertDocumentService.UpdateExpertDocumentAndUploadAsync(this.model, args.Files[0].Stream, fileName);
+
+                        if (result > 0)
+                        {
+                            this.isUploadSuccessful = true;
+
+                            this.toast.sfSuccessToast.Content = "Записът e успешeн!";
+                            await this.toast.sfSuccessToast.ShowAsync();
+
+                            await this.CallbackAfterSave_ExpDocument.InvokeAsync(this.model);
+
+                            //this.model = await this.expertDocumentService.GetExpertDocumentByIdAsync(this.model.IdExpertDocument);
+
+                            var savedEntry = await this.uploadService.GetByIdAsync<ExpertDocument>(this.model.IdExpertDocument);
+
+                            this.model.IdExpertDocument = savedEntry.IdExpertDocument;
+                            this.model.UploadedFileName = savedEntry.UploadedFileName;
+
+                            this.StateHasChanged();
+                        }
+                    }
+
+                    editContext = new EditContext(this.model);
+                    //}
+                }
+                else
+                {
+                    //resultSave = await this.expertDocumentService.UpdateExpertDocumentAsync(this.model);
+
+                    //if (resultSave > 0)
+                    //{
+                    //this.model.IdExpertDocument = resultSave;
+
+                    var fileName = args.Files[0].FileInfo.Name;
+
+                    var result = await this.expertDocumentService.UpdateExpertDocumentAndUploadAsync(this.model, args.Files[0].Stream, fileName);
+
+                    if (result > 0)
+                    {
+                        this.model.IdExpertDocument = result;
+
+                        this.isUploadSuccessful = true;
+
+                        this.toast.sfSuccessToast.Content = "Записът e успешeн!";
+                        await this.toast.sfSuccessToast.ShowAsync();
+
+                        await this.CallbackAfterSave_ExpDocument.InvokeAsync(this.model);
+
+                        //this.model = await this.expertDocumentService.GetExpertDocumentByIdAsync(this.model.IdExpertDocument);
+
+                        var savedEntry = await this.uploadService.GetByIdAsync<ExpertDocument>(this.model.IdExpertDocument);
+
+                        this.model.IdExpertDocument = savedEntry.IdExpertDocument;
+                        this.model.UploadedFileName = savedEntry.UploadedFileName;
+
+                        this.StateHasChanged();
+                    }
+
+                    this.editContext = new EditContext(this.model);
+                    //}
+                }
+            }
+        }
+    }
+
+    private async Task OnRemove(RemovingEventArgs args)
+    {
+        if (args.FilesData.Count == 1)
+        {
+            if (this.model.IdExpertDocument > 0)
+            {
+                bool isConfirmed = true;
+                if (args.FilesData[0].Name == this.model.FileName)
+                {
+                    string msg = "Сигурни ли си сте, че искате да изтриете прикачения файл?";
+                    isConfirmed = await this.ShowConfirmDialogAsync(msg);
+                }
+
+                if (isConfirmed)
+                {
+                    var result = await this.uploadService.RemoveFileByIdAsync<ExpertDocument>(this.model.IdExpertDocument);
+
+                    if (result == 1)
+                    {
+                        this.model = await this.expertDocumentService.GetExpertDocumentByIdAsync(this.model.IdExpertDocument);
+
+                        this.StateHasChanged();
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task OnDownloadClick()
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewExpertsData", false);
+        if (!hasPermission) { return; }
+
+        this.SpinnerShow();
+
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+
+            var hasFile = await this.uploadService.CheckIfExistUploadedFileAsync<ExpertDocument>(this.model.IdExpertDocument);
+            if (hasFile)
+            {
+                var documentStream = await this.uploadService.GetUploadedFileAsync<ExpertDocument>(this.model.IdExpertDocument);
+
+                if (!string.IsNullOrEmpty(documentStream.FileNameFromOldIS))
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, documentStream.FileNameFromOldIS, documentStream.MS!.ToArray());
+                }
+                else
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, this.model.FileName, documentStream.MS!.ToArray());
+                }
+            }
+            else
+            {
+                var msg = this.LocService.GetLocalizedHtmlString("NotExistingFileForDownload").Value;
+
+                await this.ShowErrorAsync(msg);
+            }
+        }
+        finally
+        {
+            this.loading = false;
+        }
+
+        this.SpinnerHide();
+
+    }
+
+    private async Task OnRemoveClick()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageExpertsData", false);
+        if (!hasPermission) { return; }
+
+        if (this.model.IdExpertDocument > 0)
+        {
+            string msg = "Сигурни ли си сте, че искате да изтриете прикачения файл?";
+            bool isConfirmed = await this.ShowConfirmDialogAsync(msg);
+            if (isConfirmed)
+            {
+                var result = await this.uploadService.RemoveFileByIdAsync<ExpertDocument>(this.model.IdExpertDocument);
+
+                if (result == 1)
+                {
+                    this.model = await this.expertDocumentService.GetExpertDocumentByIdAsync(this.model.IdExpertDocument);
+
+                    this.StateHasChanged();
+                }
+            }
+        }
+    }
+
+}

@@ -1,0 +1,85 @@
+﻿@using System.Net.Http
+
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+
+
+@using ISNAPOO.Common.HelperClasses
+@using ISNAPOO.Core.Contracts
+@using ISNAPOO.Core.Contracts.Common
+@using ISNAPOO.Core.Contracts.Common.Concurrency
+@using ISNAPOO.Core.HelperClasses
+@using ISNAPOO.WebSystem
+@using ISNAPOO.WebSystem.Shared
+@using ISNAPOO.WebSystem.ValidationModels
+@using ISNAPOO.Core.ViewModels.Common.ValidationModels
+@using ISNAPOO.Core.ViewModels.Common
+@using ISNAPOO.Core.Mapping
+@using ISNAPOO.WebSystem.Pages.Common
+@using ISNAPOO.Core.Contracts.SPPOO
+@using ISNAPOO.Core.Contracts.EKATTE
+@using ISNAPOO.Core.Contracts.DOC.NKPD
+@using ISNAPOO.Core.Contracts.DOC
+@using ISNAPOO.Common.Constants
+@using ISNAPOO.Core.ViewModels.SPPOO
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.Area
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.Profession
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.ProfessionalDirection
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.Speciality
+@using ISNAPOO.Core.ViewModels.CPO
+@using ISNAPOO.Core.ViewModels.EKATTE
+@using ISNAPOO.Core.ViewModels.DOC.NKPD
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals
+@using ISNAPOO.WebSystem.Pages.DOC.NKPD
+@using ISNAPOO.Core.ViewModels.DOC
+@using ISNAPOO.WebSystem.Pages.DOC
+@using ISNAPOO.WebSystem.Resources
+@using ISNAPOO.Core.ViewModels.Candidate
+@using ISNAPOO.WebSystem.Pages.Framework
+@using ISNAPOO.Core.ViewModels.Request
+@using ISNAPOO.Core.ViewModels.CPO.ProviderData
+@using ISNAPOO.WebSystem.Pages.Candidate
+@using ISNAPOO.WebSystem.Pages.Candidate.CIPO
+@using ISNAPOO.WebSystem.Pages.Candidate.NAPOO
+@using ISNAPOO.WebSystem.Pages.Candidate.ChangeLicenzing
+@using ISNAPOO.WebSystem.Pages.Archive
+@using ISNAPOO.Core.ViewModels.Archive
+@using ISNAPOO.WebSystem.Pages.Common.Notifications
+@using ISNAPOO.Core.Contracts.Candidate
+@using ISNAPOO.Core.ViewModels.Training
+@using ISNAPOO.WebSystem.Pages.Training.SPKAndPoP
+@using ISNAPOO.WebSystem.Pages.Training.LegalCapacity
+@using ISNAPOO.Core.Contracts.Assessment;
+@using ISNAPOO.Core.ViewModels.Assessment;
+@using ISNAPOO.WebSystem.Pages.Training.Validation;
+@using ISNAPOO.WebSystem.Pages.Registers.RegisterMTB;
+@using ISNAPOO.WebSystem.Pages.Registers.RegisterTrainer;
+@using ISNAPOO.WebSystem.Pages.EGovPayment;
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission;
+
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.SplitButtons
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.TreeGrid
+@using Syncfusion.Blazor.Notifications
+@using Syncfusion.PdfExport
+
+
+@using TooltipPosition = Syncfusion.Blazor.Popups.Position
+
+

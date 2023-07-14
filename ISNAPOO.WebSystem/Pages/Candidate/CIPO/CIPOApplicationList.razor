@@ -1,0 +1,204 @@
+﻿@page "/CIPOApplicationList"
+
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ShowCIPOApplicationList")]
+
+@{
+    base.CheckUserActionPermission("ShowCIPOApplicationList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Заявления за лицензиране</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @if (this.isApplicationChange)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenModalForApplicationChangeBtn">Нов</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+
+                            @if (this.showFilterBtn)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterBtn">Филтър</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="SendNotificationAsync">Изпрати известие към ЦИПО</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="candidateProviders" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="applicationsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })" 
+                                AllowExcelExport="true" AllowPdfExport="true" EnableVirtualization="true" Height="450">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridEvents TValue="CandidateProviderVM" OnToolbarClick="ToolbarClick" RowSelected="RowSelectedHandler" RowDeselected="RowDeselectedHandler" />
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="5%"></GridColumn>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(applicationsGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                </Template>
+                            </GridColumn>   
+                            <GridColumn HeaderText=" " Width="2%" Visible="this.showAllGridButtons">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Документи за лицензиране" OpensOn="Hover" Width="100px">
+                                        <button @onclick="(async () => await SelectedRow(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-file-text-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%" Visible="this.showAllGridButtons">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        if (ctx.IdApplicationStatus != null && ctx.AdditionalDocumentRequested == true)
+                                        {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Допълнителни документи" OpensOn="Hover">
+                                                    <button @onclick="(async () => await SelectedRowCIPOAdditionalDocument(ctx))" class="btn-row"><i class="fa fa-clipboard"></i></button>
+                                                </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText=" " Width="4%" Visible="@this.isVisibleProcedureBtn">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Процедура за лицензиране" OpensOn="Hover" Width="100px">
+                                        @{
+                                            var rowModel = context as CandidateProviderVM;
+                                            if (rowModel.IdStartedProcedure.HasValue)
+                                            {
+                                                <button @onclick="(async () => await SelectedRowProcedure(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-list-alt"></i></button>
+                                            }
+                                        }
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="PoviderBulstat" HeaderText="ЕИК" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="LocationCorrespondence.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ProviderAddressCorrespondence" HeaderText="Контакти" TextAlign="TextAlign.Left" Width="27%">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        <p style="margin-bottom: -4px;">адрес: @ctx.ProviderAddressCorrespondence</p>
+                                        <p style="margin-bottom: -4px;">лице за контакт: @ctx.PersonNameCorrespondence</p>
+                                        <p style="margin-bottom: -4px;">телефон: @ctx.ProviderPhoneCorrespondence</p>
+                                        <p>e-mail: @ctx.ProviderEmailCorrespondence</p>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="TypeApplication" HeaderText="Процедура" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ApplicationStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="15%">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        switch (ctx.ApplicationStatus)
+                                        {
+                                            case "Подготвяне на документи за лицензиране":
+                                                <label class="form-label label label-info">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Подадени заявление и документи за лицензиране":
+                                                <label class="form-label label label-info">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Заведено в деловодството заявление ":
+                                                <label class="form-label label label-info">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Проверка на редовността на подаденото заявление и документи (административна оценка)":
+                                                <label class="form-label label label-info">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Положителна оценка от административната оценка":
+                                                <label class="form-label label label-success">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Отрицателна оценка, в подадените документи има непълноти или нередовности":
+                                                <label class="form-label label label-danger">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Тече едномесечен срок за корекции":
+                                                <label class="form-label label label-warning">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Лицензионна експертиза":
+                                                <label class="form-label label label-info">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Разглеждане на процедурата от ЕК, оценка от ЕК":
+                                                <label class="form-label label label-info">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Издадена заповед за лицензиране":
+                                                <label class="form-label label label-success">@ctx.ApplicationStatus</label>
+                                                break;
+                                            case "Издадена заповед за отказ от издаване на лицензия":
+                                                <label class="form-label label label-danger">@ctx.ApplicationStatus</label>
+                                                break;
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        if (ctx.HavePayments == true)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Заявки за плащания" OpensOn="Hover">
+                                                <button @onclick="(async () => await ShowPaymentRequests(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-credit-card"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ApplicationDate" HeaderText="Подадена на" TextAlign="TextAlign.Left" Width="10%" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        var date = ctx.ApplicationDate.HasValue ? $"{ctx.ApplicationDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="3%">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+
+                                        if (ctx.IdApplicationFiling != null && ctx.IdApplicationFiling != this.kvApplicationFilingType.IdKeyValue)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Въведи номер на заявление от Деловодната ИС" OpensOn="Hover">
+                                               <button @onclick="(async () => await UpdateAppNumberDate(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-list-ol"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CIPOApplicationModal @ref="applicationModal" CallbackAfterSubmit="OnApplicationSubmit" />
+<CIPOProcedureModal @ref="procedureModal" />
+<ApplicationListFilterModal @ref="applicationListFilterModal" CallbackAfterSubmit="OnFilterModalSubmit" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<AdditionalDocumentModal @ref="additionalDocumentModal" />

@@ -1,0 +1,44 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="50%" Height="auto" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="@isVisible" ZIndex="3010">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            @((MarkupString)this.title)
+        </Header>
+        <Content>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="control-label">
+                            Прикачване на файл:
+                        </label>
+                        <SfUploader @ref="this.uploader" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                            <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                        </SfUploader>
+                    </div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(this.uploadedFileName))
+            {
+                <div class="row e-upload" style="margin-left:0px">
+                    <div class="col-sm-8">
+                        <button type="button" class="btn-row" @onclick="(async () => await this.OnRemove())"><i class="fa fa-trash-o"></i></button>
+                        <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.fileName</a></span>
+                    </div>
+                </div>
+            }
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

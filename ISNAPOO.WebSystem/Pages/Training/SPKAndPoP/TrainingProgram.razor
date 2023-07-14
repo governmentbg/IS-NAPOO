@@ -1,0 +1,137 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <p>
+                @if (this.ShowLegalCapacityOrdinanceType)
+                {
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group required">
+                                <label class="control-label">Правоспособност: </label>
+                                <SfComboBox Enabled="this.ProgramVM.IdProgram == 0" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" AllowFiltering="true" DataSource="legalCapacityOrdinanceTypeSource" AllowCustom="false" @bind-Value="this.ProgramVM.IdLegalCapacityOrdinanceType">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="OnLegalCapacityValueChanged" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (this.ShowLegalCapacityOrdinanceType && !string.IsNullOrEmpty(this.legalCapacityDescription))
+                {
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">Име на наредбата: </label>
+                                <InputTextArea class="form-control" @bind-Value="this.legalCapacityDescription" disabled="@(true)" rows="2" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group required">
+                            <label class="control-label">Специалност: </label>
+                            <SfComboBox @ref="specialitiesCB" Enabled="this.ProgramVM.IdProgram == 0 && this.isSpecialitySelectEnabled" ShowClearButton="true" TValue="int" TItem="SpecialityVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" AllowFiltering="true" DataSource="specialitiesSource" AllowCustom="false" @bind-Value="this.ProgramVM.IdSpeciality">
+                                <ComboBoxFieldSettings Text="CodeAndName" Value="IdSpeciality" />
+                                <ComboBoxEvents TItem="SpecialityVM" TValue="int" ValueChange="SpecialitySelectedHandler" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">Вид: </label>
+                            <SfTextBox Enabled="false" @bind-Value="@this.courseType" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Номер на програмата: </label>
+                            <SfTextBox @bind-Value="this.ProgramVM.ProgramNumber" />
+                        </div>
+                    </div>
+                    @if (!this.ShowLegalCapacityOrdinanceType)
+                    {
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Рамкова програма: </label>
+                                <SfComboBox Enabled="this.isSpecialitySelected && this.isTypeFrameworkProgramSelected" ShowClearButton="true" TValue="int?" TItem="FrameworkProgramVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.frameworkProgramSource" AllowCustom="false" @bind-Value="this.ProgramVM.IdFrameworkProgram">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdFrameworkProgram" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group required">
+                            <label class="control-label">Наименование на програмата: </label>
+                            <InputText class="form-control" @bind-Value="this.ProgramVM.ProgramName" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Допълнителна информация: </label>
+                            <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                 ondrop="5"
+                                                 rows="4"
+                                                 @bind-Value="this.ProgramVM.ProgramNote"
+                                                 maxlength="4000">
+                            </CustomInputTextArea>
+                            <div style="float:right"><label>@(this.ProgramVM.ProgramNote != null ? this.ProgramVM.ProgramNote.Length : 0)/4000</label></div>
+                        </div>
+                    </div>
+                </div>
+                @if (!this.ShowLegalCapacityOrdinanceType)
+                {
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="new-task">
+                                <div class="to-do-list">
+                                    <div class="checkbox-fade fade-in-primary">
+                                        <label class="form-label">
+                                            <input type="checkbox" @bind-value="this.ProgramVM.IsProgramLegalCapacityOrdinance" checked="@(this.ProgramVM.IsProgramLegalCapacityOrdinance ? "checked" : null)">
+                                            <span class="cr">
+                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                            </span> <span>Програмата за обучение е свързана с придобиването на документ за правоспособност</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (this.ProgramVM.IsProgramLegalCapacityOrdinance)
+                    {
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="form-group required">
+                                    <label class="control-label">Правоспособност: </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" AllowFiltering="true" DataSource="legalCapacityOrdinanceTypeSourceForSPKAndPP" AllowCustom="false" @bind-Value="this.ProgramVM.IdLegalCapacityOrdinanceType">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="OnLegalCapacityFromSPKAndPPValueChanged" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(this.legalCapacityDescription))
+                        {
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Име на наредбата: </label>
+                                        <InputTextArea class="form-control" @bind-Value="this.legalCapacityDescription" disabled rows="2" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </p>
+        </div>
+    </div>
+</EditForm>

@@ -1,0 +1,45 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="form-group required">
+                            <label class="control-label">Статус на приключване: </label>
+                            <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" Enabled="this.ConsultingClientVM.IsArchived == false" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="finishedTypeSource" AllowCustom="false" @bind-Value="this.model.IdFinishedType">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                @if (this.model.IdFinishedType == this.kvFinishedWithDoc.IdKeyValue)
+                {
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Сканиран документ:
+                                </label>
+                                <SfUploader AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" Enabled="this.ConsultingClientVM.IsArchived == false" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(this.model.UploadedFileName))
+                    {
+                        <div class="row e-upload" style="margin-left:0px">
+                            <div class="col-sm-8">
+                                <button type="button" class="btn-row" disabled="@(this.ConsultingClientVM.IsArchived == true)" @onclick="(() => OnRemove(this.model.UploadedFileName))"><i class="fa fa-trash-o"></i></button>
+                                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.model.FileName</a></span>
+                            </div>
+                        </div>
+                    }
+                }   
+            </p>
+        </div>
+    </div>
+</EditForm>
+

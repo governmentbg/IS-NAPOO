@@ -1,0 +1,7 @@
+<ValidPersonResponse xmlns="http://egov.bg/RegiX/GRAO/NBD/ValidPersonResponse">
+  <FirstName>Живко</FirstName>
+  <SurName>Атанасов</SurName>
+  <FamilyName>Христов</FamilyName>
+  <BirthDate>1922-03-03</BirthDate>
+  <DeathDate>1972-01-05</DeathDate>
+</ValidPersonResponse>

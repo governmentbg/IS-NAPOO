@@ -1,0 +1,720 @@
+﻿@page "/license_change"
+
+<h3>Приложения за промяна на лицензия на ЦПО</h3>
+
+@using System.IO;
+
+@using ISNAPOO.Core.Contracts.Licensing
+@using ISNAPOO.Core.Services
+@using ISNAPOO.Core.ViewModels.CPO.LicensingChangeProcedureDoc
+@using ISNAPOO.Core.ViewModels.NAPOOCommon
+@using ISNAPOO.Core.ViewModels.SPPOO
+@using ISNAPOO.Core.HelperClasses
+
+@inject Microsoft.JSInterop.IJSRuntime JS
+@inject ILicensingChangeProcedureCPOService licChngProcDocCPOService
+
+<br />
+
+@*<button class="btn btn-primary" @onclick="@Application_1">Application 01</button>
+
+<button class="btn btn-primary" @onclick="@Application_2">Application 02</button>
+
+<button class="btn btn-primary" @onclick="@Application_3">Application 03</button>
+
+<button class="btn btn-primary" @onclick="@Application_4">Application 04</button>
+
+<button class="btn btn-primary" @onclick="@Application_6">Application 06</button>
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="@Application_7">Application 07</button>
+
+<button class="btn btn-primary" @onclick="@Application_8">Application 08</button>
+
+<button class="btn btn-primary" @onclick="@Application_9">Application 09</button>
+
+<button class="btn btn-primary" @onclick="@Application_10">Application 10</button>
+
+<button class="btn btn-primary" @onclick="@Application_11">Application 11</button>
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="@Application_13">Application 13</button>
+
+<button class="btn btn-primary" @onclick="@Application_14">Application 14</button>
+
+<button class="btn btn-primary" @onclick="@Application_15">Application 15</button>
+
+<button class="btn btn-primary" @onclick="@Application_16">Application 16</button>
+
+<button class="btn btn-primary" @onclick="@Application_17">Application 17</button>
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="@Application_18">Application 18</button>
+
+<button class="btn btn-primary" @onclick="@Application_19">Application 19</button>
+
+<button class="btn btn-primary" @onclick="@Application_20">Application 20</button>
+
+<button class="btn btn-primary" @onclick="@Application_21">Application 21</button>*@
+
+
+@code {
+    List<Expert> externalExperts;
+    List<ProfessionalDirectionVM> professionalDirectionVM;
+    Dictionary<int, List<ScoreTableData>> scoreTable;
+
+    CPOLicenseChangeApplication1 application1;
+    CPOLicenseChangeApplication2 application2;
+    CPOLicenseChangeApplication3 application3;
+    CPOLicenseChangeApplication4 application4;
+    CPOLicenseChangeApplication6 application6;
+    CPOLicenseChangeApplication7 application7;
+    CPOLicenseChangeApplication8 application8;
+    CPOLicenseChangeApplication9 application9;
+    CPOLicenseChangeApplication10 application10;
+    CPOLicenseChangeApplication11 application11;
+    CPOLicenseChangeApplication13 application13;
+    CPOLicenseChangeApplication14 application14;
+    CPOLicenseChangeApplication15 application15;
+    CPOLicenseChangeApplication16 application16;
+    CPOLicenseChangeApplication17 application17;
+    CPOLicenseChangeApplication18 application18;
+    CPOLicenseChangeApplication19 application19;
+    CPOLicenseChangeApplication20 application20;
+    CPOLicenseChangeApplication21 application21;
+
+    MemoryStream documentStream;
+    CPOMainData cPOMainData;
+    ContactPersonData contactPersonData;
+    Expert expert;
+
+    //protected override void OnInitialized()
+    //{
+    //    base.OnInitialized();
+
+    //    this.application1 = new CPOLicenseChangeApplication1();
+    //    this.application2 = new CPOLicenseChangeApplication2();
+    //    this.application3 = new CPOLicenseChangeApplication3();
+    //    this.application4 = new CPOLicenseChangeApplication4();
+    //    this.application6 = new CPOLicenseChangeApplication6();
+    //    this.application7 = new CPOLicenseChangeApplication7();
+    //    this.application8 = new CPOLicenseChangeApplication8();
+    //    this.application9 = new CPOLicenseChangeApplication9();
+    //    this.application10 = new CPOLicenseChangeApplication10();
+    //    this.application11 = new CPOLicenseChangeApplication11();
+    //    this.application13 = new CPOLicenseChangeApplication13();
+    //    this.application14 = new CPOLicenseChangeApplication14();
+    //    this.application15 = new CPOLicenseChangeApplication15();
+    //    this.application16 = new CPOLicenseChangeApplication16();
+    //    this.application17 = new CPOLicenseChangeApplication17();
+    //    this.application18 = new CPOLicenseChangeApplication18();
+    //    this.application19 = new CPOLicenseChangeApplication19();
+    //    this.application20 = new CPOLicenseChangeApplication20();
+    //    this.application21 = new CPOLicenseChangeApplication21();
+
+    //    externalExperts = new List<Expert>
+    //    {
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Търговия на едро и дребно",
+    //            Name = "Иван Иванов"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Счетоводство и данъчно облагане",
+    //            Name = "Владимир Владимиров"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Администрация и управление",
+    //            Name = "Владимир Владимиров"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Секретарски и административни офис дейности",
+    //            Name = "Кремена Кременова"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Пътувания, туризъм и свободното време",
+    //            Name = "Кремена Кременова"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Спорт",
+    //            Name = "Кремена Кременова"
+    //        },
+    //        new Expert
+    //        {
+    //            ProfessionalDirection = "Фризьорски и козметични услуги",
+    //            Name = "Трендафил Трендафилов"
+    //        }
+    //    };
+
+    //    professionalDirectionVM = new List<ProfessionalDirectionVM>
+    //    {
+    //        new ProfessionalDirectionVM
+    //        {
+    //            Name = "Електротехника и енергетика",
+    //            Code = "522",
+    //            Professions = new List<ProfessionVM>()
+    //            {
+    //                new ProfessionVM()
+    //                {
+    //                    Name = "Електротехник",
+    //                    Code = "522010",
+
+    //                    Specialities = new List<SpecialityVM>()
+    //                    {
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електродомакинска техника",
+    //                            Code = "5220110",
+    //                            VQS_Name = "III СПК"
+    //                        },
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрически машини и апарати",
+    //                            Code = "5220101",
+    //                            VQS_Name = "III СПК"
+    //                        }
+    //                    }
+    //                },
+    //                new ProfessionVM()
+    //                {
+    //                    Name = "Електромонтьор",
+    //                    Code = "522020",
+
+    //                    Specialities = new List<SpecialityVM>()
+    //                    {
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрически машини и апарати",
+    //                            Code = "5220201",
+    //                            VQS_Name = "II СПК"
+    //                        },
+    //                        new SpecialityVM()
+    //                        {
+    //                            Name = "Електрообзавеждане на производството",
+    //                            Code = "5220204",
+    //                            VQS_Name = "II СПК"
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    };
+
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "ОТБОР НА НАДЕЖДАТА",
+    //            CompanyName = "\"СПОРТС МЕНИДЖМЪНТ БЪЛГАРИЯ\" ЕООД",
+    //            CityName = "София",
+    //            CompanyId = "54689198"
+    //        };
+
+    //    contactPersonData = new ContactPersonData
+    //        {
+    //            FullName = "Виктор Кирилов Кирков",
+    //            Sirname = "Кирков",
+    //            StreetName = "ж.к. \"Дианабад\", бл. 47, вх.11",
+    //            CityName = "София",
+    //            PostCode = "1172"
+    //        };
+
+    //    expert = new Expert
+    //        {
+    //            Name = "Юлиян Юлиянов",
+    //            EGN = "8910155684",
+    //            IdCardNumber = "687415285",
+    //            IdCardIssueDate = DateTime.UtcNow.AddYears(-7).AddMonths(4).AddDays(13),
+    //            IdCardCityOfIssue = "София",
+    //            AddressByIdCard = "Ул.Трендафил, номер 17",
+    //            ProfessionalDirection = "Търговия на едро и дребно",
+    //            TaxOffice = "София"
+    //        };
+
+    //    scoreTable = new Dictionary<int, List<ScoreTableData>>
+    //        {
+    //            {
+    //                1, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "1", MaxValue = 10.00, Value = 10.00 },
+    //                    new ScoreTableData { Id = "1.1.1", MaxValue = 1.00, Value = 1.00 },
+    //                    new ScoreTableData { Id = "1.1.2", MaxValue = 1.00, Value = 1.00 },
+    //                    new ScoreTableData { Id = "1.2.1", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "1.2.2", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "1.2.3", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "1.2.4", MaxValue = 2.00, Value = 2.00 }
+    //                }
+    //            },
+    //            {
+    //                2, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "2", MaxValue = 7.00, Value = 7.00 },
+    //                }
+    //            },
+    //            {
+    //                3, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "3", MaxValue = 10.00, Value = 10.00 },
+    //                    new ScoreTableData { Id = "3.1.1.", MaxValue = 5.00, Value = 5.00 },
+    //                    new ScoreTableData { Id = "3.1.2.", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "3.2.1.", MaxValue = 3.00, Value = 3.00 }
+    //                }
+    //            },
+    //            {
+    //                4, new List<ScoreTableData>
+    //                {
+    //                    new ScoreTableData { Id = "4", MaxValue = 5.00, Value = 5.00 },
+    //                    new ScoreTableData { Id = "4.1.1.", MaxValue = 2.00, Value = 2.00 },
+    //                    new ScoreTableData { Id = "4.1.2.", MaxValue = 1.00, Value = 1.00 },
+    //                    new ScoreTableData { Id = "4.1.3.", MaxValue = 1.00, Value = 1.00 },
+    //                    new ScoreTableData { Id = "4.2.1.", MaxValue = 1.00, Value = 1.00 }
+    //                }
+    //            }
+    //        };
+    //}
+
+    //protected async void Application_1()
+    //{
+    //    externalExperts = new List<Expert>
+    //    {
+    //        new Expert()
+    //        {
+    //            ProfessionalDirection = "Електротехника и енергетика",
+    //            Name = "Стойка Стоева"
+    //        },
+    //        new Expert()
+    //        {
+    //            ProfessionalDirection = "Електротехника и енергетика",
+    //            Name = "Иван Иванов"
+    //        }
+    //    };
+
+    //    cPOMainData = new CPOMainData
+    //        {
+    //            CPOName = "Име на ЦПО",
+    //            CompanyName = "\"ЦПО\" ЕООД",
+    //            CityName = "София"
+    //        };
+
+    //    application1 = new CPOLicenseChangeApplication1
+    //        {
+    //            ChiefExpert = "Иван Иванов",
+    //            ApplicationNumber = "00001",
+    //            ApplicationDate = DateTime.UtcNow,
+    //            CPOMainData = cPOMainData,
+    //            LicenseNumber = "468195",
+    //            ProfessionalDirections = professionalDirectionVM,
+    //            ExternalExperts = externalExperts,
+    //            ExpertCommissionName = "Информационни и комуникационни технологии, електроника и автоматизация",
+    //            ExpertCommissionReportTerm = DateTime.UtcNow.AddDays(5)
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_1(application1);
+    //    await FileUtils.SaveAs(JS, "Application_1a.docx", documentStream.ToArray());
+    //}
+
+    //protected async void Application_2()
+    //{
+    //    application2 = new CPOLicenseChangeApplication2
+    //        {
+    //            OrderNumber = "84481",
+    //            LicenseNumber = "481952",
+    //            CPOMainData = cPOMainData,
+    //            ProfessionsCount = 8,
+    //            SpecialtiesCount = 11,
+    //            ExternalExpertCommissionReportTerm = DateTime.UtcNow.AddDays(7),
+    //            ExternalExperts = externalExperts,
+    //            ExpertCommissionName = "Стопанско управление и администрация",
+    //            ExpertCommissionReportTerm = DateTime.UtcNow.AddDays(14),
+    //            ChiefExpert = "Пенка Николова"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_2(application2);
+    //    await FileUtils.SaveAs(JS, "Application_2a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_3()
+    //{
+    //    application3 = new CPOLicenseChangeApplication3
+    //        {
+    //            ApplicationNumber = "14691",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-15),
+    //            ContactPerson = contactPersonData,
+    //            ContactPersonSirname = contactPersonData.Sirname,
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            ExternalExperts = externalExperts,
+    //            LicenseNumber = "95169165",
+    //            OrderNumber = "194549",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            StringTax = "петдесет",
+    //            IntegerTax = "50"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_3(application3);
+    //    await FileUtils.SaveAs(JS, "Application_3a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_4()
+    //{
+    //    application4 = new CPOLicenseChangeApplication4
+    //        {
+    //            ContractNumber = "21919",
+    //            DateOfDraft = DateTime.UtcNow,
+    //            OrderNumber = "9519",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-5),
+    //            CPOMainData = cPOMainData,
+    //            ExternalExpertData = expert,
+    //            ContractTerm = DateTime.UtcNow.AddDays(14)
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_4(application4);
+    //    await FileUtils.SaveAs(JS, "Application_4a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_6()
+    //{
+    //    List<string> issues = new List<string>
+    //    {
+    //        "Issue number 1: Some text containing explanaition about a particular issue with the licensing documents.",
+    //        "Issue number 2: Some text containing another explanaition about some particular issue with the licensing documents.",
+    //        "Issue number 3: Some text containing other explanaition about any other particular issue with the licensing documents.",
+    //        "Issue number 4: Some text containing the last explanaition about another particular issue with the licensing documents.",
+    //    };
+
+    //    application6 = new CPOLicenseChangeApplication6
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            LicenseNumber = "195448",
+    //            CPOMainData = cPOMainData,
+    //            ApplicationNumber = "5985285",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-5),
+    //            Issues = issues
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_6(application6);
+    //    await FileUtils.SaveAs(JS, "Application_6a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_7()
+    //{
+    //    List<string> issues = new List<string>
+    //    {
+    //        "Issue number 1: Some text containing explanaition about a particular issue with the licensing documents.",
+    //        "Issue number 2: Some text containing another explanaition about some particular issue with the licensing documents.",
+    //        "Issue number 3: Some text containing other explanaition about any other particular issue with the licensing documents.",
+    //        "Issue number 4: Some text containing the last explanaition about another particular issue with the licensing documents.",
+    //    };
+
+    //    application7 = new CPOLicenseChangeApplication7
+    //        {
+    //            ContactPersonData = contactPersonData,
+    //            LicenseNumber = "95194",
+    //            CPOMainData = cPOMainData,
+    //            ChiefExpert = "Пенка Николова",
+    //            TelephoneNumber = "02/ 956 245 242",
+    //            EmailAddress = "penka.nikolova@napoo.bg",
+    //            Issues = issues
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_7(application7);
+    //    await FileUtils.SaveAs(JS, "Application_7a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_8()
+    //{
+    //    application8 = new CPOLicenseChangeApplication8
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            LicenseNumber = "191956",
+    //            NotificationLetterNumber = "5195",
+    //            ApplicationNumber = "59565",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-10),
+    //            DueDate = DateTime.UtcNow.AddDays(7),
+    //            ReportNumber = "9519"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_8(application8);
+    //    await FileUtils.SaveAs(JS, "Application_8a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_9()
+    //{
+    //    application9 = new CPOLicenseChangeApplication9
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            LicenseNumber = "191956",
+    //            OrderNumber = "91957"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_9(application9);
+    //    await FileUtils.SaveAs(JS, "Application_9a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_10()
+    //{
+    //    application10 = new CPOLicenseChangeApplication10
+    //        {
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            LicenseNumber = "191956",
+    //            NotificationLetterNumber = "5195",
+    //            DueDate = DateTime.UtcNow.AddDays(7),
+    //            ContactPersonData = contactPersonData,
+    //            OrderNumber = "59491"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_10(application10);
+    //    await FileUtils.SaveAs(JS, "Application_10a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_11()
+    //{
+    //    scoreTable = new Dictionary<int, List<ScoreTableData>>
+    //    {
+    //        {
+    //            1, new List<ScoreTableData>
+    //            {
+    //                new ScoreTableData { Id = "1.", MaxValue = 7.00, Value = 7.00 }
+    //            }
+    //        },
+    //        {
+    //            2, new List<ScoreTableData>
+    //            {
+    //                new ScoreTableData { Id = "2.", MaxValue = 10.00, Value = 10.00 },
+    //                new ScoreTableData { Id = "2.1.1.", MaxValue = 5.00, Value = 5.00 },
+    //                new ScoreTableData { Id = "2.1.2.", MaxValue = 2.00, Value = 2.00 },
+    //                new ScoreTableData { Id = "2.2.1.", MaxValue = 3.00, Value = 3.00 }
+    //            }
+    //        }
+    //    };
+
+    //    application11 = new CPOLicenseChangeApplication11
+    //        {
+    //            ExternalExpertData = expert,
+    //            LicenseNumber = "191956",
+    //            CPOMainData = cPOMainData,
+    //            ProfessionalDirections = professionalDirectionVM,
+    //            OrderNumber = "95194",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-10),
+    //            PeriodOfOrderCompletion = new PeriodOfOrderCompletion
+    //            {
+    //              FromDate = DateTime.UtcNow,
+    //              ToDate = DateTime.UtcNow.AddDays(10)
+    //            },
+    //            ScoreTable = scoreTable,
+    //            TotalScore = "17.00"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_11(application11);
+    //    await FileUtils.SaveAs(JS, "Application_11a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_13()
+    //{
+    //    DateTime dayOfMeeting = DateTime.UtcNow;
+
+    //    application13 = new CPOLicenseChangeApplication13
+    //        {
+    //            CPOMainData = cPOMainData,
+    //            ChiefExpert = "Пенка Николова",
+    //            DateOfMeeting = dayOfMeeting,
+    //            DayOfWeek = ((DaysOfWeek)dayOfMeeting.DayOfWeek).ToString(),
+    //            Time = TimeOnly.FromDateTime(dayOfMeeting),
+    //            ExpertCommissionName = "Обществена сигурност и безопасност",
+    //            ExpertCommissionMembers = new List<string> { "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов" },
+    //            HeadOfExpertCommission = "Цойка Стоилова",
+    //            OrderNumber = "95195"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_13(application13);
+    //    await FileUtils.SaveAs(JS, "Application_13a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_14()
+    //{
+    //    application14 = new CPOLicenseChangeApplication14
+    //        {
+    //            CPOMainData = cPOMainData,
+    //            ChiefExpert = expert,
+    //            ExpertCommissionName = "Обществена сигурност и безопасност",
+    //            OrderNumber = "95195",
+    //            DateOfDraft = DateTime.UtcNow,
+    //            ContractNumber = "695498"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_14(application14);
+    //    await FileUtils.SaveAs(JS, "Application_14a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_15()
+    //{
+    //    application15 = new CPOLicenseChangeApplication15
+    //        {
+    //            CPOMainData = cPOMainData,
+    //            ExpertCommissionMember = expert,
+    //            ExpertCommissionName = "Обществена сигурност и безопасност",
+    //            OrderNumber = "95195",
+    //            DateOfDraft = DateTime.UtcNow,
+    //            ContractNumber = "695498"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_15(application15);
+    //    await FileUtils.SaveAs(JS, "Application_15a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_16()
+    //{
+    //    Dictionary<string, string> expertCommisionScores = new Dictionary<string, string>
+    //    {
+    //        { "Аудио-визуални изкуства и техники; производство на медийни продукти", "5.00" },
+    //        { "Секретарски и административни офис дейности", "15.00" }
+    //    };
+
+    //    application16 = new CPOLicenseChangeApplication16
+    //        {
+    //            ProtcolNumber = "8519965",
+    //            ExpertCommissionName = "Обществена сигурност и безопасност",
+    //            DateOfDraft = DateTime.UtcNow,
+    //            Time = TimeOnly.FromDateTime(application16.DateOfDraft.Value),
+    //            DistanceConnectionSoftwareName = "Zoom",
+    //            LicenseNumber = "5919",
+    //            CPOMainData = cPOMainData,
+    //            OrderNumber = "95195",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-5),
+    //            TotalScore = "17.00",
+    //            MeetingAttendance = new List<string> { "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов" },
+    //            ProfessionalDirections = professionalDirectionVM,
+    //            ReviewResults = "Текст съдърждащ решение на експертна комисия",
+    //            ChiefOfExpertCommission = "Йордан Йорданов",
+    //            ExpertCommissionScores = expertCommisionScores,
+    //            Protocoler = "Йордан Йорданов"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_16(application16);
+    //    await FileUtils.SaveAs(JS, "Application_16a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_17()
+    //{
+    //    Dictionary<string, string> expertCommisionScores = new Dictionary<string, string>
+    //    {
+    //        { "Аудио-визуални изкуства и техники; производство на медийни продукти", "5.00" },
+    //        { "Секретарски и административни офис дейности", "15.00" }
+    //    };
+
+    //    application17 = new CPOLicenseChangeApplication17
+    //        {
+    //            ExpertCommissionChairman = "Йордан Йорданов",
+    //            ExpertCommissionName = "Науки за земята и добив и обогатяване на полезни изкопаеми",
+    //            OrderNumber = "549198",
+    //            OrderInputDate = DateTime.UtcNow.AddDays(-4),
+    //            CPOMainData = cPOMainData,
+    //            ApplicationNumber = "5918",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-6),
+    //            ChiefExpert = "Пенка Николова",
+    //            ProfessionalDirections = professionalDirectionVM,
+    //            ProtocolInputDate = DateTime.UtcNow.AddDays(-6),
+    //            ProtocolNumber = "9519",
+    //            TotalScore = "17.00",
+    //            LicenseNumber = "595981",
+    //            ExpertCommissionScores = expertCommisionScores
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_17(application17);
+    //    await FileUtils.SaveAs(JS, "Application_17a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_18()
+    //{
+    //    application18 = new CPOLicenseChangeApplication18
+    //        {
+    //            ExpertCommissionName = "Науки за земята и добив и обогатяване на полезни изкопаеми",
+    //            LicenseNumber = "65981964",
+    //            OrderNumber = "549198",
+    //            OrderInputDate = DateTime.UtcNow,
+    //            ProtocolInputDate = DateTime.UtcNow.AddDays(-6),
+    //            ProtocolNumber = "9519",
+    //            ChiefExpert = "Пенка Николова",
+    //            CPOMainData = cPOMainData,
+    //            ProfessionsCount = "2",
+    //            SpecialitiesCount = "4",
+    //            ExpertCommissionChairmanFullName = "Йордан Йорданов",
+    //            ExpertCommissionChairmanSirname = "Йорданов",
+    //            ReportNumber = "5258696",
+    //            ReportInputDate = DateTime.UtcNow.AddDays(-10),
+    //            ProfessionalDirections = professionalDirectionVM
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_18(application18);
+    //    await FileUtils.SaveAs(JS, "Application_18a.docx", documentStream.ToArray());
+    //}
+
+    //protected async void Application_19()
+    //{
+    //    application19 = new CPOLicenseChangeApplication19
+    //        {
+    //            ExpertCommissionName = "Науки за земята и добив и обогатяване на полезни изкопаеми",
+    //            OrderNumber = "549198",
+    //            CPOMainData = cPOMainData,
+    //            ProfessionsCount = "2",
+    //            SpecialitiesCount = "4",
+    //            ProfessionalDirections = professionalDirectionVM,
+    //            LicenseNumber = "9519",
+    //            LicenseInputDate = DateTime.UtcNow.AddDays(-25),
+    //            ApplicationNumber = "69549",
+    //            ChiefExpert = "Пенка Николова",
+    //            ApplicationInputDate = DateTime.UtcNow.AddDays(-20),
+    //            ReportNumber = "5258696",
+    //            ReportInputDate = DateTime.UtcNow.AddDays(-10)
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_19(application19);
+    //    await FileUtils.SaveAs(JS, "Application_19a.docx", documentStream.ToArray());
+    //}
+
+    //protected async void Application_20()
+    //{
+    //    application20 = new CPOLicenseChangeApplication20
+    //        {
+    //            CPOMainData = cPOMainData,
+    //            ProfessionalDirections = professionalDirectionVM,
+    //            LicenseNumber = "9519",
+    //            ChiefExpert = "Пенка Николова",
+    //            ContactPersonData = contactPersonData
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_20(application20);
+    //    await FileUtils.SaveAs(JS, "Application_20a.doc", documentStream.ToArray());
+    //}
+
+    //protected async void Application_21()
+    //{
+    //    application21 = new CPOLicenseChangeApplication21
+    //        {
+    //            ExpertCommissionName = "Науки за земята и добив и обогатяване на полезни изкопаеми",
+    //            OrderNumber = "549198",
+    //            CPOMainData = cPOMainData,
+    //            LicenseNumber = "9519",
+    //            ChiefExpert = "Пенка Николова",
+    //            App19OrderNumber = "95418",
+    //            ExpertCommissionChairman = "Йордан Йорданов",
+    //            MemberList = new List<string> { "Гинка Драгичева", "Цойка Стоилова", "Йордан Върбанов", "Орлин Спасов" },
+    //            ProtocolNumber = "9519"
+    //        };
+
+    //    documentStream = licChngProcDocCPOService.GenerateApplication_21(application21);
+    //    await FileUtils.SaveAs(JS, "Application_21a.doc", documentStream.ToArray());
+    //}
+}

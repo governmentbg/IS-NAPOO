@@ -1,0 +1,232 @@
+﻿@using Data.Models.Data.Training
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+@inject ITrainingService TrainingService
+@inject IJSRuntime JsRuntime
+@inject ILocService LocService
+@inject IUploadFileService UploadFileService
+@inject IDataSourceService DataSourceService
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                @if (this.IsEditable)
+                {
+                    <div class="card-header">
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Създаване на нов курс" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddCourseOrderBtn">Нова заповед</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+
+                            </ul>
+                        </nav>
+                    </div>
+                }
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="courseOrdersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CourseOrderVM).IdCourseOrder).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="13" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.EditCourseBtn(context as CourseOrderVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="13" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteSelected(context as CourseOrderVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdCourseOrder" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="OrderNumber" HeaderText="№ на заповед" TextAlign="TextAlign.Left" Width="70"></GridColumn>
+                            <GridColumn Field="OrderDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="40" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as CourseOrderVM);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                            foreach (var item in files)
+                                            {
+                                                <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                                <br />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @entry.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<TrainingCourseOrderModal IsEditable="IsEditable" @ref="trainingCourseOrderModal" CallbackAfterSubmit="UpdateAfterSave"></TrainingCourseOrderModal>
+<ToastMsg @ref="toast"></ToastMsg>
+@code {
+    [Parameter]
+
+    public CourseVM CourseVM { get; set; }
+
+    [Parameter]
+    public bool IsEditable { get; set; } = true;
+
+    private ToastMsg toast = new ToastMsg();
+    private IEnumerable<CourseOrderVM> courseOrdersSource = new List<CourseOrderVM>();
+    private SfGrid<CourseOrderVM> sfGrid = new SfGrid<CourseOrderVM>();
+    private TrainingCourseOrderModal trainingCourseOrderModal = new TrainingCourseOrderModal();
+    private CourseOrderVM orderToDelete = new CourseOrderVM();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.courseOrdersSource = await this.TrainingService.GetAllCourseOrdersByIdCourseAsync(this.CourseVM.IdCourse);
+        foreach (var courseOrder in this.courseOrdersSource)
+        {
+
+            if (courseOrder.HasUploadedFile)
+            {
+                await this.SetFileNameAsync(courseOrder);
+            }
+        }
+    }
+
+    private void AddCourseOrderBtn()
+    {
+        trainingCourseOrderModal.OpenModal(new CourseOrderVM() { IdCourse = this.CourseVM.IdCourse });
+    }
+
+    private async Task UpdateAfterSave()
+    {
+        this.courseOrdersSource = await this.TrainingService.GetAllCourseOrdersByIdCourseAsync(this.CourseVM.IdCourse);
+        foreach (var courseOrder in this.courseOrdersSource)
+        {
+
+            if (courseOrder.HasUploadedFile)
+            {
+                await this.SetFileNameAsync(courseOrder);
+            }
+        }
+    }
+
+    private async Task EditCourseBtn(CourseOrderVM model)
+    {
+        trainingCourseOrderModal.OpenModal(model);
+    }
+
+    private async Task OnDownloadClick(string fileName, CourseOrderVM courseOrder)
+    {
+        this.SpinnerShow();
+
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+
+            //var selectedTrainerDoc = this.trainerDocumentsSource.FirstOrDefault(x => x.IdCandidateProviderTrainer == this.selectedTrainerId);
+            var hasFile = await this.UploadFileService.CheckIfExistUploadedFileAsync<CourseOrder>(courseOrder.IdCourseOrder, fileName);
+            if (hasFile)
+            {
+                var documentStream = await this.UploadFileService.GetUploadedFileAsync<CourseOrder>(courseOrder.IdCourseOrder, fileName);
+
+                if (!string.IsNullOrEmpty(documentStream.FileNameFromOldIS))
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, documentStream.FileNameFromOldIS, documentStream.MS!.ToArray());
+                }
+                else
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, fileName, documentStream.MS!.ToArray());
+                }
+            }
+            else
+            {
+                var msg = this.LocService.GetLocalizedHtmlString("NotExistingFileForDownload");
+
+                await this.ShowErrorAsync(msg);
+            }
+        }
+        finally
+        {
+            this.loading = false;
+        }
+
+        this.SpinnerHide();
+    }
+    private async Task SetFileNameAsync(CourseOrderVM courseOrder)
+    {
+        var settingResource = (await this.DataSourceService.GetSettingByIntCodeAsync("ResourcesFolderName")).SettingValue;
+        var fileFullName = settingResource + "\\" + courseOrder.UploadedFileName;
+        if (Directory.Exists(fileFullName))
+        {
+            var files = Directory.GetFiles(fileFullName);
+            files = files.Select(x => x.Split(($"\\{courseOrder.IdCourseOrder}\\"), StringSplitOptions.RemoveEmptyEntries).LastOrDefault()).ToArray();
+            courseOrder.FileName = string.Join(Environment.NewLine, files);
+        }
+    }
+    private async Task DeleteSelected(CourseOrderVM _model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageOrderData", false);
+        if (!hasPermission) { return; }
+        this.orderToDelete = _model;
+        bool isConfirmed = await this.ShowConfirmDialogAsync("Сигурни ли сте, че искате да изтриете избрания запис?");
+        if (isConfirmed)
+        {
+            var resultContext = new ResultContext<CourseOrderVM>();
+            resultContext.ResultContextObject = orderToDelete;
+            var files = orderToDelete.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+            foreach (var item in files)
+            {
+                await this.UploadFileService.RemoveFileByIdAsync<CourseOrder>(this.orderToDelete.IdCourseOrder);
+            }
+            await TrainingService.DeleteCourseOrderAsync(resultContext);
+            var result =
+            toast.sfSuccessToast.Content = "Записът е изтрит успешно!";
+            await toast.sfSuccessToast.ShowAsync();
+            this.courseOrdersSource = await this.TrainingService.GetAllCourseOrdersByIdCourseAsync(this.CourseVM.IdCourse);
+            foreach (var courseOrder in this.courseOrdersSource)
+            {
+
+                if (courseOrder.HasUploadedFile)
+                {
+                    await this.SetFileNameAsync(courseOrder);
+                }
+            }
+            this.StateHasChanged();
+        }
+    }
+}

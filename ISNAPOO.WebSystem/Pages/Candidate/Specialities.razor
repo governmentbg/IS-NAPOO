@@ -1,0 +1,427 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="this.editContext">
+    <div class="card">
+        <div class="card-block" style="">
+            <div class="row align-items-start">
+                @if (!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenOpenFromProfile && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                {
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group required">
+                                <label class="control-label">Специалност: </label>
+                                <SfAutoComplete @ref="this.sfAutoCompleteSpecialities" TValue="int" TItem="SpecialityVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                @bind-Value="this.idSpeciality" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                DataSource="this.specialitySource" AllowFiltering="true">
+                                    <AutoCompleteTemplates TItem="SpecialityVM">
+                                        <NoRecordsTemplate>
+                                            Няма намерени резултати.
+                                        </NoRecordsTemplate>
+                                    </AutoCompleteTemplates>
+                                    <AutoCompleteFieldSettings Text="CodeAndAreaForAutoCompleteSearch" Value="IdSpeciality" />
+                                    <AutoCompleteEvents TValue="int" TItem="SpecialityVM" Filtering="OnFilterSpeciality"></AutoCompleteEvents>
+                                </SfAutoComplete>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <p>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на специалност за лицензиране" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSpeciality">Добави</button>
+                                    </SfTooltip>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-7">
+                            <nav class="navbar navbar-expand  ">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Изтегляне на бланка за автоматично зареждане на учебен план и учебни програми" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="CurriculumTemplateDownloadHandler">Шаблон за импорт</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Зареждане на учебен план и учебни програми за избрана специалност от файл" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="OpenImportCurriculumModalBtn">Импорт уч. план</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Проверка на съответствието на учебния план и учебните програми с нормативните изисквания в рамковата програма" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="ValidateCurriculum">Валидирай уч. план</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Печат на бланка на учебния план и учебните програми за избраната специалност" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="PrintCurriculum">Печат уч. план</button>
+                                        </SfTooltip>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                }
+                <div class="row" style="margin-top: -5px;">
+                    <div class="col-sm-5">
+                        <p style="color: #01A9AC; font-size: 13px;">
+                            <div>
+                                <div style="margin-bottom: -7px;">
+                                    <span>Минимален брой задължителни учебни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionА == 0 ? "" : this.frameworkProgramVM.SectionА)</span></span>
+                                </div>
+                                <div>
+                                    <span>Брой избираеми учебни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionB == 0 ? "" : this.frameworkProgramVM.SectionB)</span></span>
+                                </div>
+                            </div>
+                        </p>
+                        <p style="color: #01A9AC; font-size: 13px;">
+                            <div>
+                                <div style="margin-bottom: -7px;">
+                                    <span>Входящо минимално образователно равнище: <span class="text-gray">@this.frameworkProgramVM.MinimumLevelEducationName</span></span>
+                                </div>
+                                <div style="margin-bottom: -7px;">
+                                    <span>Входящо минимално квалификационно равнище: <span class="text-gray">@this.frameworkProgramVM.MinimumLevelQualification</span></span>
+                                </div>
+                                <div>
+                                    <span>Продължителност на обучението: <span class="text-gray">@this.frameworkProgramVM.TrainingPeriodName</span></span>
+                                </div>
+                                <div style="line-height: 15px; margin-bottom: 3px;">
+                                    <span>Максимален % часове обща професионална подготовка спрямо общия брой задължителни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionА1 == 0 ? "" : this.frameworkProgramVM.SectionА1)</span></span>
+                                </div>
+                                <div style="line-height: 15px;">
+                                    <span>Минимален % на учебните часове за практическо обучение спрямо общия брой часове за отраслова и специфична професионална подготовка: <span class="text-gray">@(this.frameworkProgramVM.Practice == 0 ? "" : this.frameworkProgramVM.Practice)</span></span>
+                                </div>
+                            </div>
+                        </p>
+
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p style="color: #01A9AC; font-size: 13px;">
+                                    <div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>Общо <span class="text-gray">@(this.totalHours == 0 ? "" : this.totalHours)</span> @(this.totalHours == 1 ? "час" : "часа"), от тях:</span>
+                                        </div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>- A Задължителни учебни часове: <span class="text-gray">@(this.compulsoryHours == 0 ? "" : this.compulsoryHours)</span></span>
+                                        </div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>- Б Избираеми учебни часове: <span class="text-gray">@(this.nonCompulsoryHours == 0 ? "" : this.nonCompulsoryHours)</span></span>
+                                        </div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>- A1 Обща професионална подготовка: <span class="text-gray">@(this.generalProfessionTrainingHours == 0 ? "" : this.generalProfessionTrainingHours)</span></span>
+                                        </div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>- A2 Отраслова професионална подготовка: <span class="text-gray">@(this.industryProfessionTrainingHours == 0 ? "" : this.industryProfessionTrainingHours)</span></span>
+                                        </div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>- A3 Специфична професионална подготовка: <span class="text-gray">@(this.specificProfessionTrainingHours == 0 ? "" : this.specificProfessionTrainingHours)</span></span>
+                                        </div>
+                                        <div>
+                                            <span>- Б Разширена професионална подготовка: <span class="text-gray">@(this.extendedProfessionTrainingHours == 0 ? "" : this.extendedProfessionTrainingHours)</span></span>
+                                        </div>
+                                    </div>
+                                </p>
+                                <p style="color: #01A9AC; font-size: 13px;">
+                                    <div>
+                                        <div style="margin-bottom: -7px;">
+                                            <span>Брой часове по теория: <span class="text-gray">@(this.totalTheoryHours != 0 ? this.totalTheoryHours : "")</span></span>
+                                        </div>
+                                        <div>
+                                            <span>Брой часове по практика: <span class="text-gray">@(this.totalPracticeHours != 0 ? this.totalPracticeHours : "")</span></span>
+                                        </div>
+                                    </div>
+                                </p>
+
+                            </div>
+                            @if (this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality != 0)
+                            {
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Рамкова програма:
+                                        </label>
+                                        <SfComboBox Enabled="!this.IsLicenceChange && this.addedCurriculums.Count == 0 && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && this.DisableFieldsWhenOpenFromProfile && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="FrameworkProgramVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.selectedCandidateProviderSpeciality.IdFrameworkProgram" DataSource="this.frameworkProgramSource" AllowFiltering="true">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdFrameworkProgram" />
+                                            <ComboBoxEvents TValue="int?" TItem="FrameworkProgramVM" OnValueSelect="OnFrameworkProgramSelectedHandlerAsync"  />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Форма на обучение:
+                                        </label>
+                                        <SfComboBox Enabled="false" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.selectedCandidateProviderSpeciality.IdFormEducation" DataSource="this.kvFormEducationSource" AllowFiltering="true">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <nav class="navbar navbar-expand  ">
+                            <ul class="navbar-nav">
+                                @if (this.showUploadCurriculumFileBtn && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                {
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Прикачване на файл с учебния план за избраната специалност от списъка" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="(async () => await this.OpenUploadCurriculumUploadedFileModalBtn())" disabled="@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality == 0 || !this.addedCurriculums.Any())">Прикачи файл с учебен план</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="col-sm-7">
+                        <nav class="navbar navbar-expand  ">
+                            <ul class="navbar-nav">
+                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenOpenFromProfile && !this.DisableFieldsWhenActiveLicenceChange)
+                                {
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Добавяне на нова тема към учебната програма за специалността" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="AddCurriculumModalBtn" disabled="@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality == 0)">Нова тема</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Добавяне на съответствие с ДОС и ЕРУ за избран ред от учебната програма" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="OpenDOCERUModal">Съответствие с ДОС</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Изтриване на избрани теми от учебната програма" OpensOn="Hover">
+                                            <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" style="text-transform: none;" @onclick="DeleteSelectedCurriculumsBtn">Изтрий теми</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                }
+                                else
+                                {
+                                    if (!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange)
+                                    {
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Въвеждане на промени в учебния план и учебните програми за избраната специалност" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="(async () => await this.OpenChangeCurriculumModalBtn())" disabled="@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality == 0)">Промяна на уч. план</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <label>&nbsp</label>
+                                    }
+
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="История на промените на учебния план и учебните програми за избраната специалност" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="(async () => await this.OpenHistoryChangeCurriculumModalBtn())" disabled="@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality == 0)">История на промените</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                }
+
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Преглед на цял екран на въведените учебен план и учебни програми за избраната специалност" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="(() => this.ViewCurriculumsBtn())" disabled="@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality == 0)">Преглед на цял екран</button>
+                                    </SfTooltip>
+                                </li>
+                                <label>&nbsp</label>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <label class="text-gray"><b>Специалности:</b></label>
+                        <SfGrid @ref="this.providerSpecialitiesGrid" Height="500" DataSource="this.providerSpecialitiesSource" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true" AllowPaging="false" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true" EnableVirtualization="true" SelectedRowIndex="0">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                            <GridColumns>
+                                <GridColumn Width="10%" Visible="!this.DisableFieldsWhenOpenFromProfile && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange">
+                                    <Template Context="specialitiesContext">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteProviderSpecialityBtn(specialitiesContext as CandidateProviderSpecialityVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn HeaderText="" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "font-size-10px e-removewrap" }})" TextAlign="TextAlign.Center" Width="5%" AllowFiltering="false">
+                                    <Template Context="idContext">
+                                        @GetRowNumber(this.providerSpecialitiesGrid, (idContext as CandidateProviderSpecialityVM).IdCandidateProviderSpeciality).Result
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="IdCandidateProviderSpeciality" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field="Speciality.CodeAndAreaForAutoCompleteSearch" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                <GridColumn Field="Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                <GridColumn Field="Speciality.Profession.ProfessionalDirection.DisplayNameAndCode" HeaderText="Проф. направление" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                <GridColumn Field="LicenceDateAsStr" HeaderText="Дата на лицензиране" TextAlign="TextAlign.Left" Width="40%" Visible="this.CandidateProviderVM.IdLicenceStatus.HasValue"></GridColumn>
+                                <GridColumn HeaderText="" TextAlign="TextAlign.Left" Width="10%">
+                                    <Template Context="specialitiesContext">
+                                        @if ((specialitiesContext as CandidateProviderSpecialityVM).Speciality.IdDOC.HasValue)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с ДОС/ДОИ" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(async () => await this.DownloadDOCBtn((specialitiesContext as CandidateProviderSpecialityVM).Speciality))"><i class="fa fa-file-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn HeaderText="" TextAlign="TextAlign.Left" Width="10%">
+                                    <Template Context="specialitiesContext">
+                                        @if (!string.IsNullOrEmpty((specialitiesContext as CandidateProviderSpecialityVM).CurriculumModificationUploadedFileName))
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с прикачен учебен план" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(async () => await this.DownloadCurriculumModificationFileBtn((specialitiesContext as CandidateProviderSpecialityVM).IdCandidateProviderSpeciality))"><i class="fa fa-paperclip"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn TextAlign="TextAlign.Center" Width="10%">
+                                    <Template Context="specialitiesContext">
+                                        @{
+                                            var specialityCtx = specialitiesContext as CandidateProviderSpecialityVM;
+                                            var licenceInfo = string.Empty;
+                                            if (specialityCtx.LicenceData.HasValue)
+                                            {
+                                                licenceInfo = $"<p>Дата на лицензиране: {specialityCtx.LicenceData.Value.ToString(GlobalConstants.DATE_FORMAT)} г.</p>";
+                                            }
+
+                                            if (!string.IsNullOrEmpty(specialityCtx.LicenceProtNo))
+                                            {
+                                                if (specialityCtx.LicenceData.HasValue)
+                                                {
+                                                    licenceInfo += $"<p style=\"margin-top: -10px; margin-bottom: -1px;\">Заповед: {specialityCtx.LicenceProtNo}</p>";
+                                                }
+                                                else
+                                                {
+                                                    licenceInfo += $"<p>Заповед: {specialityCtx.LicenceProtNo}</p>";
+                                                }
+                                            }
+
+                                            if (!string.IsNullOrEmpty(licenceInfo))
+                                            {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" OpensOn="Hover" Content="@(licenceInfo)">
+                                                    <button type="button" class="btn-row" disabled><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                            <GridEvents TValue="CandidateProviderSpecialityVM" OnRecordClick="SpecialityRecordClickHandler" RowSelecting="SpecialitySelectingHandler" RowSelected="SpecialitySelectedHandler" QueryCellInfo="SpecialitiesQueryCellInfo"
+                                        RowDeselected="SpecialityDeselectedHandler" RowDeselecting="SpecialityDeselectingHandler" DataBound="SelectFirstRowHandler" OnToolbarClick="SpecialitiesToolbarClick" />
+                        </SfGrid>
+                    </div>
+                    <div class="col-sm-7">
+                        <label class="text-gray">
+                            <b>Учебен план и учебни програми@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality != 0 ? $" за" : string.Empty)<span style="color: #01a9ac !important">@(this.selectedCandidateProviderSpeciality.IdCandidateProviderSpeciality != 0 ? $" {this.selectedCandidateProviderSpeciality.Speciality.CodeAndName}" : string.Empty)</span>:</b>
+                        </label>
+                        <SfGrid Height="500" @ref="this.curriculumsGrid" DataSource="this.addedCurriculums" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true" EnableVirtualization="false"
+                                Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true" AllowPaging="true">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                            <GridEditSettings AllowDeleting="true" />
+                            <GridPageSettings PageCount="5" PageSize="50" PageSizes="@(new string[] { "5", "10", "15", "20", "50" })"></GridPageSettings>
+                            <GridSelectionSettings CheckboxOnly="true" />
+                            <GridTemplates>
+                                <EmptyRecordTemplate Context="emptyRecord">
+                                    <span>Няма намерени резултати.</span>
+                                </EmptyRecordTemplate>
+                            </GridTemplates>
+                            <GridColumns>
+                                <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="10" CustomAttributes="@(new Dictionary<string, object>(){{"class", "e-check_AppList"}})"></GridColumn>
+                                <GridColumn Width="15" HeaderText=" " Visible="@(!this.DisableFieldsWhenActiveLicenceChange && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenOpenFromProfile && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO)">
+                                    <Template Context="curriculumContext">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditCurriculumModalBtn(curriculumContext as CandidateCurriculumVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="15" HeaderText=" " Visible="@(!this.DisableFieldsWhenActiveLicenceChange && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenOpenFromProfile && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO)">
+                                    <Template Context="curriculumContext">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteCurriculum(curriculumContext as CandidateCurriculumVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="IdCandidateCurriculum" HeaderText="" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "font-size-10px e-removewrap" }})" TextAlign="TextAlign.Center" Width="15" AllowFiltering="false">
+                                    <Template Context="idContext">
+                                        @if ((idContext as CandidateCurriculumVM).IdCandidateCurriculum != 0)
+                                        {
+                                            @GetRowNumber(curriculumsGrid, (idContext as CandidateCurriculumVM).IdCandidateCurriculum).Result
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="IdCandidateCurriculum" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field="ProfessionalTraining" HeaderText="Р" TextAlign="TextAlign.Left" Width="15"></GridColumn>
+                                <GridColumn Field="Subject" HeaderText="Предмет" TextAlign="TextAlign.Left" Width="57"></GridColumn>
+                                <GridColumn Field="Topic" HeaderText="Тема" TextAlign="TextAlign.Left" Width="146"></GridColumn>
+                                <GridColumn Field="Theory" HeaderText="Т" TextAlign="TextAlign.Right" Width="30">
+                                    <Template Context="theory">
+                                        <div class="text-right" style="font-size: 20px !important;">
+                                            @{
+                                                var candidateCurriculumVM = theory as CandidateCurriculumVM;
+                                                @candidateCurriculumVM.Theory
+
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="Practice" HeaderText="П" TextAlign="TextAlign.Right" Width="30">
+                                    <Template Context="practice">
+                                        <div class="text-right" style="font-size: 20px !important;">
+                                            @{
+                                                var candidateCurriculumVM = practice as CandidateCurriculumVM;
+                                                @candidateCurriculumVM.Practice
+
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="ERUsForExport" HeaderText="ЕРУ" TextAlign="TextAlign.Center" Width="28">
+                                    <Template Context="candidateCurriculumCtx">
+                                        @{
+                                            var candidateCurriculum = candidateCurriculumCtx as CandidateCurriculumVM;
+
+                                            foreach (var eru in candidateCurriculum.SelectedERUs.OrderBy(x => x.ERUIntCodeSplit))
+                                            {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="@eru.Name" OpensOn="Hover">
+                                                    @(eru.Code)
+                                                </SfTooltip>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                            <GridEvents TValue="CandidateCurriculumVM" OnRecordClick="CurriculumRecordClickHandler"
+                                        RowSelected="CurriculumSelectedHandler" RowDeselected="CurriculumDeselectedHandler"
+                                        RowSelecting="CurriculumSelectingHandler" RowDeselecting="CurriculumDeselectingHandler"
+                                        DataBound="CalculateCurriculumHours" OnToolbarClick="ToolbarClick" QueryCellInfo="CustomizeCellHours" />
+                        </SfGrid>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<UploadCurriculumFileModal @ref="uploadCurriculumFileModal" CallbackAfterSubmit="ReloadCurriculumFileDataAfterSubmit" />
+<CurriculumReadonlyModal @ref="curriculumReadonlyModal" />
+<CurriculumModificationHistoryModal @ref="curriculumModificationHistoryModal" />
+@if (this.DisableFieldsWhenOpenFromProfile)
+{
+    <CurriculumModificationReasonModal @ref="curriculumModificationReasonModal" />
+    <CurriculumModificationModal @ref="curriculumModificationModal" CallbackAfterSubmit="ReloadCurriculumsDataAsync" />
+}
+else
+{
+    <ImportCandidateCurriculumModal @ref="importCandidateCurriculumModal" CallbackAfterSave="UpdateAfterExcelImport" />
+    <CandidateCurriculumModal @ref="candidateCurriculumModal" CallbackAfterSubmit="UpdateAfterSubmitCandidateCurriculumModal" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.DisableFieldsWhenUserIsExternalExpertOrCommittee" DisableAllFields="this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenActiveLicenceChange || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation || this.DisableFieldsWhenOpenFromProfile" />
+    <DOCERUModal @ref="docEruModal" CallbackAfterERUSelected="AfterSelectedERUHandler" />
+}
+
+<style>
+    .e-grid .e-table .e-rowcell.font-size-10px {
+        font-size: 10px !important;
+    }
+</style> 

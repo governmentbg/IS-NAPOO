@@ -1,0 +1,75 @@
+﻿@page "/ProviderProfile"
+
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ManageProfile")]
+
+@{
+    base.CheckUserActionPermission("ManageProfile", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@this.title</h6>
+            <div class="card">
+				@*
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @*<li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>* @
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+			</div>
+			*@
+                <div class="card-body">
+                    <SfGrid DataSource="this.applicationSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="this.applicationGrid" AllowSelection="false" AllowPaging="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" Width="10px">
+                                <Template>
+                                    @(this.GetRowNumber(this.applicationGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result)
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="@(this.isCPO ? "Редакция на профила на ЦПО" : "Редакция на профила на ЦИПО")" OpensOn="Hover">
+                                    <button @onclick="(async () => await this.EditProfileBtn(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-edit"></i></button>
+                                     </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="65"></GridColumn>
+                            <GridColumn Field="LocationCorrespondence.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ProviderAddressCorrespondence" HeaderText="Адрес за кореспонденция" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                            <GridColumn Field="PersonNameCorrespondence" HeaderText="Лице за контакт" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ProviderPhoneCorrespondence" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="ProviderEmailCorrespondence" HeaderText="E-mail" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="LicenceNumber" HeaderText="№ на лицензия" TextAlign="TextAlign.Left" Width="50">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        var licenceDate = ctx.LicenceDate.HasValue ? $"/{ctx.LicenceDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        var licenceInfo = $"{ctx.LicenceNumber}{licenceDate}";
+
+                                        @licenceInfo
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ApplicationModal @ref="applicationModal" CallbackAfterProfileSubmit="UpdateAfterProfileModalSubmitAsync" />

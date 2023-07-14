@@ -1,0 +1,307 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.Common
+@using System.IO
+
+@inject Microsoft.JSInterop.IJSRuntime JsRuntime
+@inject IExpertProfessionalDirectionService ExpertProfessionalDirectionService
+@inject IProfessionalDirectionService ProfessionalDirectionService
+@*@inject IKeyValueService KeyValueService*@
+@inject IDataSourceService DataSourceService
+@inject IApplicationUserService ApplicationUserService
+@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" Width="65%" Height="650px" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            @*@if (model.IdExpert > 0)
+                {
+                <label>
+                Редакция на експерт
+                </label>
+                }
+                else
+                {
+                <label>
+                Нов експерт
+                </label>
+                }*@
+            Данни за професионално направление за експерт <span style="font-size: 18px;color: white !important;">@person.FullName</span>
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="expertProfessionalDirectionForm">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Професионално направление:
+                                </label>
+                                <SfComboBox TValue="string" TItem="ProfessionalDirectionVM" AllowCustom="false" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="currentValue" DataSource="@professionalDirectionSource" AllowFiltering="true">
+                                    @*<ComboBoxEvents TValue="int" TItem="ProfessionalDirectionVM" Filtering="FilteringProfessionalDirection"></ComboBoxEvents>*@
+                                    <ComboBoxFieldSettings Text="DisplayNameAndCode" Value="DisplayNameAndCode" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Номер на заповед:
+                                </label>
+                                <div>
+                                    <InputText class="form-control" @bind-Value="model.OrderNumber" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Дата на утвърждаване:
+                                </label>
+                                <div>
+                                    <SfDatePicker CssClass="form-control customPad" TValue="DateTime?" @bind-Value="model.DateApprovalExternalExpert" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Статус:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="100px" CssClass="form-control customPad"
+                                            @bind-Value="model.IdStatus" DataSource="@kvStatusSource">
+                                    @*<ComboBoxEvents TValue="int" TItem="KeyValueVM" Filtering="FilteringKeyValueSex"></ComboBoxEvents> FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" *@
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+
+                                </SfComboBox>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Коментар при промяна на статуса:
+                                </label>
+                                <div>
+                                    <InputTextArea rows="3" class="form-control" @bind-Value="model.Comment" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDate</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDate</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-info" form="expertProfessionalDirectionForm">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+
+    public override bool IsContextModified => this.editContext.IsModified();
+
+
+
+    private string dialogClass = "";
+    private string CreationDate = "";
+    private string ModifyDate = "";
+    private bool isSubmitClicked = false;
+    ExpertProfessionalDirectionVM model = new ExpertProfessionalDirectionVM();
+
+
+    KeyValueVM kvExpertTypeFilterVM;
+
+    ProfessionalDirectionVM professionalDirectionFilterVM;
+
+    IEnumerable<KeyValueVM> kvExpertTypeSource;
+
+    IEnumerable<ProfessionalDirectionVM> professionalDirectionSource;
+
+    IEnumerable<KeyValueVM> kvStatusSource;
+
+    PersonVM person = new PersonVM();
+
+    ToastMsg toast;
+
+    string currentValue = "";
+
+    [Parameter]
+    public EventCallback<ExpertProfessionalDirectionVM> CallbackAfterSave_ExpProfDirection { get; set; }
+
+    public bool IsExpertProffesionalDirectionChange { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        this.editContext = new EditContext(this.model);
+    }
+
+
+    public async Task OpenModalProfessionalDirection(ExpertVM expert, ExpertProfessionalDirectionVM _model)
+    {
+        currentValue = "";
+        this.kvExpertTypeFilterVM = new KeyValueVM();
+        this.professionalDirectionFilterVM = new ProfessionalDirectionVM();
+        var kvExpertTypes = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ExpertType");
+
+        this.professionalDirectionSource = await this.ProfessionalDirectionService.GetAllProfessionalDirectionsAsync(this.professionalDirectionFilterVM);
+        var expertProfessionalDirections = await this.ExpertProfessionalDirectionService.GetExpertProfessionalDirectionsByExpertIdAsync(_model.IdExpert);
+        foreach (var item in expertProfessionalDirections)
+        {
+            if (item.IdProfessionalDirection != _model.IdProfessionalDirection)
+            {
+                professionalDirectionSource = professionalDirectionSource.Where(p => p.IdProfessionalDirection != item.IdProfessionalDirection).ToList();
+            }
+        }
+        
+        this.kvStatusSource = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ExpertStatus");
+        var kvExpertTypeSource = kvExpertTypes.Where(kv => kv.KeyValueIntCode == "ExternalExpert").FirstOrDefault();
+        person = expert.Person;
+        if (_model.IdExpertProfessionalDirection != 0)
+        {
+            this.model = await this.ExpertProfessionalDirectionService.GetExpertProfessionalDirectionByIdAsync(_model.IdExpertProfessionalDirection);
+            this.CreationDate = model.CreationDate.ToString("dd.MM.yyyy");
+            this.ModifyDate = model.ModifyDate.ToString("dd.MM.yyyy");
+            this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdCreateUser);
+            this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdModifyUser);
+        }
+        else
+        {
+            this.model = _model;
+            this.CreationDate = "";
+            this.ModifyDate = "";
+            this.model.CreatePersonName = "";
+            this.model.ModifyPersonName = "";
+        }
+        if (this.model.IdStatus == null || this.model.IdStatus == 0)
+        {
+            this.model.IdStatus = kvStatusSource.FirstOrDefault(s => s.KeyValueIntCode == "ActiveExpert").IdKeyValue;
+        }
+        if (_model.IdProfessionalDirection != 0)
+        {
+            currentValue = this.professionalDirectionSource.FirstOrDefault(p => p.IdProfessionalDirection == _model.IdProfessionalDirection).DisplayNameAndCode;
+        }
+        this.professionalDirectionSource = this.professionalDirectionSource.OrderBy(p => p.Code).ToList();
+        this.model.IdExpertType = kvExpertTypeSource.IdKeyValue;
+        this.editContext = new EditContext(this.model);
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+
+    private async Task<int> Save()
+    {
+
+        if (this.loading)
+        {
+            return 0;
+        }
+
+        try
+        {
+            this.loading = true;
+
+            bool hasPermission = await CheckUserActionPermission("ManageExpertsData", false);
+            if (!hasPermission) { return 0; }
+            this.SpinnerShow();
+
+            this.editContext = new EditContext(this.model);
+            this.editContext.EnableDataAnnotationsValidation();
+            if (currentValue != null)
+            {
+                this.model.IdProfessionalDirection = this.professionalDirectionSource.First(p => p.DisplayNameAndCode == currentValue).IdProfessionalDirection;
+            }
+            bool isValid = editContext.Validate();
+            this.isSubmitClicked = true;
+            var result = 0;
+            if (isValid)
+            {
+                result = await this.ExpertProfessionalDirectionService.UpdateExpertProfessionalDirectionAsync(this.model);
+                var expertProfessionalDirectionsById = await this.ExpertProfessionalDirectionService.GetExpertProfessionalDirectionsByExpertIdAsync(model.IdExpert);
+                if (this.model.IdExpertProfessionalDirection == 0)
+                {
+                    this.model.IdExpertProfessionalDirection = expertProfessionalDirectionsById.FirstOrDefault(p => p.IdProfessionalDirection == this.model.IdProfessionalDirection).IdExpertProfessionalDirection;
+                }
+                this.model = await this.ExpertProfessionalDirectionService.GetExpertProfessionalDirectionByIdAsync(this.model.IdExpertProfessionalDirection);
+
+
+                this.CreationDate = model.CreationDate.ToString("dd.MM.yyyy");
+                this.ModifyDate = model.ModifyDate.ToString("dd.MM.yyyy");
+                this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdCreateUser);
+                this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdModifyUser);
+                this.ShowSuccessAsync("Записът e успешeн!");
+            }
+
+
+            if (result > 0)
+            {
+                this.StateHasChanged();
+                await this.CallbackAfterSave_ExpProfDirection.InvokeAsync(this.model);
+            }
+
+
+            this.isSubmitClicked = false;
+            
+            return result;
+        }
+        finally
+        {
+            this.SpinnerHide();
+            this.loading = false;
+        }
+    }
+
+    private async void FilteringKeyValueExpertType(FilteringEventArgs args)
+    {
+        //Използваме кода да вземем от базата филтрираните редове
+        this.kvExpertTypeFilterVM.Name = args.Text;
+        this.kvExpertTypeSource = new List<KeyValueVM>();
+        //this.kvExpertTypeSource = await this.KeyValueService.GetAllAsync(this.kvExpertTypeFilterVM);
+        this.StateHasChanged();
+    }
+
+    private async void FilteringProfessionalDirection(FilteringEventArgs args)
+    {
+        //Използваме кода да вземем от базата филтрираните редове
+        this.professionalDirectionFilterVM.DisplayNameFilter = args.Text;
+        this.professionalDirectionSource = new List<ProfessionalDirectionVM>();
+        this.professionalDirectionSource = await this.ProfessionalDirectionService.GetAllProfessionalDirectionsAsync(this.professionalDirectionFilterVM);
+        this.StateHasChanged();
+    }
+
+}

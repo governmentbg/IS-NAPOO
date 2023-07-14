@@ -1,0 +1,150 @@
+﻿@page "/CPOFollowUpControl"
+@attribute [Authorize(Policy = "ShowFollowUpControlList")]
+
+@using ISNAPOO.Core.Contracts.Control
+@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.WebSystem.Pages.Control;
+
+@inject IControlService controlService
+
+@inherits BlazorBaseComponent
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Последващ контрол</h6>
+            <div class="card">
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@controlsSource" AllowSorting="true" EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true"
+                            @ref="sfGrid" AllowPaging=true AllowReordering=true AllowTextWrap="true"
+                            AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport"})">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents TValue="FollowUpControlVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="ControlStartDate" Direction="SortDirection.Descending" />
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as FollowUpControlVM).IdFollowUpControl).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        if(CPOorCIPO == "ЦПО")
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изпращане на доклад на ЦПО за изпълнени препоръки от ПК." OpensOn="Hover">
+                                                <button @onclick="(() => SelectedRow(ctx))" class="btn-row"><i class="fa fa-clipboard"></i></button>
+                                            </SfTooltip>
+                                        }
+                                        else
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изпращане на доклад на ЦИПО за изпълнени препоръки от ПК." OpensOn="Hover">
+                                                <button @onclick="(() => SelectedRow(ctx))" class="btn-row"><i class="fa fa-clipboard"></i></button>
+                                            </SfTooltip>
+                                
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdFollowUpControl" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Visible=false></GridColumn>
+                            @if(CPOorCIPO == "ЦПО")
+                            {
+                                <GridColumn Field="CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            }
+                            else
+                            {
+                                <GridColumn Field="CandidateProvider.CIPONameOwnerGrid" HeaderText="ЦИПО" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            }
+                            <GridColumn Field="FollowUpControlTypeName" HeaderText="Вид на последващия контрол" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ControlTypeName" HeaderText="Вид на проверката" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ControlStartDate" HeaderText="Срок за проверката от" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        var date = ctx.ControlStartDate.HasValue ? $"{ctx.ControlStartDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ControlEndDate" HeaderText="Срок за проверката до" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        var date = ctx.ControlEndDate.HasValue ? $"{ctx.ControlEndDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="TermImplRecommendation" HeaderText="Срок за изпълнение на препоръки" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        var date = ctx.TermImplRecommendation.HasValue ? $"{ctx.TermImplRecommendation.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="8%">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as FollowUpControlVM;
+                                            if (ctx.IdStatus != 0)
+                                            {
+                                                switch (ctx.StatusName)
+                                                {
+                                                    case "Текуща":
+                                                        <label class="form-label-status label label-success">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Предстояща":
+                                                        <label class="form-label-status label label-warning">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Приключила":
+                                                        <label class="form-label-status label label-danger">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Анулирана":
+                                                        <label class="form-label-status label label-danger">@ctx.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="25">
+                                <Template Context="docContext">
+
+                                    @{
+                                        var entry = (docContext as FollowUpControlVM);
+                                        var document = entry.FollowUpControlDocuments.FirstOrDefault(x => x.IdDocumentType == kvDocumentType.IdKeyValue);
+                                        if (document is not null && !string.IsNullOrEmpty(document.UploadedFileName))
+                                        {
+                                            var files = document.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                            foreach (var item in files)
+                                            {
+                                                <a href="#" @onclick="(() => OnDownloadClick(item, document))">@item</a>
+                                                <br />
+                                            }
+                                        }
+                                        else if (document is not null)
+                                        {
+                                            @document.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<FollowUpControlUpdateDocument @ref="followUpControlUpdateDocument" CallBackAfterUploadFile="UpdateAfterSave"></FollowUpControlUpdateDocument>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

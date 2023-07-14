@@ -1,0 +1,99 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Дата на подаване: </label>
+                            <SfDatePicker TValue="DateTime?" @bind-Value="this.SelfAssessmentReportVM.FilingDate" Enabled="false" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Статус на доклада: </label>
+                            <SfTextBox @bind-Value="this.SelfAssessmentReportVM.Status" Enabled="false" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group required">
+                            <label class="control-label">Година на доклада: </label>
+                            <SfNumericTextBox TValue="int" @bind-Value="this.SelfAssessmentReportVM.Year" Enabled="false" Format="##.##" ShowSpinButton="false" />
+                        </div>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</EditForm>
+
+<SfGrid DataSource="this.SelfAssessmentReportVM.SelfAssessmentReportStatuses" EnableAltRow="true" EnableHover="false" AllowTextWrap="true" @ref="statusesGrid">
+
+    <GridColumns>
+        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8%">
+            <Template>
+                @GetRowNumber(statusesGrid, (context as SelfAssessmentReportStatusVM).IdSelfAssessmentReportStatus).Result
+            </Template>
+        </GridColumn>
+        <GridColumn Field="IdSelfAssessmentReportStatus" IsPrimaryKey="true" Visible="false"></GridColumn>
+        <GridColumn Field="PersonName" HeaderText="Потребител" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+        <GridColumn Field="StatusDate" HeaderText="Дата на промяна" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+        <GridColumn Field="StatusValue" HeaderText="Статус" TextAlign="TextAlign.Center" Width="20%">
+            <Template>
+                <div class="text-center">
+                    @{
+                        var doc = context as SelfAssessmentReportStatusVM;
+                        switch (doc.StatusValueIntCode)
+                        {
+                            case "Created":
+                                <label class="form-label-status label label-warning">@doc.StatusValue</label>
+                                break;
+                            case "Submitted":
+                                <label class="form-label-status label label-primary">@doc.StatusValue</label>
+                                break;
+                            case "Returned":
+                                <label class="form-label-status label label-danger">@doc.StatusValue</label>
+                                break;
+                            case "Approved":
+                                <label class="form-label-status label label-success">@doc.StatusValue</label>
+                                break;
+                        }
+                    }
+                </div>
+            </Template>
+        </GridColumn>
+        
+        <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="100%"></GridColumn>
+
+        <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="15%">
+            <Template Context="docContext">
+                @{
+                    var entry = (docContext as SelfAssessmentReportStatusVM);
+
+                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                    {
+                        if (entry.FileName is not null)
+                        {
+                            var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                            foreach (var item in files)
+                            {
+                                <a href="#" @onclick="(() => OnDownloadClick(entry))">@item</a>
+                                <br />
+                            }
+                        }
+                    }
+                    else
+                    {
+                        @entry.FileName
+                    }
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>

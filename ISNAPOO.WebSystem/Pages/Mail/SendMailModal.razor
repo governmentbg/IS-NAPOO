@@ -1,0 +1,83 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" ZIndex="3000" Width="900px" EnableResize=true AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Изпращане на E-mail</Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="SendMails" id="submitFormSendMailModal">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Заглавие:
+                                </label>
+                                <InputText class="form-control" @bind-Value="sendMailModel.Title" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                        <div class="form-group required">
+                        <label class="control-label">
+                            Съдържание:
+                        </label>
+                            <InputTextArea class="form-control" @bind-Value="sendMailModel.body">
+                            </InputTextArea>
+                        </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (HasUploadedFile)
+                            {
+                                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@sendMailModel.FileName</a></span>
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                        <div class="col-sm-4" style="text-align: right;">
+                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                            <button type="button" class="btn-row" disabled="@(!HasUploadedFile)" @onclick="OnRemoveClick"><i class="fa fa-trash-o"></i></button>
+                              </SfTooltip>
+                                </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader AutoUpload="false" AllowMultiple="false">
+                                    <UploaderEvents ValueChange="OnChange"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                  
+                            <button type="submit" class="btn btn-info" form="submitFormSendMailModal">Изпрати</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+

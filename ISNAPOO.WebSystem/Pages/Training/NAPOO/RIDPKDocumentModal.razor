@@ -1,0 +1,342 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="98%" Height="98%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card" style="margin-bottom: 0px;">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                </nav>
+                            </div>
+                            <div class="row" style="padding: 0 18px 0 18px;">
+                                <div class="col-sm-6">
+                                    <p style="color: #01A9AC;">
+                                        <div>
+                                            @if (this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)
+                                            {
+                                                <div>
+                                                    <span>Курс: <span class="text-gray">@(this.ridpkVM.Course.CourseName)</span></span>
+                                                </div>
+                                            }
+                                            <div>
+                                                <span>Рамкова програма: <span class="text-gray">@(this.ridpkVM.FrameworkProgram.Name)</span></span>
+                                            </div>
+                                            @if (this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)
+                                            {
+                                                <div>
+                                                    <span>
+                                                        Вид на курса: <span class="text-gray">
+                                                            @(
+                                                                this.ridpkVM.IdClientCourseDocument != 0 ? "Професионално обучение за придобиване на СПК" : "Валидиране на степен на професионална квалификация"
+                                                                )
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    <span>
+                                                        Вид на курса: <span class="text-gray">
+                                                            @(
+                                                                this.ridpkVM.IdValidationClientDocument != 0 ? "Валидиране на степен на професионална квалификация" : "Валидиране на част от професия"
+                                                                )
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            }
+                                            <div>
+                                                <span>СПК: <span class="text-gray">@(this.ridpkVM.Speciality.VQS_Name)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>Специалност: <span class="text-gray">@this.ridpkVM.Speciality.CodeAndName</span></span>
+                                            </div>
+                                            @if (this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)
+                                            {
+                                                <div>
+                                                    <span>Период на курса: <span class="text-gray">@this.ridpkVM.Course.StartDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г. - @this.ridpkVM.Course.EndDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г.</span></span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    <span>Период на валидирането: <span class="text-gray">@this.ridpkVM.ValidationClient.StartDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г. - @this.ridpkVM.ValidationClient.EndDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г.</span></span>
+                                                </div>
+                                            }
+                                            @if (this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)
+                                            {
+                                                <div>
+                                                    <span>Форма на обучение: <span class="text-gray">@this.ridpkVM.Course.FormEducationName</span></span>
+                                                </div>
+                                            }
+                                            @if (this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)
+                                            {
+                                                <div>
+                                                    <span>Дата за държавен изпит - част по теория: <span class="text-gray">@this.ridpkVM.Course.ExamTheoryDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г.</span></span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                if (this.ridpkVM.ValidationClient.ExamTheoryDate.HasValue)
+                                                {
+                                                    <div>
+                                                        <span>Дата за държавен изпит - част по теория: <span class="text-gray">@this.ridpkVM.ValidationClient.ExamTheoryDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г.</span></span>
+                                                    </div>
+                                                }
+                                            }
+                                            @if (this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)
+                                            {
+                                                <div>
+                                                    <span>Дата за държавен изпит - част по практика: <span class="text-gray">@this.ridpkVM.Course.ExamPracticeDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г.</span></span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                if (this.ridpkVM.ValidationClient.ExamPracticeDate.HasValue)
+                                                {
+                                                    <div>
+                                                        <span>Дата за държавен изпит - част по практика: <span class="text-gray">@this.ridpkVM.ValidationClient.ExamPracticeDate!.Value.ToString(GlobalConstants.DATE_FORMAT) г.</span></span>
+                                                    </div>
+                                                }
+                                            }
+                                            <div>
+                                                <span>Учебен план: <button type="button" class="btn-row" @onclick="(async () => await this.OpenCurriculumFilesModalBtn())"><i class="fa fa-file-o" style="font-size: 18px"></i></button></span>
+                                            </div>
+                                        </div>
+                                    </p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <table class="ridpk-table" style="width: 100%;">
+                                        <tr class="ridpk-table">
+                                            <th class="ridpk-table" style="padding: 5px;"></th>
+                                            <th class="ridpk-table" style="padding: 5px;">Изисквания на рамкова програма</th>
+                                            <th class="ridpk-table" style="padding: 5px;">По учебен план</th>
+                                        </tr>
+                                        <tr class="ridpk-table">
+                                            <td class="ridpk-table" style="padding: 5px;">A Задължителни учебни часове</td>
+                                            <td class="ridpk-table cell-orange text-right" style="padding: 5px;">@this.ridpkVM.FrameworkProgram.SectionА</td>
+                                            <td class="ridpk-table cell-bluegreen text-right" style="padding: 5px;">@this.compulsoryHours</td>
+                                        </tr>
+                                        <tr class="ridpk-table">
+                                            <td class="ridpk-table" style="padding: 5px;">Б Избираеми учебни часове</td>
+                                            <td class="ridpk-table cell-orange text-right" style="padding: 5px;">@this.ridpkVM.FrameworkProgram.SectionB</td>
+                                            <td class="ridpk-table cell-bluegreen text-right" style="padding: 5px;">@this.nonCompulsoryHours</td>
+                                        </tr>
+                                        <tr class="ridpk-table">
+                                            <td class="ridpk-table" style="padding: 5px;">Продължителност на обучението</td>
+                                            <td class="ridpk-table cell-orange text-right" style="padding: 5px;">@this.ridpkVM.FrameworkProgram.TrainingPeriodName</td>
+                                            <td class="ridpk-table cell-bluegreen text-right" style="padding: 5px;">@this.durationMonths</td>
+                                        </tr>
+                                        <tr class="ridpk-table">
+                                            <td class="ridpk-table" style="padding: 5px;">% часове обща професионална подготовка</td>
+                                            <td class="ridpk-table cell-orange text-right" style="padding: 5px;">@this.ridpkVM.FrameworkProgram.SectionА1%</td>
+                                            <td class="ridpk-table cell-bluegreen text-right" style="padding: 5px;">@this.a1Percentage.ToString("f2")%</td>
+                                        </tr>
+                                        <tr class="ridpk-table">
+                                            <td class="ridpk-table" style="padding: 5px;">% на учебните часове за практическо обучение</td>
+                                            <td class="ridpk-table cell-orange text-right" style="padding: 5px;">@this.ridpkVM.FrameworkProgram.Practice%</td>
+                                            <td class="ridpk-table cell-bluegreen text-right" style="padding: 5px;">@this.a2a3PracticePercentage.ToString("f2")%</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    <ul class="navbar-nav">
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="@this.toolTipText" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="(async () => await this.OpenCourseBtn())"><i class="fa fa-search-plus"></i>@this.btnText</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Content="Одобряване на подадени документи от ЦПО за ПК" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="ApproveBtn">Публикувай в регистъра</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Content="Връщане за корекция на подадени документи от ЦПО за ПК" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ReturnBtn">Върни за корекция</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Content="Отказ за публикуване на подадени документи от ЦПО за ПК" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="RejectBtn">Откажи публикуване</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid DataSource="documentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                        AllowTextWrap="true" @ref="documentsGrid" AllowSelection="true" AllowPaging="true"
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridEvents TValue="RIDPKDocumentVM" OnToolbarClick="ToolbarClick" />
+                                    <GridSelectionSettings CheckboxOnly="true" />
+                                    <GridColumns>
+                                        <GridColumn Type="ColumnType.CheckBox" Width="8%"></GridColumn>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8%">
+                                            <Template>
+                                                @GetRowNumber(documentsGrid, (context as RIDPKDocumentVM).IdEntity).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdEntity" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="DocumentRegNo" HeaderText="Регистрационен номер" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                        <GridColumn Field="DocumentDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="35%"></GridColumn>
+                                        <GridColumn Field="DocumentSerialNumber" HeaderText="Фабричен номер" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                        <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="60%"></GridColumn>
+                                        <GridColumn Field="ClientFirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                        <GridColumn Field="ClientSecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                        <GridColumn Field="ClientFamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                        <GridColumn Field="ClientDocuments" HeaderText="Документи на курсиста" TextAlign="TextAlign.Center" Width="40%">
+                                            <Template>
+                                                @{
+                                                    var client = context as RIDPKDocumentVM;
+                                                    foreach (var kvp in client.ClientDocuments)
+                                                    {
+                                                        var idDoc = kvp.Key;
+                                                        var docData = kvp.Value;
+                                                        if (docData.Count > 1)
+                                                        {
+                                                            <div style="line-height: 14px;">
+                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="@docData[1]" OpensOn="Hover">
+                                                                    <a href="#" @onclick="(async () => await this.DownloadClientUploadedDocumentAsync(idDoc))">@(docData[0])</a>
+                                                                </SfTooltip>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div style="line-height: 14px;">
+                                                                <a href="#" @onclick="(async () => await this.DownloadClientUploadedDocumentAsync(idDoc))">@(docData[0])</a>
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="CourseProtocolsWithGrades" HeaderText="Оценки" TextAlign="TextAlign.Center" Width="40%">
+                                            <Template>
+                                                @{
+                                                    var client = context as RIDPKDocumentVM;
+                                                    if (client.CourseProtocolsWithGrades.Any())
+                                                    {
+                                                        foreach (var kvp in client.CourseProtocolsWithGrades)
+                                                        {
+                                                            var idProtocol = kvp.Key;
+                                                            var protocolData = kvp.Value.Split(" - ", StringSplitOptions.RemoveEmptyEntries);
+                                                            if (protocolData.Count() > 1)
+                                                            {
+                                                                var protocolName = protocolData[0];
+                                                                var grade = protocolData[1];
+
+                                                                <div style="line-height: 14px;">
+                                                                    <a href="#" @onclick="(async () => await this.DownloadProtocolUploadedDocumentAsync(idProtocol))">@(protocolName)</a>
+
+                                                                    <span> - @grade</span>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                var protocolName = protocolData[0];
+                                                                <div style="line-height: 14px;">
+                                                                    <a href="#" @onclick="(async () => await this.DownloadProtocolUploadedDocumentAsync(idProtocol))">@(protocolName)</a>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        var theoryGrade = client.GradesFromOldIS[0];
+                                                        if (!string.IsNullOrEmpty(theoryGrade))
+                                                        {
+                                                            <div style="line-height: 14px;">
+                                                                <span>@theoryGrade</span>
+                                                            </div>
+                                                        }
+
+                                                        var practiceGrade = client.GradesFromOldIS[1];
+                                                        if (!string.IsNullOrEmpty(practiceGrade))
+                                                        {
+                                                            <div style="line-height: 14px;">
+                                                                <span>@practiceGrade</span>
+                                                            </div>
+                                                        }
+
+                                                        var finalGrade = client.GradesFromOldIS[2];
+                                                        if (!string.IsNullOrEmpty(finalGrade))
+                                                        {
+                                                            <div style="line-height: 14px;">
+                                                                <span>@finalGrade</span>
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn TextAlign="TextAlign.Center" Width="10%">
+                                            <Template>
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с документа" OpensOn="Hover">
+                                                    <button type="button" class="btn-row" @onclick="(async () => await this.OpenFileWithDocumentBtn(context as RIDPKDocumentVM))"><i class="fa fa-file-o"></i></button>
+                                                </SfTooltip>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn TextAlign="TextAlign.Center" Width="10%">
+                                            <Template>
+                                                @{
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на статуса" OpensOn="Hover">
+                                                        <button type="button" class="btn-row" @onclick="(async () => await this.OpenStatusHistoryBtn(context as RIDPKDocumentVM))"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                                    </SfTooltip>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SubmissionCommentModal @ref="submissionCommentModal" CallbackAfterSubmit="UpdateDocumentsDataAfterDocumentSubmissionAsync" />
+<DocumentStatusModal @ref="documentStatusModal" />
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />
+<TrainingValidationClientModal @ref="validationModal" PageType="this.kvSPKCourseValue.IdKeyValue" />
+<CurrentCourseTrainingCurriculumUploadedFilesModal @ref="uploadedFilesModal" />
+

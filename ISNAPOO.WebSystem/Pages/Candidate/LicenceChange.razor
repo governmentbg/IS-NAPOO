@@ -1,0 +1,48 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="changesSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="changesGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="CandidateProviderLicenceChangeVM" OnToolbarClick="ToolbarClick" />
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="4%">
+                                <Template>
+                                    @GetRowNumber(changesGrid, (context as CandidateProviderLicenceChangeVM).IdCandidateProviderLicenceChange).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%" HeaderText=" " TextAlign="TextAlign.Center">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед на документ" OpensOn="Hover">
+                                        <button class="btn-row" @onclick="(async () => await this.GetLicenceDocumentBtn(context as CandidateProviderLicenceChangeVM))"><i class="fa fa-file-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidateProviderLicenceChange" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="LicenceStatusName" HeaderText="Статус на лицензията" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="NumberCommand" HeaderText="Заповед" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="ChangeDateAsStr" HeaderText="Дата" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="LicenceStatusDetailName" HeaderText="Вид на промяната" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="Notes" HeaderText="Бележки" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="Archive" HeaderText="Съхранение на архива" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,120 @@
+﻿@page "/CPODocumentDestructionList"
+@attribute [Authorize(Policy = "ShowCPODocumentDestructionList")]
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Отчет на документите с фабрична номерация</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @if (!this.isInRoleNAPOOExpert)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block float-none">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewDocumentDestructionBtn">Нов</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="requestReportsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="requestReportsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel">
+                            <GridFilterColumns>
+                                <GridFilterColumn Field="Year" MatchCase="true" Operator="Operator.Equal" Value="@((DateTime.Now.Year - 1).ToString())"></GridFilterColumn>
+                            </GridFilterColumns>
+                        </GridFilterSettings>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="DestructionDate" Direction="SortDirection.Descending" />
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="RequestReportVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="7">
+                                <Template>
+                                    @GetRowNumber(requestReportsGrid, (context as RequestReportVM).IdRequestReport).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="6">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => EditDocumentDestructionBtn(context as RequestReportVM))"><i class="fa fa-edit"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="6">
+                                <Template>
+
+                                    @{
+                                        var reqReport = context as RequestReportVM;
+                                        if (reqReport.IdStatus == this.idCreatedKv)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button @onclick="(async () => await this.DeleteRequestReport(reqReport))" class="btn-row"><i class="fa fa-trash-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdRequestReport" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="Year" HeaderText="Година" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="DestructionDate" HeaderText="Дата на отчета" TextAlign="TextAlign.Left" Width="30" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as RequestReportVM;
+                                        var date = ctx.DestructionDate.HasValue ? $"{ctx.DestructionDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Center" Width="30">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as RequestReportVM;
+                                            if (ctx.IdStatus != 0)
+                                            {
+                                                switch (ctx.StatusName)
+                                                {
+                                                    case "Създаден":
+                                                        <label class="form-label-status label label-warning" style="width: 60%;">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Подаден":
+                                                        <label class="form-label-status label label-primary" style="width: 60%;">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Одобрен":
+                                                        <label class="form-label-status label label-success" style="width: 60%;">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Върнат за корекция":
+                                                        <label class="form-label-status label label-danger" style="width: 60%;">@ctx.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ToastMsg @ref="toast" />
+<CPODocumentDestructionModal @ref="cpoDocumentDestructionModal" CallbackAfterSubmit="UpdateAfterModalSubmit" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

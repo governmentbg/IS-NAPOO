@@ -1,0 +1,48 @@
+﻿@page "/RegisterStateExamination"
+@*@attribute [Authorize(Policy = "ShowStateExaminationList")]*@
+@using ISNAPOO.Core.ViewModels.Register;
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Регистър на датите за провеждане на държавни изпити от ЦПО</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="coursesSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridEvents OnToolbarClick="ToolbarClick" TValue="CourseVM"></GridEvents>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn Field="IdCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Width="3%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button @onclick="(() => openModal(context as CourseVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProviderLicenseNumber" HeaderText="Лицензия" Width="14%"></GridColumn>
+                            <GridColumn Field="CandidateProviderName" HeaderText="ЦПО" Width="30%"></GridColumn>
+                            <GridColumn Field="CourseName" HeaderText="Курс" Width="30%"></GridColumn>
+                            <GridColumn Field="CourseTypeByDate" HeaderText="Вид" Width="10%"></GridColumn>
+                            <GridColumn Field="combined_date_string" HeaderText="Дата на изпит" Width="13%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />
+<StateExaminationInfoFilterList @ref="filterModal" CallbackAfterSubmitStateExamInfoList="Filter"></StateExaminationInfoFilterList>

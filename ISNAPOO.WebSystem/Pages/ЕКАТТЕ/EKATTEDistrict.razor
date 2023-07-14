@@ -1,0 +1,66 @@
+﻿@inject IDistrictService DistrictService
+
+<EditForm Model="districtVM" OnValidSubmit="SubmitHandler">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label>Име на областта:</label>
+        <InputText class="form-control" @bind-Value="districtVM.DistrictName" />
+    </div>
+    <div class="form-group">
+        <label>Код на областта:</label>
+        <InputText class="form-control" @bind-Value="districtVM.DistrictCode" />
+    </div>
+    <br />
+    <div class="text-center">
+        <SfButton Content="Запази" IsPrimary="true" Type="submit"></SfButton>
+    </div>
+</EditForm>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    ToastMsg toast;
+
+    DistrictVM districtVM = new DistrictVM();
+
+    [Parameter]
+    public int DistrictId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (this.DistrictId != 0)
+        {
+            this.districtVM = await this.DistrictService.GetDistrictByIdAsync(this.DistrictId);
+        }
+    }
+
+    private async Task SubmitHandler()
+    {
+        int result;
+
+        if (this.DistrictId != 0)
+        {
+            result = await this.DistrictService.UpdateDistrictAsync(this.districtVM);
+        }
+        else
+        {
+            result = await this.DistrictService.CreateDistrictAsync(this.districtVM);
+        }
+
+        if (result == 1)
+        {
+            toast.sfSuccessToast.Content = "Записът e успешeн!";
+            await toast.sfSuccessToast.ShowAsync();
+            await this.OnSubmit.InvokeAsync();
+        }
+        else
+        {
+            toast.sfErrorToast.Content = "Грешка при запис в базата!";
+            await toast.sfErrorToast.ShowAsync();
+        }
+    }
+}

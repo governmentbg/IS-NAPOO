@@ -1,0 +1,176 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="97%" Height="97%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" @bind-Visible="this.isVisible" ZIndex="2001">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @((MarkupString)this.title)
+        </Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card" style="margin-bottom: 0px;">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    @*<ul class="navbar-nav">
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Създаване на нова програма за обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewProgramBtn">Нова програма</button>
+                                    </SfTooltip>
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                    </li>
+                                    </ul>*@
+                                </nav>
+                            </div>
+                            <div class="row" style="padding-left: 18px;">
+                                <div class="col-sm-8">
+                                    <p style="color: #01A9AC;">
+                                        <div>
+                                            <div>
+                                                <span>Минимален брой задължителни учебни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionА == 0 ? "" : this.frameworkProgramVM.SectionА)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>Брой избираеми учебни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionB == 0 ? "" : this.frameworkProgramVM.SectionB)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>Входящо минимално образователно равнище: <span class="text-gray">@this.frameworkProgramVM.MinimumLevelEducationName</span></span>
+                                            </div>
+                                            <div>
+                                                <span>Входящо минимално квалификационно равнище: <span class="text-gray">@this.frameworkProgramVM.MinimumLevelQualification</span></span>
+                                            </div>
+                                            <div>
+                                                <span>Продължителност на обучението: <span class="text-gray">@this.frameworkProgramVM.TrainingPeriodName</span></span>
+                                            </div>
+                                            <div style="line-height: 15px; margin-bottom: 3px;">
+                                                <span>Максимален % часове обща професионална подготовка спрямо общия брой задължителни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionА1 == 0 ? "" : this.frameworkProgramVM.SectionА1)</span></span>
+                                            </div>
+                                            <div style="line-height: 15px;">
+                                                <span>Минимален % на учебните часове за практическо обучение спрямо общия брой часове за отраслова и специфична професионална подготовка: <span class="text-gray">@(this.frameworkProgramVM.Practice == 0 ? "" : this.frameworkProgramVM.Practice)</span></span>
+                                            </div>
+                                        </div>
+                                    </p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <p style="color: #01A9AC;">
+                                        <div>
+                                            <div>
+                                                <span>Общо <span class="text-gray">@(this.totalHours == 0 ? "" : this.totalHours)</span> @(this.totalHours == 1 ? "час" : "часа"), от тях:</span>
+                                            </div>
+                                            <div>
+                                                <span>- A Задължителни учебни часове: <span class="text-gray">@(this.compulsoryHours == 0 ? "" : this.compulsoryHours)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>- Б Избираеми учебни часове: <span class="text-gray">@(this.nonCompulsoryHours == 0 ? "" : this.nonCompulsoryHours)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>- A1 Обща професионална подготовка: <span class="text-gray">@(this.generalProfessionTrainingHours == 0 ? "" : this.generalProfessionTrainingHours)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>- A2 Отраслова професионална подготовка: <span class="text-gray">@(this.industryProfessionTrainingHours == 0 ? "" : this.industryProfessionTrainingHours)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>- A3 Специфична професионална подготовка: <span class="text-gray">@(this.specificProfessionTrainingHours == 0 ? "" : this.specificProfessionTrainingHours)</span></span>
+                                            </div>
+                                            <div>
+                                                <span>- Б Разширена професионална подготовка: <span class="text-gray">@(this.extendedProfessionTrainingHours == 0 ? "" : this.extendedProfessionTrainingHours)</span></span>
+                                            </div>
+                                        </div>
+                                    </p>
+                                    <p style="color: #01A9AC;">
+                                        <div>
+                                            <div>
+                                                <span>Брой часове по теория: <span class="text-gray">@(this.totalTheoryHours != 0 ? this.totalTheoryHours : "")</span></span>
+                                            </div>
+                                            <div>
+                                                <span>Брой часове по практика: <span class="text-gray">@(this.totalPracticeHours != 0 ? this.totalPracticeHours : "")</span></span>
+                                            </div>
+                                        </div>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid @ref="this.curriculumsGrid" DataSource="addedCurriculums" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true"
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true" AllowPaging="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                    <GridEditSettings AllowDeleting="true" />
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Field="IdCandidateCurriculum" HeaderText="" TextAlign="TextAlign.Center" Width="15" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" AllowFiltering="false">
+                                            <Template Context="idContext">
+                                                @if ((idContext as CandidateCurriculumVM).IdCandidateCurriculum != 0)
+                                                {
+                                                    @GetRowNumber(curriculumsGrid, (idContext as CandidateCurriculumVM).IdCandidateCurriculum).Result
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdCandidateCurriculum" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="ProfessionalTraining" HeaderText="Р" TextAlign="TextAlign.Center" Width="15"></GridColumn>
+                                        <GridColumn Field="Subject" HeaderText="Предмет" TextAlign="TextAlign.Left" Width="57"></GridColumn>
+                                        <GridColumn Field="Topic" HeaderText="Тема" TextAlign="TextAlign.Left" Width="146"></GridColumn>
+                                        <GridColumn Field="Theory" HeaderText="Т" TextAlign="TextAlign.Center" Width="30">
+                                            <Template>
+                                                @{
+                                                    var ctx = context as CandidateCurriculumVM;
+                                                    <div class="text-right" style="font-size: 20px !important;">
+                                                        @ctx.Theory
+                                                    </div>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="Practice" HeaderText="П" TextAlign="TextAlign.Center" Width="30">
+                                            <Template>
+                                                @{
+                                                    var ctx = context as CandidateCurriculumVM;
+                                                    <div class="text-right" style="font-size: 20px !important;">
+                                                        @ctx.Practice
+                                                    </div>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="ERUsForExport" HeaderText="ЕРУ" TextAlign="TextAlign.Center" Width="28">
+                                            <Template Context="candidateCurriculumCtx">
+                                                @{
+                                                    var candidateCurriculum = candidateCurriculumCtx as CandidateCurriculumVM;
+
+                                                    foreach (var eru in candidateCurriculum.SelectedERUs.OrderBy(x => x.ERUIntCodeSplit))
+                                                    {
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="@eru.Name" OpensOn="Hover">
+                                                            @(eru.Code)
+                                                        </SfTooltip>
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                    <GridEvents TValue="CandidateCurriculumVM" 
+                                                DataBound="CalculateCurriculumHours" OnToolbarClick="ToolbarClick" QueryCellInfo="CustomizeCellHours" />
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+

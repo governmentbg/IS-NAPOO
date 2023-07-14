@@ -1,0 +1,481 @@
+﻿@using ISNAPOO.Core.Contracts.Common
+@using ISNAPOO.Core.ViewModels.Common
+@using Syncfusion.Blazor.Spinner
+
+@inject IDataSourceService DataSourceService
+@inject IKeyValueService KeyValueService
+@inject ITemplateDocumentService TemplateDocumentService
+@inject IApplicationUserService ApplicationUserService
+@inject Microsoft.JSInterop.IJSRuntime JsRuntime
+@inherits BlazorBaseComponent
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="880px" Height="700px" EnableResize=true AllowDragging="true"
+          IsModal="true" CloseOnEscape="false" ShowCloseIcon="true" AllowPrerender="true"
+          CssClass="@dialogClass" ZIndex="2000" @bind-Visible="@isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Данни за шаблон на документ</Header>
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.validationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="saveForm">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Наименование на шаблона:
+                                </label>
+                                <InputText class="form-control" @bind-Value="document.TemplateName" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Модул:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            Placeholder="Изберете модул" DataSource="modules" @bind-Value="document.IdModule">
+                                    <ComboBoxEvents TValue="int" TItem="KeyValueVM" OnValueSelect="@SelectApplicationsByModule" />
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Тип на приложението:
+                                </label>
+                                <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            Placeholder="Изберете тип на приложението" DataSource="applicationTypes" Enabled="isModuleSet || document.idTemplateDocument > 0" AllowFiltering="true" @bind-Value="document.IdApplicationType" @ref="cbxApplicationType">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Описание:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="document.TemplateDescription" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Статус на валидност:
+                                </label>
+                                <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            Placeholder="Изберете статус" DataSource="statuses" AllowFiltering="true" @bind-Value="document.IdStatus">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Дата на валидност от:
+                                </label>
+                                <SfDatePicker Enabled="(this.document.IdStatus == this.kvActiveStatus.IdKeyValue)" @bind-Value="this.document.DateFrom" Format="dd.MM.yyyy" TValue="DateTime?" />
+
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Дата на валидност до:
+                                </label>
+                                <SfDatePicker Enabled="(this.document.IdStatus == this.kvActiveStatus.IdKeyValue)" @bind-Value="this.document.DateTo" Format="dd.MM.yyyy" TValue="DateTime?" />
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label>
+                                    Прикачен файл:
+                                </label>
+                                <div class="row e-upload" style="margin-left:0px">
+                                    <div class="col-sm-8">
+                                        @if (document.HasUploadedFile)
+                                        {
+                                            <span class="align-text-bottom">
+                                                <a @onclick="OnDownloadClick" href="#" class="link-primary">
+                                                    @document.FileName
+                                                </a>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <label>
+                                                Няма прикачен файл
+                                            </label>
+                                        }
+                                    </div>
+                                    <div class="col-sm-4" style="text-align: right;">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" disabled="@(!document.HasUploadedFile)" @onclick="OnRemoveClick" class="btn-row"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </div>
+                                </div>
+                                <SfUploader AutoUpload="false" AllowMultiple="false" Enabled="@(document.idTemplateDocument > 0)" AllowedExtensions=".doc,.docx">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @document.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @document.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-info" form="saveForm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@*@if (this.showDocumentDeleteConfirmDialog)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(this.showDocumentDeleteConfirmDialog ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Внимание!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Сигурни ли сте, че искате да изтриете прикачения файл?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="@(async () => { this.documentDeleteConfirmed = true; await OnRemoveClick(); })">Да</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="@(()=> this.showDocumentDeleteConfirmDialog = false)">Отказ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}*@
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+
+
+    [Parameter]
+    public EventCallback CallbackAfterSubmit { get; set; }
+
+    private SfDialog sfDialog = new SfDialog();
+
+    TemplateDocumentVM document = new TemplateDocumentVM();
+    TemplateDocumentVM documentToDelete = new TemplateDocumentVM();
+
+    string description;
+    ToastMsg toast;
+    SfSpinner spinner = new SfSpinner();
+    TemplateDocumentVM fileToDelete = new TemplateDocumentVM();
+    UploadChangeEventArgs fileToReplace = new UploadChangeEventArgs();
+    private string CreationDateStr = "";
+    private string ModifyDateStr = "";
+    List<string> validationMessages = new List<string>();
+
+
+
+    public override bool IsContextModified => this.editContext.IsModified();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.editContext = new EditContext(this.document);
+        cbxApplicationType = new SfComboBox<int, KeyValueVM>();
+        this.kvActiveStatus = await this.DataSourceService.GetKeyValueByIntCodeAsync("StatusTemplate", "Active");
+        modelModule = new KeyValueVM();
+    }
+
+    public async Task ChangeDocument()
+    {
+
+        this.SpinnerShow();
+
+        bool hasPermission = await CheckUserActionPermission("ManagePolicyData", false);
+        if (!hasPermission) { return; }
+
+        this.editContext = new EditContext(this.document);
+        await TemplateDocumentService.UpdateTemplateDocumentsAsync(document);
+
+        await this.CallbackAfterSubmit.InvokeAsync();
+
+        this.SpinnerHide();
+    }
+
+    IEnumerable<KeyValueVM> modules;
+    IEnumerable<KeyValueVM> applications;
+    IEnumerable<KeyValueVM> statuses;
+    IEnumerable<KeyValueVM> applicationTypes = new List<KeyValueVM>();
+    KeyValueVM modelModule;
+    string modelModuleName;
+
+    bool isModuleSet = false;
+    SfComboBox<int, KeyValueVM> cbxApplicationType;
+    private KeyValueVM kvActiveStatus;
+
+    [Parameter]
+    public EventCallback<TemplateDocumentVM> CallbackAfterSave { get; set; }
+
+    public async Task OpenModal(TemplateDocumentVM _document)
+    {
+        this.isVisible = true;
+        this.validationMessages.Clear();
+
+        this.modules = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ModuleTemplate");
+        this.applications = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ProcedureDocumentType");
+        this.statuses = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("StatusTemplate");
+        statuses = statuses.Where(x => x.KeyValueIntCode != "Deleted").ToList();
+
+        this.editContext = new EditContext(this.document);
+
+        if (_document.idTemplateDocument != 0)
+        {
+            this.document = await this.TemplateDocumentService.GetTemplateDocumentByIdAsync(_document.idTemplateDocument);
+            this.modelModule = await this.DataSourceService.GetKeyValueByIdAsync(document.IdModule);
+            this.applicationTypes = this.applications.Where(x => x.DefaultValue1 == modelModule.KeyValueIntCode).ToList();
+            this.CreationDateStr = this.document.CreationDate.ToString("dd.MM.yyyy");
+            this.ModifyDateStr = this.document.ModifyDate.ToString("dd.MM.yyyy");
+            this.document.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.document.IdModifyUser);
+            this.document.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.document.IdCreateUser);
+        }
+        else
+        {
+            this.CreationDateStr = "";
+            this.ModifyDateStr = "";
+            this.document.ModifyPersonName = "";
+            this.document.CreatePersonName = "";
+            this.document = _document;
+        }
+
+        this.StateHasChanged();
+    }
+
+    private void SelectApplicationsByModule(SelectEventArgs<KeyValueVM> args)
+    {
+        string moduleKeyValueIntCode = args.ItemData.KeyValueIntCode;
+
+        editContext = new EditContext(this.document);
+        this.applicationTypes = this.applications.ToList<KeyValueVM>();
+
+        this.applicationTypes = this.applicationTypes.Where(x => x.DefaultValue1 == moduleKeyValueIntCode).ToList();
+        isModuleSet = args.ItemData.IdKeyValue != 0;
+
+        this.StateHasChanged();
+    }
+
+    private async Task OnChange(UploadChangeEventArgs args)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageTemplateDocumentData", false);
+        if (!hasPermission) { return; }
+
+        if (this.document.idTemplateDocument > 0)
+        {
+            if (args.Files.Count == 1)
+            {
+                this.fileToReplace = args;
+                var resCheck = await this.TemplateDocumentService.CheckIfExistUploadedFileAsync(this.document);
+                if (resCheck)
+                {    
+                    string msg = "За избрания документ вече има прикачен файл. Искате ли да го подмените?";
+                    bool isConfirmed = await this.ShowConfirmDialogAsync(msg);          
+                
+                    if (isConfirmed)
+                    {
+                        var fileName = fileToReplace.Files[0].FileInfo.Name;
+
+                        var result = await this.TemplateDocumentService.UploadFileAsync(fileToReplace.Files[0].Stream, fileName, this.document);
+
+                        if (result == 1)
+                        {
+                            this.document = await this.TemplateDocumentService.GetTemplateDocumentByIdAsync(this.document.idTemplateDocument);
+                        }
+                    }
+                }
+                else
+                {
+                    var fileName = fileToReplace.Files[0].FileInfo.Name;
+
+                    var result = await this.TemplateDocumentService.UploadFileAsync(fileToReplace.Files[0].Stream, fileName, this.document);
+
+                    if (result == 1)
+                    {
+                        this.document = await this.TemplateDocumentService.GetTemplateDocumentByIdAsync(this.document.idTemplateDocument);
+                    }
+                }
+
+                this.StateHasChanged();
+                editContext = new EditContext(this.document);
+            }
+        }
+    }
+
+    private async Task OnRemove(RemovingEventArgs args)
+    {
+        if (args.FilesData.Count == 1)
+        {
+            if (this.document.idTemplateDocument > 0)
+            {
+                bool isConfirmed = true;
+                if (args.FilesData[0].Name == this.document.FileName)
+                {                   
+                    string msg = "Сигурни ли си сте, че искате да изтриете прикачения файл?";
+                    isConfirmed = await this.ShowConfirmDialogAsync(msg);          
+                }
+
+                if (isConfirmed)
+                {
+                    var result = await this.TemplateDocumentService.RemoveFileAsync(args.FilesData[0].Name, this.document);
+
+                    if (result == 1)
+                    {
+                        this.document = await this.TemplateDocumentService.GetTemplateDocumentByIdAsync(this.document.idTemplateDocument);
+
+                        this.StateHasChanged();
+                    }
+                }
+            }
+        }
+    }
+
+    private async void OnDownloadClick()
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewTemplateDocumentData", false);
+        if (!hasPermission) { return; }
+
+        var hasFile = await this.TemplateDocumentService.CheckIfExistUploadedFileAsync(this.document);
+        if (hasFile)
+        {
+            var documentStream = this.TemplateDocumentService.GetUploadedFile(this.document);
+
+            await FileUtils.SaveAs(this.JsRuntime, this.document.FileName, documentStream.ToArray());
+        }
+        else
+        {
+            await this.JsRuntime.InvokeVoidAsync("alert", "Файлът, който се опитвате да свалите не съществува!");
+        }
+    }
+
+    private async Task OnRemoveClick()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageTemplateDocumentData", false);
+        if (!hasPermission) { return; }
+
+        if (this.document.idTemplateDocument > 0)
+        {
+
+            string msg = "Сигурни ли сте, че искате да изтриете прикачения файл?";
+            bool confirmed = await this.ShowConfirmDialogAsync(msg);
+            if (confirmed)
+            {
+                var result = await this.TemplateDocumentService.RemoveFileAsync("", this.document);
+
+                if (result == 1)
+                {
+                    toast.sfSuccessToast.Content = "Записът е изтрит успешно!";
+                    await toast.sfSuccessToast.ShowAsync();
+                    this.document = await this.TemplateDocumentService.GetTemplateDocumentByIdAsync(this.document.idTemplateDocument);
+
+                    this.StateHasChanged();
+                }
+            }
+        }
+    }
+
+    public async Task<TemplateDocumentVM> SaveFromParent()
+    {
+        return this.document;
+    }
+
+    private async Task<int> Save()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageTemplateDocumentData", false);
+        if (!hasPermission) { return 0; }
+        this.SpinnerShow();
+        this.validationMessages.Clear();
+        this.editContext = new EditContext(this.document);
+        this.editContext.EnableDataAnnotationsValidation();
+
+        this.isSubmitClicked = true;
+        var result = 0;
+
+        bool isValid = this.editContext.Validate();
+        this.validationMessages.AddRange(this.editContext.GetValidationMessages());
+        if (isValid)
+        {
+
+            bool isCreatedNew = this.document.idTemplateDocument == 0;
+            result = await this.TemplateDocumentService.UpdateTemplateDocumentsAsync(this.document);
+
+            await this.ShowSuccessAsync("Записът e успешeн!");
+        }
+
+        if (result > 0)
+        {
+            if (this.document.idTemplateDocument == 0)
+            {
+                this.document.idTemplateDocument = result;
+            }
+
+            this.StateHasChanged();
+            await CallbackAfterSave.InvokeAsync(this.document);
+        }
+        if (!(this.document.idTemplateDocument == 0))
+        {
+            this.document = await this.TemplateDocumentService.GetTemplateDocumentByIdAsync(this.document.idTemplateDocument);
+        }
+        this.CreationDateStr = this.document.CreationDate.ToString("dd.MM.yyyy");
+        this.ModifyDateStr = this.document.ModifyDate.ToString("dd.MM.yyyy");
+        this.document.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.document.IdModifyUser);
+        this.document.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.document.IdCreateUser);
+
+        this.SpinnerHide();
+        return result;
+    }
+
+}

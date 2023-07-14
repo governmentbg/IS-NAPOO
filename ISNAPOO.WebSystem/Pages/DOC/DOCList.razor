@@ -1,0 +1,200 @@
+﻿@page "/DOCList"
+@attribute [Authorize(Policy = "ShowDOCList")]
+
+@using ISNAPOO.Core.Contracts.DOC
+@using ISNAPOO.Core.ViewModels.DOC
+@using Syncfusion.PdfExport
+@using Syncfusion.XlsIO
+
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">ДОС - Държавни образователни стандарти</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(async () => await FilterGrid())">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="ImportDOS">Импорт ДОС</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+
+
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@dataSource" AllowSorting="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport"})" AllowExcelExport="true" AllowPdfExport="true"
+                            EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true" AllowTextWrap="true" @ref="sfGrid"
+                            AllowPaging=true>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSizes="true" PageSize=20></GridPageSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="DocVM"></GridEvents>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="Name" Direction="SortDirection.Ascending"></GridSortColumn>
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as DocVM).IdDOC).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as DocVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => DeleteRowDOC((context as DocVM)))"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdDOC" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="ДОС" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="StartDate" HeaderText="В сила от" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                        @{
+                                        var ctx = context as DocVM;
+                                        var date = ctx.StartDate.HasValue ? $"{ctx.StartDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Profession.ComboBoxName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="SpecialitiesJoin" HeaderText="Специалности" TextAlign="TextAlign.Left" DisableHtmlEncode="false" Width="25%"></GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Center" Width="10%">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var providerStatus = context as DocVM;
+                                            if (providerStatus.IdStatus != 0)
+                                            {
+                                                switch (providerStatus.StatusName)
+                                                {
+                                                    case "Активен":
+                                                        <label class="form-label-status label label-success" style="width: 80%;">@providerStatus.StatusName</label>
+                                                        break;
+                                                    case "Рaботен":
+                                                        <label class="form-label-status label label-warning" style="width: 80%;">@providerStatus.StatusName</label>
+                                                        break;
+                                                    case "Неактивен":
+                                                        <label class="form-label-status label label-danger" style="width: 80%;">@providerStatus.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="RequirementsCandidates" HeaderText="Изисквания към кандидатите" TextAlign="TextAlign.Left" Visible="false"></GridColumn>
+                            <GridColumn Field="DescriptionProfession" HeaderText="Описание на професията" TextAlign="TextAlign.Left" Visible="false"></GridColumn>
+                            <GridColumn Field="RequirementsMaterialBase" HeaderText="Изисквания към материалната база" TextAlign="TextAlign.Left" Visible="false"></GridColumn>
+                            <GridColumn Field="RequirementsТrainers" HeaderText="Изисквания към обучаващите" TextAlign="TextAlign.Left" Visible="false"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<SfDialog Width="40%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@IsFilterVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <EditForm id="sf" Model="filterModel" OnSubmit="@(async () => await FilterGrid())">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Наредба: </label>
+                                        <SfTextBox @bind-Value="@this.filterModel.Regulation"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            НКПД:
+                                        </label>
+                                        <SfMultiSelect OpenOnClick="false" ShowDropDownIcon="false" AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" ItemsCount="20" TValue="List<int>" EnableVirtualization="true" TItem="NKPDVM" Mode="@VisualMode.Default" DataSource="@nkpdSource" @bind-Value="@this.filterModel.NKPDIds">
+                                            <MultiSelectFieldSettings Text="CodeAndName" Value="IdNKPD"></MultiSelectFieldSettings>
+                                        </SfMultiSelect>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Наименование на ЕРУ: </label>
+                                        <SfTextBox @bind-Value="@this.filterModel.EruName"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="this.filterModel.IsDOI" checked="@(this.filterModel.IsDOI ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>ДОИ</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <button type="submit" form="sf" class="btn btn-info" @onclick="(() =>  { this.IsSearchConfirmed = true;})">Търси</button>
+            <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="(() =>  this.IsFilterVisible = false)">Отказ</button>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<EditDOC @ref="editDOC" CallbackAfterSave="UpdateAfterSave"></EditDOC>
+<ImportDOC @ref="importDOCmodal" CallbackAfterSave="UpdateAfterSave"></ImportDOC>
+<ToastMsg @ref="toast"></ToastMsg>

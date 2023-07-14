@@ -1,0 +1,230 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+
+@inject IJSRuntime JsRuntime
+@inject IExpertService ExpertService
+@inject IDataSourceService DataSourceService
+@inject IApplicationUserService ApplicationUserService
+@inject IDOCService DOCService
+
+@inherits BlazorBaseComponent
+<SfDialog Target="#target" Width="65%" Height="60%" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за Работни групи/Рецензенти на ДОС за експерт <span style="font-size: 18px;color: white !important;">@this.person.FullName</span>
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="submitFormExpertDOC">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Проект на ДОС:
+                                </label>
+                                <SfComboBox TValue="string" TItem="DocVM" AllowCustom="false" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="currentValue" DataSource="this.docSource" AllowFiltering="true">
+                                    <ComboBoxFieldSettings Text="Name" Value="Name" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label required">
+                                    Номер на заповед:
+                                </label>
+                                <div>
+                                    <InputText class="form-control" @bind-Value="this.model.OrderNumber" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label required">
+                                    Дата на утвърждаване:
+                                </label>
+                                <div>
+                                    <SfDatePicker CssClass="form-control customPad" TValue="DateTime?" @bind-Value="this.model.DateOrder" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Статус:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="100px" CssClass="form-control customPad"
+                                            @bind-Value="this.model.IdStatus" DataSource="@kvStatusSource">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+
+                                </SfComboBox>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Коментар при промяна на статуса:
+                                </label>
+                                <div>
+                                    <InputTextArea rows="3" class="form-control" @bind-Value="this.model.Comment" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @CreationDateStr </div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-info" form="submitFormExpertDOC">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+@code {
+
+
+    [Parameter]
+    public EventCallback<ExpertDOCVM> CallbackAfterSave { get; set; }
+
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+    ExpertDOCVM model = new ExpertDOCVM();
+    PersonVM person = new PersonVM();
+    IEnumerable<DocVM> docSource;
+    IEnumerable<KeyValueVM> kvStatusSource;
+    private string currentValue = "";
+    private string CreationDateStr = "";
+    private string ModifyDateStr = "";
+    public override bool IsContextModified => this.editContext.IsModified();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.kvStatusSource = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ExpertStatus");
+        this.editContext = new EditContext(this.model);
+    }
+    public async Task Open(ExpertDOCVM _model)
+    {
+        if (_model.IdExpertDOC != 0)
+        {
+            this.model = await ExpertService.GetExpertDOCByIdAsync(_model.IdExpertDOC);
+            this.CreationDateStr = this.model.CreationDate.ToString(GlobalConstants.DATE_FORMAT);
+            this.ModifyDateStr = this.model.ModifyDate.ToString(GlobalConstants.DATE_FORMAT);
+            this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdCreateUser);
+            this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdModifyUser);
+        }
+        else
+        {
+            this.model = _model;
+            this.CreationDateStr = "";
+            this.ModifyDateStr = "";
+            this.model.CreatePersonName = "";
+            this.model.ModifyPersonName = "";
+        }
+        var expert = await ExpertService.GetExpertByIdAsync(this.model.IdExpert);
+        this.person = expert.Person;
+        this.docSource = await this.DOCService.GetAllDOCByStatus("Draft");
+        var currentDOCs = await ExpertService.GetAllExpertExpertDOCsAsync(this.model.IdExpert);
+        foreach (var doc in currentDOCs)
+        {
+            if (doc.IdDOC != _model.IdDOC)
+            {
+                this.docSource = this.docSource.Where(d => d.IdDOC != doc.IdDOC);
+            }
+        }
+        if (this.model.IdStatus == null || this.model.IdStatus == 0)
+        {
+            this.model.IdStatus = kvStatusSource.FirstOrDefault(s => s.KeyValueIntCode == "ActiveExpert").IdKeyValue;
+        }
+        if (this.model.IdDOC != 0)
+        {
+            currentValue = this.docSource.FirstOrDefault(d => d.IdDOC == this.model.IdDOC).Name;
+        }
+
+        this.editContext = new EditContext(this.model);
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+    public async Task<int> Save()
+    {
+
+        if (this.loading)
+        {
+            return 0;
+        }
+
+        try
+        {
+            this.loading = true;
+
+            bool hasPermission = await CheckUserActionPermission("ManageExpertsData", false);
+            if (!hasPermission) { return 0; }
+            this.SpinnerShow();
+            this.editContext = new EditContext(this.model);
+            this.editContext.EnableDataAnnotationsValidation();
+            if (currentValue != null)
+            {
+                this.model.IdDOC = this.docSource.First(d => d.Name == currentValue).IdDOC;
+            }
+            bool isValid = editContext.Validate();
+            var result = 0;
+
+            if (isValid)
+            {
+                result = await this.ExpertService.UpdateExpertDOCAsync(this.model);
+                var expertDOCById = await this.ExpertService.GetAllExpertExpertDOCsAsync(model.IdExpert);
+                if (this.model.IdExpertDOC == 0)
+                {
+                    this.model.IdExpertDOC = expertDOCById.FirstOrDefault(e => e.IdDOC == this.model.IdDOC).IdExpertDOC;
+                }
+                this.model = await ExpertService.GetExpertDOCByIdAsync(this.model.IdExpertDOC);
+                this.CreationDateStr = this.model.CreationDate.ToString(GlobalConstants.DATE_FORMAT);
+                this.ModifyDateStr = this.model.ModifyDate.ToString(GlobalConstants.DATE_FORMAT);
+                this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdCreateUser);
+                this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdModifyUser);
+                this.ShowSuccessAsync("Записът e успешeн!");
+            }
+            if (result > 0)
+            {
+                this.StateHasChanged();
+                await CallbackAfterSave.InvokeAsync(this.model);
+            }
+            return result;
+        }
+        finally
+        {
+            this.SpinnerHide();
+            this.loading = false;
+        }
+    }
+}

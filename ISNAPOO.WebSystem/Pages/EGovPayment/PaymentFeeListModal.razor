@@ -1,0 +1,12 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="90%" Height="90%" IsModal="true" ZIndex="4000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Електронни плащания на такси за лицензиране</Header>
+        <Content>
+            <PaymentFeeList candidateProviderVM="this.candidateProviderVM"></PaymentFeeList>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

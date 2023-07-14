@@ -1,0 +1,139 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://egov.bg/RegiX/NACID/Rdpzsd/RdpzsdRegisterEntriesResponse" xmlns:common="http://egov.bg/RegiX/NACID/Rdpzsd" targetNamespace="http://egov.bg/RegiX/NACID/Rdpzsd/RdpzsdRegisterEntriesResponse" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:element name="RdpzsdRegisterEntriesResponse" type="RdpzsdRegisterEntriesResponseType">
+    <xs:annotation>
+      <xs:documentation>Справка за статистически и персонални данни и основание за приемане на студенти във висшите училища, техните основни звена и филиали</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="RdpzsdRegisterEntriesResponseType">
+    <xs:sequence>
+      <xs:element name="RdpzsdRegisterEntry" type="RdpzsdRegisterEntryType" minOccurs="0" maxOccurs="unbounded"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RdpzsdRegisterEntryType">
+    <xs:sequence>
+      <xs:element name="FullName" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Име</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Uan" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>ЕАН</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Uin" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>ЕГН</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IdNumber" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>ЛНЧ</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Email" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Имейл</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SpecialityInfo" type="SpecialityInfoType" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Висше образование</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DoctoralInfo" type="DoctoralInfoType" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Докторски програми</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SpecialityInfoType">
+    <xs:sequence>
+      <xs:element name="Institution" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Висше училище</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="AdmissionReason" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Основание за прием</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Speciality" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Специалност</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Municipality" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Община</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EducationForm" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Форма на обучение</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EducationalQualification" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>ОКС/ОНС</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="StudentStatus" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Статус</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DoctoralInfoType">
+    <xs:sequence>
+      <xs:element name="Institution" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Висше училище</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="AdmissionReason" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Основание за прием</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Speciality" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Докторска програма</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Municipality" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Община</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EducationForm" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Форма на обучение</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EducationalQualification" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>ОКС/ОНС</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="StartDate" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Дата на зачисляване</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Duration" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Продължителност</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="StudentStatus" type="xs:string" nillable="true">
+        <xs:annotation>
+          <xs:documentation>Статус</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

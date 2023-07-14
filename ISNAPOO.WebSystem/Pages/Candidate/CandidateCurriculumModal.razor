@@ -1,0 +1,201 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="80%" EnableResize="true" AllowDragging="true" Height="80%" IsModal="true" CloseOnEscape="false" ShowCloseIcon="true" ZIndex="2005">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Учебна програма - данни за предмет и тема</Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <div id="validation-errors">
+                    @if (this.validationMessages.Any())
+                    {
+                        <ul class="validation-errors">
+                            @foreach (var msg in this.validationMessages)
+                            {
+                                <li class="validation-message">@msg</li>
+                            }
+                        </ul>
+                    }
+                </div>
+                @if (this.addedCurriculums.Count > 1 && this.isOpenForEdit)
+                {
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div class="col-sm-12 text-center">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="margin-right: 15px;" @onclick="PreviousCurriculum" disabled="@(this.disablePreviousBtn)"><i class="fa fa-arrow-circle-left"></i>Предишна тема</button>
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextCurriculum" disabled="@(this.disableNextBtn)"><i class="fa fa-arrow-circle-right"></i>Следваща тема</button>
+                        </div>
+                    </div>
+                }
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид професионална подготовка: </label>
+                                        <SfComboBox Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableAllFields" CssClass="form-control customPad" ShowClearButton="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="professionalTrainingSource" AllowFiltering="true" @bind-Value="candidateCurriculumVM.IdProfessionalTraining" AllowCustom="false">
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" ValueChange="OnProfessionalTrainingChangeHandler" />
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Теория: </label>
+                                        <SfNumericTextBox Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableAllFields" @bind-Value="this.candidateCurriculumVM.Theory" Min="0" ShowSpinButton="false" Format="##.##"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Практика: </label>
+                                        <SfNumericTextBox Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableAllFields" @bind-Value="this.candidateCurriculumVM.Practice" Min="0" ShowSpinButton="false" Format="##.##"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Предмет: </label>
+                                        <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                             ondrop="5"
+                                                             rows="3"
+                                                             @bind-Value="this.candidateCurriculumVM.Subject"
+                                                             maxlength="1000"
+                                                             disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableAllFields)">
+                                        </CustomInputTextArea>
+                                        <div style="float:right"><label>@(this.candidateCurriculumVM.Subject != null ? this.candidateCurriculumVM.Subject.Length : 0)/1000</label></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Тема: </label>
+                                        <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                             ondrop="5"
+                                                             rows="5"
+                                                             @bind-Value="this.candidateCurriculumVM.Topic"
+                                                             maxlength="4000"
+                                                             disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableAllFields)">
+                                        </CustomInputTextArea>
+                                        <div style="float:right"><label>@(this.candidateCurriculumVM.Topic != null ? this.candidateCurriculumVM.Topic.Length : 0)/4000</label></div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (this.candidateCurriculumVM.IdProfessionalTraining != this.kvBPTValue.IdKeyValue)
+                            {
+                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableAllFields)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Съответствие с ДОС: </label>
+                                                <SfComboBox CssClass="form-control customPad" TValue="int" TItem="ERUVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="eruDataSourceForComboBox" AllowFiltering="true" @bind-Value="idEru" AllowCustom="false">
+                                                    <ComboBoxTemplates TItem="ERUVM">
+                                                        <NoRecordsTemplate>
+                                                            Няма намерени резултати.
+                                                        </NoRecordsTemplate>
+                                                    </ComboBoxTemplates>
+                                                    <ComboBoxFieldSettings Text="CodeWithName" Value="IdERU" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <p>
+                                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OnAddERUClickHandler">Добави</button>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <SfGrid @ref="erusGrid" DataSource="addedErus" AllowSelection="false" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridTemplates>
+                                                <EmptyRecordTemplate Context="emptyRecord">
+                                                    <span>Няма намерени резултати.</span>
+                                                </EmptyRecordTemplate>
+                                            </GridTemplates>
+                                            <GridColumns>
+                                                <GridColumn Width="5%" Visible="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableAllFields">
+                                                    <Template Context="eruContext">
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="(() => DeleteEru(eruContext as ERUVM))"><i class="fa fa-trash-o"></i></button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="Code" HeaderText="Шифър на ЕРУ" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                                                <GridColumn Field="Name" HeaderText="Наименование на ЕРУ" TextAlign="TextAlign.Left" Width="18%"></GridColumn>
+                                                <GridColumn Field="RUText" HeaderText="РУ" TextAlign="TextAlign.Left" Width="63%" DisableHtmlEncode="false"></GridColumn>
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @candidateCurriculumVM.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @candidateCurriculumVM.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableAllFields)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitAndContinueBtn())"><i class="fa fa-save"></i>Запиши и добави нов</button>
+                                <button class="btn btn-info" type="submit" @onclick="(async () => await this.Submit())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SfDialog @bind-Visible="this.showUnsavedChangesConfirmDialog" Width="30%" EnableResize="true"
+          AllowDragging="true" Height="30%" IsModal="true" ZIndex="3002" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Внимание!</Header>
+        <Content>
+            Имате незапазени промени! Сигурни ли сте, че искате да смените темата?
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-primary" @onclick="@(() => { this.unsavedChangesConfirmed = true; ActionToPerform(); })">Да</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="(() => this.showUnsavedChangesConfirmDialog = false)">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast" />
+<ConfirmDialog @ref="this.ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

@@ -1,0 +1,563 @@
+﻿@page "/MenuNodesList"
+@attribute [Authorize(Policy = "ShowMenuNodesList")]
+
+@inject IMenuNodeService MenuNodeService
+@inject IApplicationUserService ApplicationUserService
+@inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ILocalStorageService localStorage;
+@using ISNAPOO.Core.ViewModels.Identity;
+@using System.Collections.ObjectModel;
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Навигационно меню</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewModal">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button class="btn btn-info" type="submit" form="submitForm" @onclick="SaveChanges">Запиши</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label class="control-label">
+                                                    Роли
+                                                </label>
+                            <SfComboBox TValue="string" TItem="ApplicationRoleVM" PopupHeight="230px" CssClass="form-control customPad"
+                                        SortOrder="Syncfusion.Blazor.DropDowns.SortOrder.Ascending"
+                                        FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="ComboboxValue"
+                                        DataSource="rolesFiltered" AllowFiltering="true" AllowCustom="false" Ena>
+                                <ComboBoxFieldSettings Text="RoleName" Value="Id" />
+                                <ComboBoxEvents ValueChange="ValueChangeHandler" TItem="ApplicationRoleVM" TValue="string" OnOpen="OnOpenProfDirComboBox" OnClose="OnCloseProfDirComboBox" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    &nbsp;
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <SfTreeGrid @ref="sfTreeGrid" ID="sfTreeGrid" DataSource="MenuNodesDataList" EnableCollapseAll="enableCollapseAllState" IdMapping="Id" ParentIdMapping="ParentId" TreeColumnIndex="3" AllowSelection="true" AutoCheckHierarchy="true">
+                                <TreeGridEvents QueryCellInfo="CellInfo" TValue="MenuNodesTreeGridDataVM" RowSelected="RowSelected" RowDeselected="RowDeselected"></TreeGridEvents>
+                                <TreeGridSelectionSettings PersistSelection="true" CheckboxOnly="true" />
+                                <TreeGridColumns>
+                                    <TreeGridColumn Width="35px">
+                                        <Template>
+                                            <nav class="navbar navbar-expand" style="padding:0">
+                                            <!-- Left navbar links -->
+                                            <ul class="navbar-nav">
+
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                                    <button class="btn-row" title="Редакция" @onclick="(() => SelectedRow(context as MenuNodesTreeGridDataVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    &nbsp;
+                                                    </li>
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                    <button type="button" class="btn-row" title="Изтрий" @onclick="(() => DeleteRow(context as MenuNodesTreeGridDataVM))"><i class="fa fa-trash-o"></i></button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    &nbsp;
+                                                    </li>
+                                            </ul>
+                                        </nav>
+                                        </Template>
+                                    </TreeGridColumn>
+                                    <TreeGridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="15px"></TreeGridColumn>
+                                    <TreeGridColumn Field="EntityId" HeaderText="Id" Width="1px" TextAlign="TextAlign.Left" IsPrimaryKey="true" Visible=false></TreeGridColumn>
+                                    <TreeGridColumn Field="Name" HeaderText="Наименование" Width="400px" TextAlign="TextAlign.Left"></TreeGridColumn>
+                                </TreeGridColumns>
+                            </SfTreeGrid>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ToastMsg @ref="toast"></ToastMsg>
+
+<MenuNodeModal @ref="menuNodeModal" OnSubmit="OnModalSubmitHandler"></MenuNodeModal>
+
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+@code {
+    bool enableCollapseAllState = false;
+    SfTreeGrid<MenuNodesTreeGridDataVM> sfTreeGrid = new SfTreeGrid<MenuNodesTreeGridDataVM>();
+
+    ToastMsg toast;
+
+    MenuNodeModal menuNodeModal = new MenuNodeModal();
+    MenuNodesTreeGridDataVM ToBeDeleted = new MenuNodesTreeGridDataVM();
+    List<MenuNodesTreeGridDataVM> MenuNodesDataList = new List<MenuNodesTreeGridDataVM>();
+
+    List<MenuNodeRoleVM> menuNodeRoles = new List<MenuNodeRoleVM>();
+
+
+    IEnumerable<ApplicationRoleVM> roles;
+
+    List<ApplicationRoleVM> rolesFiltered;
+
+    ObservableCollection<double> indexes = new ObservableCollection<double>();
+
+    private List<double> selectedIndexes = new List<double>();
+
+    private bool comboBoxSelection = false;
+    private bool isAutomaticSelection = false;
+
+    string ComboboxValue;
+
+    int[] currentdata = new int[] { };
+    List<int> list = new List<int>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.SetData(await this.MenuNodeService.GetAllMenuNodesAsync());
+        this.roles = (await ApplicationUserService.GetAllApplicationRoleAsync(new ApplicationRoleVM())).ToList();
+        rolesFiltered = roles.OrderBy(x => x.RoleName).ToList();
+        this.menuNodeRoles = await this.MenuNodeService.getAllMenuNodeRolesAsync();
+    }
+
+    private async Task OnModalSubmitHandler()
+    {
+        this.SetData(await this.MenuNodeService.GetAllMenuNodesAsync());
+    }
+
+    private async Task AddNewModal()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageMenuNodesData", false);
+        if (!hasPermission) { return; }
+
+        await this.menuNodeModal.OpenModal();
+    }
+
+    private async Task SelectedRow(MenuNodesTreeGridDataVM menuNodeVM)
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewMenuNodesData", false);
+        if (!hasPermission) { return; }
+        if(menuNodeVM.EntityType == MenuNodeTypes.MenuNodeRoot)
+        {
+           await this.menuNodeModal.OpenModal(menuNodeVM.EntityId, menuNodeVM.EntityType);
+        }
+        else if(menuNodeVM.EntityType == MenuNodeTypes.MenuNodeParent)
+        {
+            await this.menuNodeModal.OpenModal(menuNodeVM.EntityId, menuNodeVM.EntityType);
+        }
+        else
+        {
+            await this.menuNodeModal.OpenModal(menuNodeVM.EntityId, menuNodeVM.EntityType);
+        }
+    }
+
+    private async Task DeleteRow(MenuNodesTreeGridDataVM menuNodeVM)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        ToBeDeleted = menuNodeVM;
+        string msg = "Сигурни ли сте, че искате да изтриете избрания запис?";
+        bool isConfirmed = await this.ShowConfirmDialogAsync(msg);
+
+        if (isConfirmed)
+        {
+            this.StateHasChanged();
+            var result = await this.MenuNodeService.DeleteMenuNodeAsync(ToBeDeleted.EntityId);
+
+            if (result == 1)
+            {
+                await this.ShowSuccessAsync("Записът е изтрит успешно!");
+                await this.OnModalSubmitHandler();
+
+            }
+            else
+            {
+                await this.ShowErrorAsync("Грешка");
+            }
+        }
+    }
+
+    private async Task DataboundHandler(object args)
+    {
+        this.currentdata = (await this.localStorage.GetItemAsync<int[]>(GlobalConstants.LocalStorage_MenuExpandedNodes));
+
+        if (this.currentdata != null && this.currentdata.Length > 0)
+        {
+            this.list.AddRange(this.currentdata);
+        }
+
+        if (this.sfTreeGrid != null && this.localStorage != null)
+        {
+            this.currentdata = (await localStorage.GetItemAsync<int[]>(GlobalConstants.LocalStorage_MenuExpandedNodes));
+
+            if (this.currentdata != null)
+            {
+                for (var i = 0; i < currentdata.Length; i++)
+                {
+                    await this.sfTreeGrid.ExpandByKeyAsync(currentdata[i]);
+                }
+            }
+        }
+    }
+
+    private async Task ExpandedHandler(RowExpandedEventArgs<MenuNodesTreeGridDataVM> args)
+    {
+        if (args.Data != null)
+        {
+            if (!this.list.Contains(args.Data.Id))
+            {
+                this.list.Add(args.Data.Id);
+                this.currentdata = this.list.ToArray();
+                await this.localStorage.SetItemAsync(GlobalConstants.LocalStorage_MenuExpandedNodes, this.currentdata);
+            }
+        }
+    }
+
+    private async Task CollapsedHandler(RowCollapsedEventArgs<MenuNodesTreeGridDataVM> args)
+    {
+
+        if (args.Data != null)
+        {
+            this.list.Remove(args.Data.Id);
+            this.currentdata = this.list.ToArray();
+            await this.localStorage.SetItemAsync(GlobalConstants.LocalStorage_MenuExpandedNodes, this.currentdata);
+        }
+    }
+
+    private void SetData(IEnumerable<MenuNodeVM> menuNodes)
+    {
+        this.MenuNodesDataList = new List<MenuNodesTreeGridDataVM>();
+
+        List<MenuNodeVM> rootsList = menuNodes.Where(x => x.IdParentNode == 0).ToList();
+
+        int id = 1;
+
+        foreach (var root in rootsList.OrderBy(x => x.NodeOrder))
+        {
+            MenuNodesTreeGridDataVM newRoot = new MenuNodesTreeGridDataVM()
+                {
+                    Id = id++,
+                    ParentId = null,
+                    Name = root.Name,
+                    EntityId = root.IdMenuNode,
+                    EntityType = "root"
+                };
+
+            this.MenuNodesDataList.Add(newRoot);
+
+            List<MenuNodeVM> parentsList = menuNodes.Where(x => x.IdParentNode == root.IdMenuNode).ToList();
+
+            foreach (var parent in parentsList.OrderBy(x => x.NodeOrder))
+            {
+                MenuNodesTreeGridDataVM newParent = new MenuNodesTreeGridDataVM()
+                    {
+                        Id = id++,
+                        ParentId = newRoot.Id,
+                        Name = parent.Name,
+                        EntityId = parent.IdMenuNode,
+                        EntityType = "parent"
+                    };
+
+                this.MenuNodesDataList.Add(newParent);
+
+                List<MenuNodeVM> linksList = menuNodes.Where(x => x.IdParentNode == parent.IdMenuNode).ToList();
+
+                foreach (var link in linksList.OrderBy(x => x.NodeOrder))
+                {
+                    MenuNodesTreeGridDataVM newLink = new MenuNodesTreeGridDataVM()
+                        {
+                            Id = id++,
+                            ParentId = newParent.Id,
+                            Name = link.Name,
+                            EntityId = link.IdMenuNode,
+                            EntityType = "link"
+                        };
+
+                    this.MenuNodesDataList.Add(newLink);
+                }
+            }
+        }
+    }
+    private async Task ValueChangeHandler(ChangeEventArgs<string, ApplicationRoleVM> args)
+    {
+        if(args.Value == null)
+        {
+            rolesFiltered = roles.OrderBy(x => x.RoleName).ToList();
+        }
+        var rows = await sfTreeGrid.GetSelectedRecordsAsync();
+
+        var list1 = menuNodeRoles.Where(x => x.IdApplicationRole == args.Value).ToList();
+
+        this.selectedIndexes.Clear();
+
+        foreach (var item in list1)
+        {
+            var index = await sfTreeGrid.GetRowIndexByPrimaryKeyAsync(item.IdMenuNode);
+            if (!this.selectedIndexes.Contains(index))
+            {
+                this.selectedIndexes.Add(index);
+            }
+        }
+
+        this.comboBoxSelection = true;
+        await sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+        this.comboBoxSelection = false;
+    }
+
+    private async Task SaveChanges()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageMenuNodesData", false);
+        if (!hasPermission) { return; }
+
+        var check = await this.sfTreeGrid.GetSelectedRecordsAsync();
+
+        var result = await this.MenuNodeService.SaveChangesAsync(check, ComboboxValue);
+
+        if (result.Contains("успешен"))
+        {
+            await this.ShowSuccessAsync(result);
+        }
+        else
+        {
+            await this.ShowErrorAsync(result);
+        }
+    }
+
+    private async void RowSelected(RowSelectEventArgs<MenuNodesTreeGridDataVM> args)
+    {
+        if (!this.comboBoxSelection)
+        {
+            if (!this.isAutomaticSelection)
+            {
+                var selectedItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == args.Data.Id);
+                if (selectedItem.EntityType == "root")
+                {
+                    var rootParentChildren = this.MenuNodesDataList.Where(x => x.ParentId == selectedItem.Id);
+                    var rootParentLinkChildren = new List<MenuNodesTreeGridDataVM>();
+                    foreach (var entry in rootParentChildren)
+                    {
+                        var parentLinkChildren = this.MenuNodesDataList.Where(x => x.ParentId == entry.Id);
+                        rootParentLinkChildren.AddRange(parentLinkChildren);
+                    }
+
+                    this.selectedIndexes.Add(double.Parse((selectedItem.Id - 1).ToString()));
+                    foreach (var entry in rootParentChildren.Select(x => x.Id - 1))
+                    {
+                        if (!this.selectedIndexes.Contains(entry))
+                        {
+                            this.selectedIndexes.Add(entry);
+                        }
+                    }
+
+                    foreach (var entry in rootParentLinkChildren.Select(x => x.Id - 1))
+                    {
+                        if (!this.selectedIndexes.Contains(entry))
+                        {
+                            this.selectedIndexes.Add(entry);
+                        }
+                    }
+
+                    this.isAutomaticSelection = true;
+                    await this.sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+                    this.isAutomaticSelection = false;
+                }
+                else if (selectedItem.EntityType == "parent")
+                {
+                    var parentChildren = this.MenuNodesDataList.Where(x => x.ParentId == selectedItem.Id);
+                    var parentRootItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == selectedItem.ParentId);
+
+                    if (!this.selectedIndexes.Contains(selectedItem.Id - 1))
+                    {
+                        this.selectedIndexes.Add(double.Parse((selectedItem.Id - 1).ToString()));
+                    }
+
+                    if (!this.selectedIndexes.Contains(parentRootItem.Id - 1))
+                    {
+                        this.selectedIndexes.Add(double.Parse((parentRootItem.Id - 1).ToString()));
+                    }
+
+                    foreach (var entry in parentChildren.Select(x => x.Id - 1))
+                    {
+                        if (!this.selectedIndexes.Contains(entry))
+                        {
+                            this.selectedIndexes.Add(entry);
+                        }
+                    }
+
+                    this.isAutomaticSelection = true;
+                    await this.sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+                    this.isAutomaticSelection = false;
+                }
+                else if (selectedItem.EntityType == "link")
+                {
+                    var parentItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == selectedItem.ParentId);
+                    var parentRootItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == parentItem.ParentId);
+
+                    if (!this.selectedIndexes.Contains(selectedItem.Id - 1))
+                    {
+                        this.selectedIndexes.Add(double.Parse((selectedItem.Id - 1).ToString()));
+                    }
+
+                    if (!this.selectedIndexes.Contains(parentRootItem.Id - 1))
+                    {
+                        this.selectedIndexes.Add(double.Parse((parentRootItem.Id - 1).ToString()));
+                    }
+
+                    if (!this.selectedIndexes.Contains(parentItem.Id - 1))
+                    {
+                        this.selectedIndexes.Add(double.Parse((parentItem.Id - 1).ToString()));
+                    }
+
+                    this.isAutomaticSelection = true;
+                    await this.sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+                    this.isAutomaticSelection = false;
+                }
+            }
+        }
+    }
+
+    private async void RowDeselected(RowDeselectEventArgs<MenuNodesTreeGridDataVM> args)
+    {
+        if (!this.isAutomaticSelection)
+        {
+            var deselectedItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == args.Data.Id);
+            if (deselectedItem.EntityType == "root")
+            {
+                var rootParentChildren = this.MenuNodesDataList.Where(x => x.ParentId == deselectedItem.Id);
+                var rootParentLinkChildren = new List<MenuNodesTreeGridDataVM>();
+                foreach (var entry in rootParentChildren)
+                {
+                    var parentLinkChildren = this.MenuNodesDataList.Where(x => x.ParentId == entry.Id);
+                    rootParentLinkChildren.AddRange(parentLinkChildren);
+                }
+
+                this.selectedIndexes.Remove(double.Parse((deselectedItem.Id - 1).ToString()));
+                foreach (var entry in rootParentChildren.Select(x => x.Id - 1))
+                {
+                    this.selectedIndexes.Remove(entry);
+                }
+
+                foreach (var entry in rootParentLinkChildren.Select(x => x.Id - 1))
+                {
+                    this.selectedIndexes.Remove(entry);
+                }
+
+                this.isAutomaticSelection = true;
+                await this.sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+                this.isAutomaticSelection = false;
+            }
+            else if (deselectedItem.EntityType == "parent")
+            {
+                var parentChildren = this.MenuNodesDataList.Where(x => x.ParentId == deselectedItem.Id);
+                var parentRootItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == deselectedItem.ParentId);
+                var parentRootParentChildren = this.MenuNodesDataList.Where(x => x.ParentId == parentRootItem.Id);
+
+                this.selectedIndexes.Remove(double.Parse((deselectedItem.Id - 1).ToString()));
+
+                bool selectedParent = false;
+                foreach (var entry in parentRootParentChildren)
+                {
+                    if (this.selectedIndexes.Any(x => x == entry.Id - 1))
+                    {
+                        selectedParent = true;
+                        break;
+                    }
+                }
+
+                if (!selectedParent)
+                {
+                    this.selectedIndexes.Remove(double.Parse((parentRootItem.Id - 1).ToString()));
+                }
+
+                foreach (var entry in parentChildren.Select(x => x.Id - 1))
+                {
+                    this.selectedIndexes.Remove(entry);
+                }
+
+                this.isAutomaticSelection = true;
+                await this.sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+                this.isAutomaticSelection = false;
+            }
+            else if (deselectedItem.EntityType == "link")
+            {
+                var parentItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == deselectedItem.ParentId);
+                var parentRootItem = this.MenuNodesDataList.FirstOrDefault(x => x.Id == parentItem.ParentId);
+                var parentRootParentChildren = this.MenuNodesDataList.Where(x => x.ParentId == parentRootItem.Id);
+                var parentItemChildren = this.MenuNodesDataList.Where(x => x.ParentId == deselectedItem.ParentId);
+
+                this.selectedIndexes.Remove(double.Parse((deselectedItem.Id - 1).ToString()));
+
+                bool selectedParentItem = false;
+                foreach (var entry in parentItemChildren)
+                {
+                    if (this.selectedIndexes.Any(x => x == entry.Id - 1))
+                    {
+                        selectedParentItem = true;
+                        break;
+                    }
+                }
+
+                if (!selectedParentItem)
+                {
+                    this.selectedIndexes.Remove(double.Parse((parentItem.Id - 1).ToString()));
+                }
+
+                bool selectedParent = false;
+                foreach (var entry in parentRootParentChildren)
+                {
+                    if (this.selectedIndexes.Any(x => x == entry.Id - 1))
+                    {
+                        selectedParent = true;
+                        break;
+                    }
+                }
+
+                if (!selectedParent)
+                {
+                    this.selectedIndexes.Remove(double.Parse((parentRootItem.Id - 1).ToString()));
+                }
+
+                this.isAutomaticSelection = true;
+                await this.sfTreeGrid.SelectRowsAsync(this.selectedIndexes.ToArray());
+                this.isAutomaticSelection = false;
+            }
+        }
+    }
+    private void OnOpenProfDirComboBox()
+    {
+        if(ComboboxValue != null)
+        rolesFiltered = roles.Where(x => x.RoleName.Contains(ComboboxValue)).ToList();
+
+    }
+
+    private async void OnCloseProfDirComboBox()
+    {
+        rolesFiltered = roles.ToList();
+    }
+    private void CellInfo(QueryCellInfoEventArgs<MenuNodesTreeGridDataVM> args)
+    {
+        //if (args.Column.Field.Equals("Name") && args.Data.EntityType.Equals("child"))
+        //{
+        //    args.Cell.AddClass(new string[] { "child" });
+        //}
+        //else if (args.Column.Field.Equals("Name") && args.Data.EntityType.Equals("parent"))
+        //{
+        //    args.Cell.AddClass(new string[] { "parent" });
+        //}
+    }
+}

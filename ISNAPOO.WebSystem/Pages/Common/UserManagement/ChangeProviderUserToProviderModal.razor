@@ -1,0 +1,47 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" Width="30%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Промяна на център към потребител provider</Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">Център: </label>
+                                <SfAutoComplete @ref="cpAutoComplete" TValue="int?" @bind-Value="this.model.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="@providersSource" AllowCustom="false" AllowFiltering="true">
+                                    <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="MixCPOandCIPONameOwner"></AutoCompleteFieldSettings>
+                                    <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                    <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                        <NoRecordsTemplate>
+                                            Няма намерени резултати.
+                                        </NoRecordsTemplate>
+                                    </AutoCompleteTemplates>
+                                </SfAutoComplete>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-3">
+                </div>
+                <div class="col-sm-9">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button style="margin-right: 15px;" class="btn btn-info" type="submit" @onclick="(async () => { await this.SubmitAndLogIn(); })">Запиши и влез като</button>
+                            <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => { await this.Submit(); })">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

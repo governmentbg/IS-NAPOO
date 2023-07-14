@@ -1,0 +1,113 @@
+﻿@using Data.Models.Data.Training
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+
+
+@inject IDataSourceService DataSourceService
+@inject IApplicationUserService ApplicationUserService
+@inject ITrainingService TrainingService
+@inject IUploadFileService UploadFileService
+@inject IJSRuntime JsRuntime
+@inject ILocService LocService
+
+@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" Width="65%" EnableResize=true AllowDragging="true"
+          IsModal="true" CloseOnEscape="false" ZIndex="3000" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>Добавяне на документ</Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="submitFormConsultingClientDocument">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на документа:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" CssClass="dropdown-menu" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            DataSource="requiredDocumentTypesSource" AllowFiltering="true" @bind-Value="model.IdConsultingRequiredDocumentType">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание на документа:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="this.model.Description" />
+                            </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-6">
+                            @if (model.HasUploadedFile)
+                            {
+                                var files = this.model.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                foreach (var file in files)
+                                {
+                                    var fileName = file.Split(($"\\{this.model.IdConsultingClientRequiredDocument}\\"), StringSplitOptions.RemoveEmptyEntries).ToArray().LastOrDefault();
+                                    <span class="align-text-bottom">
+                                        <button type="button" class="btn-row" @onclick="(() => OnRemove(fileName))"><i class="fa fa-trash-o"></i></button>
+                                        <a @onclick="(() => OnDownloadClick(fileName))" href="#" class="link-primary">@fileName</a>
+                                    </span>
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader @ref="uploader" AutoUpload="false" AllowMultiple="false" Enabled="this.model.IdConsultingClientRequiredDocument != 0" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="float-right">
+                        <button type="submit" class="btn btn-info" form="submitFormConsultingClientDocument">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+

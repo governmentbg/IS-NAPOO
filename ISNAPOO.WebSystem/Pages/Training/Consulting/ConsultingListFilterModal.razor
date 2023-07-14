@@ -1,0 +1,135 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="90%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+                    <EditForm EditContext="editContext" OnSubmit="Filter" id="mainForm">
+                        <div class="card" style="margin-bottom: 0px;">
+                            <div class="card-block" style="">
+                                <p>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Вид на услугата:
+                                                </label>
+                                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdConsultingType" DataSource="kvConsultingTypeSource" AllowFiltering="true" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Начин на предоставяне:
+                                                </label>
+                                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdConsultingReceiveType" DataSource="kvConsultingReceiveTypeSource" AllowFiltering="true" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Регистрация в бюрото по труда:
+                                                </label>
+                                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdRegistrationAtLabourOfficeType" DataSource="kvRegistrationAtLabourOfficeType" AllowFiltering="true" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Начин на финансиране:
+                                                </label>
+                                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdAssignType" DataSource="kvAssingSource" AllowFiltering="true" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue"/>
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Насочен към услугите на ЦИПО:
+                                                </label>
+                                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdAimAtCIPOServicesType" DataSource="kvAimAtCIPOServicesType" AllowFiltering="true" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="new-task">
+                                                <div class="checkbox-fade fade-in-primary">
+                                                    <label class="form-label">
+                                                        <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isStudentTrue" checked="@(this.isStudentTrue ? "checked" : null)" @onchange="OnStudentTrueValueChange">
+                                                        <span class="cr">
+                                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                        </span> <span>Учащ</span>
+                                                    </label>
+                                                </div>
+                                                <div class="to-do-list" style="margin-bottom: 0px !important;">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isStudentFalse" checked="@(this.isStudentFalse ? "checked" : null)" @onchange="OnStudentFalseValueChange">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Неучащ</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="checkbox-fade fade-in-primary">
+                                                    <label class="form-label">
+                                                        <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isEmployedPersonTrue" checked="@(this.isEmployedPersonTrue ? "checked" : null)" @onchange="OnIsEmployedPersonTrueValueChange">
+                                                        <span class="cr">
+                                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                        </span> <span>Заето лице</span>
+                                                    </label>
+                                                </div>
+                                                <div class="to-do-list">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isEmployedPersonFalse" checked="@(this.isEmployedPersonFalse ? "checked" : null)" @onchange="OnIsEmployedPersonFalseValueChange">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Безработно лице</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </p>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="submit" class="btn btn-info" form="mainForm">Търси</button>
+                        <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+
+</SfDialog>

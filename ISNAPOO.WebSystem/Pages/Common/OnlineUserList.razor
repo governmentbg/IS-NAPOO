@@ -1,0 +1,38 @@
+﻿@page "/OnlineUser"
+@using System.Collections.Concurrent
+@using static ISNAPOO.WebSystem.Extensions.BlazorCookieLoginMiddleware;
+@inject ISettingService SettingService
+@inject IDataSourceService DataSourceService
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Активни потребители</h6>
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="this.OnlineUserGrid" AllowTextWrap="true" DataSource="@OnlineUser" AllowSorting="true" AllowFiltering="true">
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                                <Template>
+                                    @GetRowNumber(OnlineUserGrid, (context as LoginInfo).Id).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Id" IsPrimaryKey="true" Visible="false" Width="10"></GridColumn>
+                            <GridColumn Field="SessionKey" IsPrimaryKey="true" Visible="true" HeaderText="SessionKey" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="ApplicationUser.Id"  Visible="false" HeaderText="Key" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="ApplicationUser.UserName" Visible="true" HeaderText="Потребител" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="ClientIP" Visible="true" HeaderText="ИП" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="LoginTime" Visible="true" HeaderText="Вход в системата" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="LastActivity" Visible="true" HeaderText="Последна активност" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="Activity" Visible="true" HeaderText="Дейност" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="LogoutTime" Visible="true" HeaderText="Изход в системата" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

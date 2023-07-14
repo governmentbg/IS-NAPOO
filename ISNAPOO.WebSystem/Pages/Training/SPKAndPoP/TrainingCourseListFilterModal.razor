@@ -1,0 +1,260 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="90%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+                    <EditForm EditContext="editContext" OnSubmit="Filter" id="mainForm">
+                        <div class="filterSection mainBGColor">
+                            <div class="col-12">
+                                Данни за курс
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Професия: </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteProfession" TValue="int" TItem="ProfessionVM" AllowCustom="false"
+                                                    @bind-Value="this.model.Program.Speciality.Profession.IdProfession"
+                                                    DataSource="professionSource" AllowFiltering="true" CssClass="form-control">
+                                        <AutoCompleteTemplates TItem="ProfessionVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="CodeAndName" Value="IdProfession" />
+                                        <AutoCompleteEvents TValue="int" TItem="ProfessionVM" Filtering="OnFilterProfession" ValueChange="OnSelectedProfession"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Специалност: </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteSpeciality" TValue="int" TItem="SpecialityVM" AllowCustom="false" ShowClearButton="true"
+                                                    @bind-Value="this.model.Program.Speciality.IdSpeciality" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    DataSource="specialitySource" AllowFiltering="true">
+                                        <AutoCompleteTemplates TItem="SpecialityVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="CodeAndName" Value="IdSpeciality" />
+                                        <AutoCompleteEvents TValue="int" TItem="SpecialityVM" Filtering="OnFilterSpeciality" ValueChange="OnSelectedSpeciality"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Вид: </label>
+                                    <SfComboBox @bind-Value="this.model.IdTrainingCourseType" TItem="KeyValueVM" AllowCustom="false"
+                                                TValue="int?" DataSource="trainingCourseType">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Програма за обучение: </label>
+                                    <InputText class="form-control" @bind-Value="this.model.Program.ProgramName"></InputText>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Наименование на курса: </label>
+                                    <InputText class="form-control" @bind-Value="this.model.CourseName"></InputText>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Основна учебна база: </label>
+                                    <InputText class="form-control" @bind-Value="this.model.CandidateProviderPremises.PremisesName"></InputText>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Населено място: </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteLocation" TValue="int" TItem="LocationVM" AllowCustom="false"
+                                                    @bind-Value="this.model.Location.idLocation"
+                                                    DataSource="locationFiltered" AllowFiltering="true" CssClass="form-control">
+                                        <AutoCompleteTemplates TItem="LocationVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                        <AutoCompleteEvents TValue="int" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence" ValueChange="OnSelectedLocation"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Вид на курс: </label>
+                                    <SfComboBox @bind-Value="this.model.IdMeasureType" TItem="KeyValueVM" AllowCustom="false"
+                                                TValue="int?" DataSource="courseType">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Основен източник на финансиране: </label>
+                                    <SfComboBox @bind-Value="this.model.IdAssignType" TItem="KeyValueVM" AllowCustom="false"
+                                                TValue="int?" DataSource="assignType">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-group">
+                                    <label>СПК: </label>
+                                    <SfComboBox @bind-Value="this.nullableVQS" TItem="KeyValueVM" TValue="int?" DataSource="VQS">
+                                        <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="@OnSelectedVQS"></ComboBoxEvents>
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Форма на обучение: </label>
+                                    <SfComboBox @bind-Value="this.model.IdFormEducation" TItem="KeyValueVM" AllowCustom="false"
+                                                TValue="int?" DataSource="formEducation">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Рамкова програма: </label>
+                                    <SfComboBox @bind-Value="this.model.Program.IdFrameworkProgram" TItem="FrameworkProgramVM" AllowCustom="false"
+                                                TValue="int?" DataSource="frameworkSource">
+                                        <ComboBoxFieldSettings Value="IdFrameworkProgram" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Крайна дата за записване от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.subscribeDateFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Крайна дата за записване до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.subscribeDateTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за започване на курса от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.startCourseFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за започване на курса до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.startCourseTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за завършване на курса от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.endCourseFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за завършване на курса до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.endtCourseTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за изпит по теория от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.examTheoryDateFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за изпит по теория до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.examTheoryDateTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за изпит по практика от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.examPracticeDateFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>Дата за изпит по практика до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.examPracticeDateTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filterSection mainBGColor">
+                            <div class="col-12">
+                                Данни за курсист
+                            </div>
+                        </div>
+                        @if (this.type != GlobalConstants.UPCOMING_COURSES_LC && this.type != GlobalConstants.UPCOMING_COURSES_PP && this.type != GlobalConstants.UPCOMING_COURSES_SPK)
+                        {
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Име: </label>
+                                        <SfTextBox @bind-Value="this.model.clientCourseFirstName"></SfTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Фамилия: </label>
+                                        <SfTextBox @bind-Value="this.model.clientCourseLastName"></SfTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+
+                                    <div class="form-group">
+                                        <label class="control-label">ЕГН/ИДН/ЛНЧ: </label>
+                                        <SfTextBox @bind-Value="this.model.clientCourseIndent"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    </EditForm>
+                </div>
+            </div>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="submit" class="btn btn-info" form="mainForm">Търси</button>
+                        <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+
+</SfDialog>

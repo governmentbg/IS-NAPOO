@@ -1,0 +1,35 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <div class="row">
+                <div class="col-sm-7">
+                    <div class="form-group required">
+                        <label class="control-label">
+                            Специалност:
+                        </label>
+                        <SfComboBox Enabled="@(this.IsEditable)" @bind-Value="IdSpeciality" TItem="SpecialityVM" AllowCustom="false"
+                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" AllowFiltering="true"
+                                    TValue="int?" DataSource="SpecialitySource">
+                            <ComboBoxFieldSettings Value="IdSpeciality" Text="SpecialityCodeAndNameAndProfessionCodeAndName"></ComboBoxFieldSettings>
+                            <ComboBoxEvents TItem="SpecialityVM" TValue="int?" ValueChange="SpecialityChangeHandler"></ComboBoxEvents>
+                        </SfComboBox>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group required">
+                        <label class="control-label">
+                            Рамкова програма:
+                        </label>
+                        <SfComboBox @bind-Value="IdFrameworkProgram" TItem="FrameworkProgramVM" AllowCustom="false"
+                                    TValue="int?" Enabled="@(this.IsEditable && enableField)" DataSource="FrameworkSource">
+                            <ComboBoxFieldSettings Value="IdFrameworkProgram" Text="Name"></ComboBoxFieldSettings>
+                            @*<ComboBoxEvents TItem="FrameworkProgramVM" TValue="int?" ValueChange="FrameworkChange"></ComboBoxEvents>*@
+                        </SfComboBox>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>

@@ -1,0 +1,25 @@
+<AdapterOperation xmlns="http://egov.bg/RegiX/RegiXClientMetadata">
+  <OperationName>TechnoLogica.RegiX.NapooStudentDocumentsAdapter.APIService.INapooStudentDocumentsAPI.GetDocumentsByStudent</OperationName>
+  <Code>GetDocumentsByStudent</Code>
+  <ControllerName>APIS</ControllerName>
+  <RequestObjectName>DocumentsByStudentRequest</RequestObjectName>
+  <Namespace>http://egov.bg/RegiX/NAPOO/DocumentsByStudentRequest</Namespace>
+  <IsActive>true</IsActive>
+  <DisplayOperationName>Справка за издадените документи на лице по подаден идентификатор</DisplayOperationName>
+  <Parameters>
+    <Parameter>
+      <ParameterInfo>
+        <ParameterName>StudentIdentifier</ParameterName>
+        <ParameterLabel>Идентификатор на физическо лице - ЕГН/ЛНЧ/Друг вид идентификатор</ParameterLabel>
+        <IsRequired>true</IsRequired>
+        <IsXmlElement>true</IsXmlElement>
+        <OrderNumber>0</OrderNumber>
+        <ParameterType>
+          <Type>string</Type>
+          <EnumValues />
+        </ParameterType>
+      </ParameterInfo>
+      <ChildParamteters />
+    </Parameter>
+  </Parameters>
+</AdapterOperation>

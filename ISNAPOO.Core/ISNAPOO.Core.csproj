@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\Identity\**" />
+    <Compile Remove="ViewModels\CPO\Applications\**" />
+    <EmbeddedResource Remove="Services\Identity\**" />
+    <EmbeddedResource Remove="ViewModels\CPO\Applications\**" />
+    <None Remove="Services\Identity\**" />
+    <None Remove="ViewModels\CPO\Applications\**" />
+    <Compile Remove="ViewModels\Register\StateExaminationInfoFilterList.cs" />
+    <None Remove="ViewModels\Mail\" />
+    <None Remove="ViewModels\Training\" />
+    <None Remove="Services\Training\" />
+    <None Remove="Contracts\Training\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="6.0.3" />
+    <PackageReference Include="Syncfusion.DocIO.Net.Core" Version="20.2.0.36" />
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="20.2.0.36" />
+    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="20.2.0.36" />
+    <PackageReference Include="Syncfusion.XlsIORenderer.Net.Core" Version="20.2.0.36" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Models\Data.Models.csproj" />
+    <ProjectReference Include="..\DocuWorkService\DocuWorkService.csproj" />
+    <ProjectReference Include="..\ISNAPOO.Common\ISNAPOO.Common.csproj" />
+    <ProjectReference Include="..\RegiX\RegiX.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\Mail\" />
+    <Folder Include="Services\Training\" />
+    <Folder Include="Contracts\Training\" />
+    <Folder Include="ViewModels\NewFolder\" />
+  </ItemGroup>
+</Project>

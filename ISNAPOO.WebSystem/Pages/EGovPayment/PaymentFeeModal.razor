@@ -1,0 +1,77 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="70%" Height="70%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Заявка за плащане</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <p>Електронните плащания в ИС на НАПОО се извършват през Единната входна точка за електронни плащания за централната 
+                и местната администрация (pay.egov.bg). Повече информация за предоставените възможности 
+                за плащане може да получите на следния линк:
+                <a href="https://pay.egov.bg/Home/Help?focus=payment_methods" target="_blank">https://pay.egov.bg/Home/Help?focus=payment_methods</a>
+            </p>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>                          
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид на задължението: </label>
+                                        <InputText disabled="disabled" class="form-control" @bind-Value="paymentVM.ObligationType"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group required">
+                                        <label class="control-label">Сума на задължението: </label>
+                                        <SfNumericTextBox Enabled="false" @bind-Value="paymentVM.PaymentAmount" Format="0.00" ShowSpinButton="false"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                            </div>                                        
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Основание за плащане: </label>
+                                        <InputTextArea disabled="@isDisabled" rows="2" class="form-control" @bind-Value="paymentVM.PaymentReason"></InputTextArea>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Още пояснения: </label>
+                                        <InputTextArea disabled="@isDisabled" rows="2" class="form-control" @bind-Value="paymentVM.AdditionalInformation"></InputTextArea>
+                                    </div>
+                                </div>
+                            </div>                           
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">                           
+                            <button disabled="@isDisabled" type="button" class="btn btn-info btn-primary" @onclick="Submit">Заяви плащане</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

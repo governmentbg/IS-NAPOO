@@ -1,0 +1,54 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="60%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="this.isVisible" ZIndex="3003">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за съдържание на E-mail за анкета към лица
+        </Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Заглавие:
+                                </label>
+                                <input type="text" class="form-control" @bind="this.model.Header" @bind:event="oninput" />
+                                <div style="float: right"><label>@(!string.IsNullOrEmpty(this.model.Header) ? this.model.Header.Length : 0)/100</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Описание:
+                                </label>
+                                <textarea rows="7" class="form-control" @bind="model.Text" @bind:event="oninput" />
+                                <div style="float: right"><label>@(!string.IsNullOrEmpty(this.model.Text) ? this.model.Text.Length : 0)/1000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button style="margin-right: 5px;" class="btn btn-info" type="button" @onclick="(async () => { await this.SubmitBtn(); })">Изпрати</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+

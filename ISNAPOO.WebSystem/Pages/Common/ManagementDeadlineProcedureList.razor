@@ -1,0 +1,56 @@
+﻿@page "/ManagementDeadlineProcedureList"
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Управление на срокове по процедури </h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+
+
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="dataSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true" >
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                      
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ManagementDeadlineProcedureVM).IdManagementDeadlineProcedure).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdManagementDeadlineProcedure" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Width="5">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as ManagementDeadlineProcedureVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>  
+                            <GridColumn Field="LicensingTypeName" HeaderText="Вид лицензия " TextAlign="TextAlign.Left" Width="80px"></GridColumn> 
+                            <GridColumn Field="ApplicationStatusName" HeaderText="Статус/Етап на процедурата по лицензиране" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Term" HeaderText="Срок" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ManagementDeadlineProcedureModal @ref="managementDeadlineProcedureModal" CallbackAfterSave="UpdateAfterSave"></ManagementDeadlineProcedureModal>

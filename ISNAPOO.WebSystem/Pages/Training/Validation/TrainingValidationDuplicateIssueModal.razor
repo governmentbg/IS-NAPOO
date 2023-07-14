@@ -1,0 +1,181 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="95%" Height="95%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <EditForm EditContext="editContext">
+                <div id="validation-errors">
+                    <ValidationSummary />
+                </div>
+                <div class="card" style="margin-bottom: 0px;">
+                    <div class="card-body" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Валидирано лице: </label>
+                                        <SfComboBox ShowClearButton="true" TValue="int?" TItem="ValidationClientVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="clientsSource" AllowCustom="false" @bind-Value="this.duplicateIssueVM.IdValidationClient" Enabled="this.duplicateIssueVM.IdValidationClientDocument == 0">
+                                            <ComboBoxFieldSettings Text="FullName" Value="IdValidationClient" />
+                                            <ComboBoxEvents TItem="ValidationClientVM" TValue="int?" ValueChange="OnValidationClientSelectedEventHandlerAsync" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Протокол: </label>
+                                        <SfComboBox Enabled="false" ShowClearButton="true" TValue="int" TItem="ValidationProtocolVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="protocolsSource" AllowCustom="false" @bind-Value="this.duplicateIssueVM.IdValidationProtocol">
+                                            <ComboBoxFieldSettings Text="NameAndDate" Value="IdValidationProtocol" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Обща оценка:
+                                        </label>
+                                        <SfTextBox @bind-Value="this.duplicateIssueVM.FinalResult" Enabled="false" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Вид на издадения документ:
+                                        </label>
+                                        <SfTextBox @bind-Value="this.duplicateIssueVM.DocumentTypeName" Enabled="false" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Година:
+                                        </label>
+                                        <SfNumericTextBox Enabled="this.duplicateIssueVM.IdValidationClientDocument == 0" @bind-Value="this.duplicateIssueVM.FinishedYear" OnChange="OnFinishedYearValueChanged" ShowSpinButton="false" Format="0" />
+                                    </div>
+                                </div>
+                            </div>
+                            @if (this.duplicateIssueVM.HasDocumentFabricNumber)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">Фабричен номер на документа: </label>
+                                            <SfComboBox Enabled="this.duplicateIssueVM.IdValidationClientDocument == 0" ShowClearButton="true" TValue="int?" TItem="DocumentSerialNumberVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="documentSerialNumbersSource" AllowCustom="true" @bind-Value="this.duplicateIssueVM.IdDocumentSerialNumber">
+                                                <ComboBoxFieldSettings Text="SerialNumber" Value="IdDocumentSerialNumber" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Регистрационен номер на документа:
+                                            </label>
+                                            <SfTextBox Enabled="!this.duplicateIssueVM.IsRIDPKDocumentSubmitted" @bind-Value="this.duplicateIssueVM.DocumentRegNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Дата на издаване: </label>
+                                            <SfDatePicker Enabled="!this.duplicateIssueVM.IsRIDPKDocumentSubmitted" TValue="DateTime?" @bind-Value="this.duplicateIssueVM.DocumentDate" Format="dd.MM.yyyy" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Регистрационен номер на документа:
+                                            </label>
+                                            <SfTextBox Enabled="!this.duplicateIssueVM.IsRIDPKDocumentSubmitted" @bind-Value="this.duplicateIssueVM.DocumentRegNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">Дата на издаване: </label>
+                                            <SfDatePicker Enabled="!this.duplicateIssueVM.IsRIDPKDocumentSubmitted" TValue="DateTime?" @bind-Value="this.duplicateIssueVM.DocumentDate" Format="dd.MM.yyyy" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (this.duplicateIssueVM.IdValidationDocumentUploadedFile != 0)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Сканиран документ:
+                                            </label>
+                                            <SfUploader Enabled="!this.duplicateIssueVM.IsRIDPKDocumentSubmitted" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                                <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                            </SfUploader>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(this.duplicateIssueVM.UploadedFileName))
+                            {
+                                <div class="row e-upload" style="margin-left: 0px">
+                                    <div class="col-sm-8">
+                                        <button type="button" class="btn-row" disabled="@(this.duplicateIssueVM.IsRIDPKDocumentSubmitted)" @onclick="(() => OnRemove(this.duplicateIssueVM.FileName))"><i class="fa fa-trash-o"></i></button>
+                                        <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.duplicateIssueVM.FileName</a></span>
+                                    </div>
+                                </div>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.duplicateIssueVM.IdValidationClientDocument != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.duplicateIssueVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.duplicateIssueVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.duplicateIssueVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.duplicateIssueVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.duplicateIssueVM.IdValidationClientDocument != 0)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.Export())">Печат на дубликат</button>
+                                <button style="margin-right: 5px;" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="(() => OpenStatusHistoryBtn())">История на статуса</button>
+                            }
+                            @if (this.duplicateIssueVM.IdValidationClientDocument != 0 && this.duplicateIssueVM.IdValidationDocumentUploadedFile != 0 && this.duplicateIssueVM.HasUploadedFile && !this.duplicateIssueVM.IsRIDPKDocumentSubmitted)
+                            {
+                                <button style="margin-right: 15px;" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="(() => FileInForVerificationBtn())">Подай за проверка</button>
+                            }
+                            @if (!this.duplicateIssueVM.IsRIDPKDocumentSubmitted)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+<SubmissionCommentModal @ref="submissionCommentModal" CallbackAfterSubmit="SetDocumentRIDPKStatusAsSent" ValidationDocuments="this.validationClientDocuments" />
+<DocumentStatusModal @ref="documentStatusModal" />
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

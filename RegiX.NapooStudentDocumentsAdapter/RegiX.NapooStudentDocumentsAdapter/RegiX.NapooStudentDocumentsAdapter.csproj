@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>TechnoLogica.RegiX.NapooStudentDocumentsAdapter</RootNamespace>
+    <Authors>Dimitar Mitev</Authors>
+    <Company>TechnoLogica</Company>
+    <Description>Description for NapooStudentDocumentsAdapter</Description>
+    <Version Condition=" '$(Major)$(Minor)$(Patch)' == '' ">1.0.0.0</Version>
+    <Version Condition=" '$(Major)$(Minor)$(Patch)' != '' ">$(Major).$(Minor).$(Patch).0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="XMLSamples\*\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="XMLSchemas\*\Transformations\*.xslt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="XMLSchemas\*\*.xsd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="XMLMetaData\*\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RegiX.WebServiceAdapterService" Version="1.0.43" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ServiceModel" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Service References\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,59 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Повишаване на квалификацията на обучителите в ЦПО</Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid DataSource="this.dataGridSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false" AllowExcelExport="true" AllowPdfExport="true"
+                                        AllowTextWrap="true" @ref="this.dataGrid" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridEvents TValue="AnnualTrainerQualificationsVM" OnToolbarClick="ToolbarClick" />
+                                    <GridColumns>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" Width="5%">
+                                            <Template>
+                                                @this.GetRowNumber(this.dataGrid, (context as AnnualTrainerQualificationsVM).Id).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn HeaderText="Повишаване на квалификацията на обучителите в ЦПО" Width="40%">
+                                            <GridColumns>
+                                                <GridColumn Field="Profession" HeaderText="Професия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                <GridColumn HeaderText="Обучители, преминали обучение - брой" Width="10%">
+                                                    <GridColumns>
+                                                        <GridColumn Field="InternalTrainingCount" HeaderText="Вътрешно обучение" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                                        <GridColumn Field="ExternalTrainingCount" HeaderText="Във външни курсове" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                                    </GridColumns>
+                                                </GridColumn>
+                                                <GridColumn Field="TotalHours" HeaderText="Продължителност на обучението (брой учебни часове общо за вътрешни и външни курсове)" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                            </GridColumns>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+

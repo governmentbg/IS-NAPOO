@@ -1,0 +1,120 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="70%" Height="auto" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="@this.isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за такса за лицензиране
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="sumbitFrm">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Наименование на услугата:
+                                </label>
+                                <InputText class="form-control" @bind-Value="this.resultContext.ResultContextObject.Name" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Цена (лв.):
+                                </label>
+                                <InputText class="form-control" @bind-Value="this.resultContext.ResultContextObject.PriceAsStr"></InputText>
+                                @*<InputNumber class="form-control" ParsingErrorMessage="Полето 'Цена' е задължително!" @bind-Value="this.resultContext.ResultContextObject.Price" step="0.01" />*@
+                            </div>
+                        </div>
+                    </div>
+                       <div class="row">
+                     <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Допълнителна информация:
+                                </label>
+                                <InputText class="form-control" @bind-Value="this.resultContext.ResultContextObject.AdditionalInformation" />
+                            </div>
+                        </div>                       
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на заявлението:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" DataSource="@kvTypeApplicationSource" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.resultContext.ResultContextObject.IdTypeApplication" AllowCustom="false" AllowFiltering="true">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Статус на обработка на заявлението:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" DataSource="@kvApplicationStatusSource" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.resultContext.ResultContextObject.IdApplicationStatus" AllowFiltering="true">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Брой професии от:
+                                </label>
+                                <InputNumber class="form-control" @onfocusout="() => IsValid()" @bind-Value="this.resultContext.ResultContextObject.CountProfessionsFrom" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Брой професии до:
+                                </label>
+                                <InputNumber class="form-control" @onfocusout="() => IsValid()" @bind-Value="this.resultContext.ResultContextObject.CountProfessionsTo" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Дата на валидност от:
+                                </label>
+                                <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @onfocusout="() => IsExpirationDateToValid()" @bind-Value="this.resultContext.ResultContextObject.ExpirationDateFrom"></SfDatePicker>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Дата на валидност до:
+                                </label>
+                                <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @onfocusout="() => IsExpirationDateToValid()" @bind-Value="this.resultContext.ResultContextObject.ExpirationDateTo"></SfDatePicker>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-info" form="sumbitFrm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

@@ -1,0 +1,70 @@
+﻿@page "/SubmittedDocumentLicenseList"
+@attribute [Authorize(Policy = "ShowSubmittedDocumentLicenseList")]
+
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Candidate
+@inject IDataSourceService dataSourceService
+@inject ICandidateProviderService candidateProviderService
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+             <h6 class="page-title-left">@Header</h6>
+            <div class="card">
+               @* <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                        </ul>
+                    </nav>
+                </div> *@
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid"  @ref="sfGrid" DataSource="candidateProviderVMs" AllowSorting="true"  AllowTextWrap="true" AllowFiltering="true"
+                        AllowPaging="true" AllowSelection="true" AllowResizing="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                         
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CandidateProviderVM"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => OpenApplicationModalBtn(context as CandidateProviderVM))"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Width="40" Visible=false></GridColumn>
+                            <GridColumn Field="ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                            <GridColumn Field="Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="ApplicationNumber" HeaderText="Номер на заявление" TextAlign="TextAlign.Left" Width="50px">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        var applicationInfo = !string.IsNullOrEmpty(ctx.ApplicationNumber) ? ctx.ApplicationNumber : string.Empty;
+                                        var dateInfo = ctx.LicenceDate.HasValue ? $"{ctx.LicenceDate.Value.ToString("dd.MM.yyyy")}г." : string.Empty;
+
+                                        @($"{applicationInfo}/{dateInfo}")
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ApplicationStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="125px"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<ApplicationModal @ref="applicationModal" />
+<CIPOApplicationModal @ref="cipoApplicationModal" />

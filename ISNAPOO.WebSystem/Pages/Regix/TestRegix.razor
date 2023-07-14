@@ -1,0 +1,18 @@
+﻿@page "/TestRegix"
+@inherits BlazorBaseComponent
+
+<button type="button" class="btn btn-info" @onclick="TestSing">Проверка на услугите на Regix</button>
+
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <SfGrid ID="Grid" @ref="Grid" DataSource="@GridData">                
+                <GridColumns>
+                    <GridColumn Field=@nameof(TestRegixResult.Register) HeaderText="Register" IsPrimaryKey="true" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                    <GridColumn Field=@nameof(TestRegixResult.Status) HeaderText="Status" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+</div>

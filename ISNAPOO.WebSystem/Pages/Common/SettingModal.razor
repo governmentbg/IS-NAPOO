@@ -1,0 +1,179 @@
+﻿@using Data.Models.Data.ProviderData
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Common
+@using ISNAPOO.Core.ViewModels.Common
+
+@inject ISettingService SettingService
+@inject IDataSourceService DataSourceService
+@inject UserManager<ApplicationUser> userManager
+@inherits BlazorBaseComponent
+
+
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="60%" EnableResize=true AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@IsVisibleAddModal" CssClass="@dialogClass">
+
+    <DialogTemplates>
+        <Header>
+            Данни за настройка
+        </Header>
+        <Content>
+            <EditForm Model="model" OnSubmit="@Save">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Име:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.SettingName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Код:
+                                </label>
+                                <InputText Readonly="true" class="form-control" @bind-Value="model.SettingIntCode" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Стойност:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.SettingValue" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="model.SettingDescription" />
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <div class="text-right">
+                                <button class="btn btn-info" type="submit">Запиши</button>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="@Cancel">Отказ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+@code {
+
+    private bool IsVisibleAddModal { get; set; } = false;
+    SfDialog sfDialog;
+    ToastMsg toast;
+    private string dialogClass = "";
+    SettingVM model = new SettingVM();
+
+    [Parameter]
+    public EventCallback<SettingVM> CallbackAfterSave { get; set; }
+
+    private string prevSettingIntCode = string.Empty;
+    private string prevSettingName = string.Empty;
+
+    public void OpenModal(SettingVM _model)
+    {
+        this.IsVisibleAddModal = true;
+        this.model = _model;
+        prevSettingIntCode = model.SettingIntCode;
+        prevSettingName = model.SettingName;
+        this.StateHasChanged();
+    }
+
+    public async Task<SettingVM> SaveFromParent()
+    {
+        return this.model;
+    }
+
+    private async Task Save()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageSettingsData", false);
+        if (!hasPermission) { return; }
+        this.SpinnerShow();
+
+        if (model.SettingClass.Equals("int"))
+        {
+            int number;
+            bool IsInt = int.TryParse(model.SettingValue, out number);
+            if (!IsInt)
+            {
+                await this.ShowErrorAsync("Стойноста трябва да е само числа!");
+                return;
+            }
+        }
+        else if (model.SettingClass.Equals("bool"))
+        {
+            bool boolean;
+            bool IsBool = bool.TryParse(model.SettingValue, out boolean);
+            if (!IsBool)
+            {
+                await this.ShowErrorAsync("Стойноста трябва да е true или false!");
+                return;
+            }
+
+        }
+
+        ResultContext<SettingVM> resultContext = new ResultContext<SettingVM>();
+
+        resultContext.ResultContextObject = this.model;
+
+
+
+        resultContext = await this.SettingService.UpdateSettingeAsync(resultContext);
+
+        if (resultContext.HasErrorMessages)
+        {
+            await this.ShowErrorAsync(string.Join(Environment.NewLine, resultContext.ListErrorMessages));
+           
+             
+        }
+        else
+        {
+            if (resultContext.ResultContextObject.SettingIntCode == "MaxFailedAccessAttempts")
+            {
+                userManager.Options.Lockout.MaxFailedAccessAttempts = Int32.Parse(resultContext.ResultContextObject.SettingValue);
+            }
+            if (resultContext.ResultContextObject.SettingIntCode == "DefaultLockoutTimeSpan")
+            {
+                userManager.Options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(Int32.Parse(resultContext.ResultContextObject.SettingValue));
+            }
+
+            await DataSourceService.ReloadSettings();
+            await SettingService.ReloadSettings();
+            await this.ShowSuccessAsync("Записът е успешен!");
+            
+        }
+        this.SpinnerHide();
+        await CallbackAfterSave.InvokeAsync(this.model);
+    }
+    private void Cancel()
+    {
+        this.IsVisibleAddModal = false;
+    }
+}

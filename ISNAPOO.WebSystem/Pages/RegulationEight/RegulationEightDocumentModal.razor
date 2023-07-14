@@ -1,0 +1,108 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за документ по Наредба №8</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div id="validation-errors">
+                    <ValidationSummary />
+                </div>
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">№ на документа: </label>
+                                        <InputText class="form-control" @bind-Value="this.typeOfRequestedDocumentVM.DocTypeOfficialNumber"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-9">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид на документа: </label>
+                                        <InputText class="form-control" @bind-Value="this.typeOfRequestedDocumentVM.DocTypeName"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Статус на документа: </label>
+                                        <SfDropDownList TValue="bool" TItem="ValidValue" @bind-Value="this.typeOfRequestedDocumentVM.IsValid" DataSource="validSource">
+                                            <DropDownListFieldSettings Value="IsValid" Text="Name"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Единична цена: </label>
+                                        <InputText class="form-control" @bind-Value="this.typeOfRequestedDocumentVM.PriceAsStr"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Номер по ред: </label>
+                                        <InputNumber class="form-control" ParsingErrorMessage="Полето 'Номер по ред' е задължително!" @bind-Value="this.typeOfRequestedDocumentVM.Order"></InputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="form-group">
+                                        <label class="control-label">Вид на курс за обучение:</label>
+                                        <SfComboBox TValue="int?" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    DataSource="typeFrameworkPrograms" AllowFiltering="true" @bind-Value="this.typeOfRequestedDocumentVM.IdCourseType">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="this.typeOfRequestedDocumentVM.HasSerialNumber" checked="@(this.typeOfRequestedDocumentVM.HasSerialNumber ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Има фабричен номер</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="this.typeOfRequestedDocumentVM.IsDestroyable" checked="@(this.typeOfRequestedDocumentVM.IsDestroyable ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Подлежи на унищожаване</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="saveForm" @onclick="Submit">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+

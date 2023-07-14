@@ -1,0 +1,147 @@
+﻿@inject IKeyValueService KeyValueService
+@inject IJSRuntime JsRuntime
+@inject IDataSourceService Datasourceservice
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewKeyValue">Нов</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="keyValues" AllowSorting="true" AllowFiltering="true" AllowPaging="true" AllowTextWrap="true" @ref="grid">
+                        <GridPageSettings PageSize="8" PageCount="5"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(grid, (context as KeyValueVM).IdKeyValue).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button type="button" class="btn-row"  @onclick="(() => SelectedRow(context as KeyValueVM))">
+                                        <i class="fa fa-pencil-square-o"></i>
+                                    </button>
+                                     </SfTooltip>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+									<button type="button" class="btn-row"  @onclick="(() => DeleteRow(context as KeyValueVM))">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                        </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdKeyValue" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Visible="false"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Наименование" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                            <GridColumn Field="Order" HeaderText="Поредност" TextAlign="TextAlign.Center" Width="10%"></GridColumn>
+                            <GridColumn Field="KeyValueIntCode" HeaderText="Код" TextAlign="TextAlign.Left" Width="10%"></GridColumn>                           
+                            <GridColumn Field="IsActive" HeaderText="Активен/Неактивен" TextAlign="TextAlign.Left" Width="20%">
+                                <Template>
+                                    <div class="text-center">
+                                            @{
+                                                var providerStatus = context as KeyValueVM;
+                                                if (providerStatus.IsActive)
+                                                {
+                                                    <label class="form-label-status label label-success" style="width: 100px;">Активен</label>
+                                                }
+                                                else
+                                                {
+                                                    <label class="form-label-status label label-danger" style="width: 100px;">Неактивен</label>
+                                                }
+                                              }
+                                      </div>
+                                </Template>
+                            </GridColumn>                           
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+<KeyValueModal @ref="keyValueModal" OnSubmitHandler="OnModalSubmitHandler"></KeyValueModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+@code {
+    ToastMsg toast;
+    SfGrid<KeyValueVM> grid = new SfGrid<KeyValueVM>();
+    IEnumerable<KeyValueVM> keyValues = new List<KeyValueVM>();
+    KeyValueModal keyValueModal = new KeyValueModal();
+    KeyValueVM ToBeDeleted = new KeyValueVM();
+    int idKeyType = 0;
+
+    public void Open(IEnumerable<KeyValueVM> keyValues, int idKeyType)
+    {
+        this.idKeyType = idKeyType;
+        this.keyValues = keyValues;
+        this.StateHasChanged();
+    }
+
+    private async Task SelectedRow(KeyValueVM model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        model.IdKeyType = this.idKeyType;
+        await this.keyValueModal.Open(model);
+    }
+
+    private async Task AddNewKeyValue()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        await this.keyValueModal.Open(new KeyValueVM() { IdKeyType = this.idKeyType });
+    }
+
+    private async Task OnModalSubmitHandler()
+    {
+        await this.Datasourceservice.ReloadKeyValue();
+        this.keyValues = await this.KeyValueService.GetAllAsync(new KeyValueVM() { IdKeyType = this.idKeyType });
+
+        grid.Refresh();
+
+    }
+
+    private async Task DeleteRow(KeyValueVM model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        ToBeDeleted = model;
+        string msg = "Сигурни ли сте, че искате да изтриете избрания запис?";
+        bool isConfirmed = await this.ShowConfirmDialogAsync(msg);
+
+        if (isConfirmed)
+        {
+            //this.ConfirmDialog.showConfirmDialog = this.showConfirmDialog;
+            this.StateHasChanged();
+            var result = await this.KeyValueService.DeleteKeyValueAsync(model);
+
+            if (result.Contains("успешно"))
+            {
+                this.ShowSuccessAsync(result);
+                await this.OnModalSubmitHandler();
+                
+            }
+            else
+            {
+                this.ShowErrorAsync(result);
+            }
+        }
+        await this.grid.Refresh();
+    }
+}

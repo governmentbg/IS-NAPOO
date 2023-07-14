@@ -1,0 +1,57 @@
+﻿@using ClickEventArgs = Syncfusion.Blazor.Navigations.ClickEventArgs
+@using Syncfusion.ExcelExport
+@using Border = Syncfusion.Blazor.Grids.Border
+@inherits BlazorBaseComponent
+<div class="card">
+    <div class="card-block">
+        <SfGrid DataSource="candidateProviders" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                AllowTextWrap="true" @ref="sfGrid" AllowPaging="true" Height="450"
+                Toolbar="@(new List<string>() { "ExcelExport","CsvExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+            <GridSelectionSettings CheckboxOnly="true" />
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+            <GridEvents TValue="CandidateProviderVM" OnToolbarClick="ToolbarClick" />
+            <GridColumns>
+                <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="2%">
+                    <Template>
+                        @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                    </Template>
+                </GridColumn>
+
+                <GridColumn Width="2.5%">
+                    <Template>
+                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Процедура за лицензиране" OpensOn="Hover">
+                            @{
+                                var rowModel = context as CandidateProviderVM;
+                                if (rowModel.IdStartedProcedure.HasValue)
+                                {
+                                    <button @onclick="(async () => await SelectedRowProcedure(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-list-alt"></i></button>
+                                }
+                            }
+                        </SfTooltip>
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                <GridColumn Field="applicationNumberAndDate" HeaderText="Заявление №" TextAlign="TextAlign.Left" Width="30%">
+                    <Template>
+                        @{
+                            var applicationNumber = !string.IsNullOrEmpty((context as CandidateProviderVM).ApplicationNumber) ? $"{(context as CandidateProviderVM).ApplicationNumber}/" : string.Empty;
+                            var applicationDate = (context as CandidateProviderVM).ApplicationDate == null ? string.Empty : (context as CandidateProviderVM).ApplicationDate.Value.ToString("dd.MM.yyyy") + "г.";
+                            var applicationNumberAndDate = applicationNumber + applicationDate;
+                            @(applicationNumberAndDate)
+
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="TypeApplication" HeaderText="Процедура" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                <GridColumn Field="ApplicationStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="20%"></GridColumn>
+
+
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+<ProcedureModal @ref="procedureModal" />
+<ChangeProcedureModal @ref="changeProcedureModal" />
+
+ 

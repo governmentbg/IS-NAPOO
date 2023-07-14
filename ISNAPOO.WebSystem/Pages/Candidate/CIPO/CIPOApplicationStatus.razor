@@ -1,0 +1,159 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="card">
+    <div class="card-block" style="padding-top: 0px;">
+        <p>
+            <nav class="navbar navbar-expand">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav float">
+                    <li class="nav-item d-none d-sm-inline-block float-none">
+                        <button class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.ValidateApplicationAsync(true))"><i class="fa fa-check-square-o" style="margin-right: 5px;" disabled="@(this.DisableAllFields)"></i>Валидирай заявление</button>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block float-none">
+                        <button type="button" @onclick="(() => PrintApplication())" class="btn btn-primary btn-outline-primary waves-effect md-trigger"><i class="fa fa-list-alt" style="margin-right: 5px;" disabled="@(this.DisableAllFields)"></i>Печат заявление</button>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block float-none">
+                        <button class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="OpenPaymentFeeListModal"><i class="fa fa-credit-card" style="margin-right: 5px;"></i>Плащане на такси</button>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block float-none">
+                        <button class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" disabled="@isBtnDisabled" @onclick="StartProcedure"><i class="fa fa-send-o" style="margin-right: 5px;"></i>Подай документи към НАПОО</button>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                </ul>
+            </nav>
+            <div class="row align-items-start">
+                <div class="col-sm-12">
+                    <EditForm EditContext="this.editContext">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        УИН на заявление:
+                                    </label>
+                                    <InputNumber class="form-control" @bind-Value="this.CandidateProviderVM.UIN" disabled />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        № на заявление:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="this.CandidateProviderVM.ApplicationNumber" disabled="@(!this.isUserInRoleNAPOO)" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата:
+                                    </label>
+                                    <SfDatePicker Enabled="@(this.isUserInRoleNAPOO)" @bind-Value="this.CandidateProviderVM.ApplicationDate" Format="dd.MM.yyyy" CssClass="form-control" TValue="DateTime?" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Вид на лицензията:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="licenseType" disabled />
+                                </div>
+                            </div>
+                            @*<div class="col-sm-3">
+                            <div class="form-group">
+                            <label class="control-label">
+                            Статус на обработка на заявлението:
+                            </label>
+                            <InputText class="form-control" @bind-Value="applicationStatus" disabled />
+                            </div>
+                            </div>*@
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group required">
+                                    <label class="control-label">Заявявам желанието си издаденият индивидуален административен акт и лицензията да бъдат получени: </label>
+                                    <SfDropDownList Enabled="!this.DisableAllFields || this.isUserInRoleNAPOO" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" ShowClearButton="true" CssClass="e-multi-column"
+                                                    @bind-Value="CandidateProviderVM.IdReceiveLicense" DataSource="kvReceiveLicenseSource">
+                                        <DropDownListFieldSettings Text="Description" Value="IdKeyValue" />
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group required">
+                                    <label class="control-label">Подаването в НАПОО на разпечатаното от ИС заявление и документ за платена държавна такса, определена в тарифа на Министерски съвет по чл. 60, ал. 2, т. 1 от ЗПОО, да стане по следните начини: </label>
+                                    <SfDropDownList Enabled="!this.DisableAllFields || this.isUserInRoleNAPOO" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" ShowClearButton="true"
+                                                    @bind-Value="CandidateProviderVM.IdApplicationFiling" DataSource="kvApplicationFilingSource">
+                                        <DropDownListFieldSettings Text="Description" Value="IdKeyValue" />
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+                        @if (this.CandidateProviderVM.IdApplicationFiling.HasValue)
+                        {
+                            if (this.CandidateProviderVM.IdApplicationFiling.Value == this.idKvESign)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Прикачване на подписано с електронен подпис заявление:
+                                            </label>
+                                            <SfUploader AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                                <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                            </SfUploader>
+                                        </div>
+                                    </div>
+                                </div>
+                                if (!string.IsNullOrEmpty(this.CandidateProviderVM.ESignApplicationFileName))
+                                {
+                                    <div class="row e-upload" style="margin-left:0px">
+                                        <div class="col-sm-8">
+                                            <button type="button" class="btn-row" @onclick="(() => OnRemove(this.CandidateProviderVM.ESignApplicationFileName))"><i class="fa fa-trash-o"></i></button>
+                                            <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.CandidateProviderVM.ESignApplicationFileName</a></span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                    </EditForm>
+                </div>
+            </div>
+        </p>
+    </div>
+</div>
+
+<style>
+    .e-multi-column.e-ddl.e-popup.e-popup-open {
+        text-overflow: unset !important;
+    }
+
+    .e-dropdownbase .e-list-item {
+        white-space: unset !important;
+        overflow-wrap: break-word !important;
+        text-overflow: unset !important;
+    }
+
+    .e-multi-column.e-ddl.e-popup.e-popup-open td {
+        padding-right: 0px !important;
+        text-indent: 0px !important;
+    }
+
+    .name {
+        padding-left: 10px;
+    }
+</style>
+
+<CIPOFormApplicationModal @ref="form" IdCandidateProvider="this.CandidateProviderVM.IdCandidate_Provider"></CIPOFormApplicationModal>
+<ISNAPOO.WebSystem.Pages.EGovPayment.PaymentFeeListModal @ref="paymentFeeListModal"></ISNAPOO.WebSystem.Pages.EGovPayment.PaymentFeeListModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

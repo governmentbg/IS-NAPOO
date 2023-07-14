@@ -1,0 +1,103 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" Height="65%" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Промяна на лицензия</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            @*<div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.editContext.GetValidationMessages())
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>*@
+            <EditForm EditContext="editContext" OnSubmit="SubmitChangeLicenseHandler" id="submitChangeLicenseForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Промяна на статуса на лицензията:
+                                </label>
+                                <SfComboBox Enabled="candidateProviderLicesingVM.IdCandidateProviderLicenceChange == 0" TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderLicesingVM.IdStatus" DataSource="kvLicenseChangeStatus" AllowFiltering="true" AllowCustom="false">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    № на заповед:
+                                </label>
+                                <div>
+                                    <InputText class="form-control" @bind-Value="this.candidateProviderLicesingVM.NumberCommand" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Дата:
+                                </label>
+                                <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.candidateProviderLicesingVM.ChangeDate"></SfDatePicker>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Бележки:
+                                </label>
+                                <CustomInputTextArea rows="4" maxlength="512" class="form-control" @bind-Value="this.candidateProviderLicesingVM.Notes"></CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderLicesingVM.Notes != null ? this.candidateProviderLicesingVM.Notes.Length : 0)/512</label></div>                       
+                            </div>
+                        </div>
+                    </div>
+                    @if (this.candidateProviderLicesingVM.IdStatus == 4636)
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Съхранение на архива:
+                                    </label>
+                                   <CustomInputTextArea rows="4" maxlength="4000" class="form-control" @bind-Value="this.candidateProviderLicesingVM.Archive"></CustomInputTextArea>
+                                  <div style="float:right"><label>@(this.candidateProviderLicesingVM.Archive != null ? this.candidateProviderLicesingVM.Archive.Length : 0)/4000</label></div>       
+                                </div>
+                            </div>
+                        </div>
+                    }                  
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="submitChangeLicenseForm">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>

@@ -1,0 +1,864 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <p></p>
+            <div class="card">
+                <div class="card-header">
+                    <nav>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <nav class="navbar navbar-expand" style="padding-top:0">
+                                    <ul class="navbar-nav">
+                                        @if (this.IsCPO)
+                                        {
+                                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange && !this.DisableFieldsWhenUserIsNAPOO)
+                                            {
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на специалност/и за избран преподавател" OpensOn="Hover">
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSpecialitiesToTrainersClickHandler" disabled="@(this.candidateProviderTrainerVM.IdCandidateProviderTrainer == 0)">Добави специалност</button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <label>&nbsp</label>
+                                            }
+
+                                            @if (this.DisableFieldsWhenUserIsNAPOO)
+                                            {
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на информация за извършена проверка от НАПОО" OpensOn="Hover">
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddCheckingToTrainersClickHandler" disabled="@(this.candidateProviderTrainerVM.IdCandidateProviderTrainer == 0)">Проверка НАПОО</button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <label>&nbsp</label>
+                                            }
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-2">
+                                <nav class="navbar navbar-expand" style="justify-content: flex-end;padding-top:0;">
+                                    <ul class="navbar-nav">
+                                        <label>&nbsp</label>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="@(this.IsCPO ? "Справка за преподавателския състав" : "Справка за консултанти")" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="ExportPDF">Справка</button>
+                                            </SfTooltip>
+                                        </li>
+
+                                        <label>&nbsp</label>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="@(this.IsCPO ? "Търсене в списъка с преподаватели по зададени критерии" : "Търсене в списъка с консултанти по зададени критерии")" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterModalBtn">Филтър</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <label>&nbsp</label>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-7">
+                                <nav class="navbar navbar-expand" style="padding-top:0;">
+                                    <ul class="navbar-nav">
+                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                        {
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="@(this.IsCPO ? "Добавяне на информация за нов преподавател" : "Добавяне на информация за нов консултант")" OpensOn="Hover">
+                                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewTrainerClickHandler">Нов @(this.IsCPO ? "преподавател" : "консултант")</button>
+                                                </SfTooltip>
+                                            </li>
+                                            <label>&nbsp</label>
+                                        }
+
+                                        @if (this.trainersSource.Count > 1 && this.candidateProviderTrainerVM is not null && this.candidateProviderTrainerVM.IdCandidateProviderTrainer != 0)
+                                        {
+                                            <li class="nav-item d-none d-sm-inline-block" style="@(!this.DisableFieldsWhenUserIsExternalExpertOrCommittee ? "margin-left: 40px; !important" : string.Empty)">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PreviousTrainerBtn" disabled="@(this.disablePreviousBtn)"><i class="fa fa-arrow-circle-left" style="margin-right: 3px !important;"></i>Предишен @(this.IsCPO ? "преподавател" : "консултант")</button>
+                                            </li>
+                                            <label>&nbsp</label>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextTrainerBtn" disabled="@(this.disableNextBtn)"><i class="fa fa-arrow-circle-right" style="margin-right: 3px !important;"></i>Следващ @(this.IsCPO ? "преподавател" : "консултант")</button>
+                                            </li>
+                                            <label>&nbsp</label>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <div class="row mainBGColor">
+                        <div class="col-sm-5">
+                            <SfGrid DataSource="this.trainersSource"
+                                    AllowPaging="false" EnableAltRow="true" EnableHover="false" Height="500" SelectedRowIndex="0"
+                                    AllowTextWrap="true" @ref="trainersGrid" AllowFiltering="true" AllowSelection="true" AllowPdfExport="true">
+                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                <GridEvents TValue="CandidateProviderTrainerVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" QueryCellInfo="QueryCellInfo"
+                                            OnRecordClick="TrainerRecordClickHandler" RowSelecting="TrainerSelectingHandler" />
+                                @if (this.IsCPO)
+                                {
+                                    <GridTemplates>
+                                        <DetailTemplate Context="specialitiesCtx">
+                                            <div>
+                                                <SfTab>
+                                                    <ChildContent>
+                                                        <div class="text-center">
+                                                            <label class="control-label" style="font-size: large">Специалности, по които преподава:</label>
+                                                        </div>
+                                                        <TabItems>
+                                                            <TabItem>
+                                                                <ChildContent>
+                                                                    <TabHeader Text="Обучение по теория"></TabHeader>
+                                                                </ChildContent>
+                                                                <ContentTemplate>
+                                                                    @{
+                                                                        var candidateProviderTrainer = specialitiesCtx as CandidateProviderTrainerVM;
+                                                                        string DOC = "Няма";
+                                                                        if (candidateProviderTrainer.CandidateProviderTrainerSpecialities == null)
+                                                                        {
+
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            var candidateProviderTrainerFromSource = this.trainersSource.FirstOrDefault(x => x.IdCandidateProviderTrainer == candidateProviderTrainer.IdCandidateProviderTrainer);
+                                                                            if(candidateProviderTrainerFromSource != null)
+                                                                            {
+                                                                            List<CandidateProviderTrainerSpecialityVM> list = candidateProviderTrainerFromSource.CandidateProviderTrainerSpecialities.OrderBy(x => x.Speciality.Code).ToList();
+                                                                            foreach (var speciality in list)
+                                                                            {
+                                                                                var temp = this.specialitiesSource.First(x => x.IdSpeciality == speciality.IdSpeciality);
+                                                                                var doc = this.docSource.FirstOrDefault(x => x.IdProfession == temp.IdProfession);
+                                                                                if (speciality.IdUsage == kvTheory.IdKeyValue || speciality.IdUsage == kvTheoryAndPractice.IdKeyValue)
+                                                                                {
+                                                                                    if (kvDocComplianceYes.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Напълно";
+                                                                                    }
+                                                                                    if (kvDocComplianceNo.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Не съответства";
+                                                                                    }
+                                                                                    if (kvDocCompliancePartial.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                    {
+                                                                                        DOC = "Съответствие с ДОС: Частично";
+                                                                                    }
+                                                                                    if (temp.IdVQS != 0)
+                                                                                    {
+                                                                                        temp.VQS_Name = this.kvVQSSource.FirstOrDefault(x => x.IdKeyValue == temp.IdVQS).Name;
+                                                                                    }
+
+                                                                                    <p style="margin-bottom: -7px;">
+                                                                                        <button type="button" class="btn-row" @onclick="(() => this.ShowDOSInfo(doc))"><i class="fa fa-info-circle"></i></button> <b>
+                                                                                            @(
+                                                                                            $"{temp.CodeAndName}, {temp.VQS_Name}"
+                                                                                                ) <span style="color: gray" id="docInfo">
+                                                                                                @(
+                                                                                                DOC
+                                                                                                    )
+                                                                                            </span>
+                                                                                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                                                            {
+                                                                                                <button type="button" class="btn-row" @onclick="(async () => await this.DeleteSpecialityBtn(speciality.IdSpeciality, candidateProviderTrainer.IdCandidateProviderTrainer, this.kvTheory.IdKeyValue))"><i class="fa fa-times"></i></button>
+                                                                                            }
+                                                                                            <br style="display: block; margin-bottom: 0em" />
+                                                                                        </b>
+                                                                                        <span style="color: gray">
+                                                                                            @(
+                                                                                            $"Добавена на: {speciality.ModifyDate.ToString(GlobalConstants.DATE_FORMAT)} г."
+                                                                                                )
+                                                                                        </span> <br style="display: block; margin-bottom: 2em" />
+                                                                                    </p>
+                                                                                }
+                                                                            }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                </ContentTemplate>
+                                                            </TabItem>
+                                                            <TabItem>
+                                                                <ChildContent>
+                                                                    <TabHeader Text="Обучение по практика"></TabHeader>
+                                                                </ChildContent>
+                                                                <ContentTemplate>
+                                                                    @{
+                                                                        var candidateProviderTrainer = specialitiesCtx as CandidateProviderTrainerVM;
+                                                                        string DOC = "Няма";
+                                                                        if (candidateProviderTrainer.CandidateProviderTrainerSpecialities == null)
+                                                                        {
+
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            var candidateProviderTrainerFromSource = this.trainersSource.FirstOrDefault(x => x.IdCandidateProviderTrainer == candidateProviderTrainer.IdCandidateProviderTrainer);
+                                                                            if(candidateProviderTrainerFromSource != null)
+                                                                            {
+                                                                                List<CandidateProviderTrainerSpecialityVM> list = candidateProviderTrainerFromSource.CandidateProviderTrainerSpecialities.OrderBy(x => x.Speciality.Code).ToList();
+                                                                                foreach (var speciality in list)
+                                                                                {
+                                                                                    var temp = this.specialitiesSource.First(x => x.IdSpeciality == speciality.IdSpeciality);
+                                                                                    var doc = this.docSource.FirstOrDefault(x => x.IdProfession == temp.IdProfession);
+                                                                                    if (speciality.IdUsage == kvPractice.IdKeyValue || speciality.IdUsage == kvTheoryAndPractice.IdKeyValue)
+                                                                                    {
+                                                                                        if (kvDocComplianceYes.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                        {
+                                                                                            DOC = "Съответствие с ДОС: Напълно";
+                                                                                        }
+                                                                                        if (kvDocComplianceNo.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                        {
+                                                                                            DOC = "Съответствие с ДОС: Не съответства";
+                                                                                        }
+                                                                                        if (kvDocCompliancePartial.IdKeyValue == speciality.IdComplianceDOC)
+                                                                                        {
+                                                                                            DOC = "Съответствие с ДОС: Частично";
+                                                                                        }
+                                                                                        if (temp.IdVQS != 0)
+                                                                                        {
+                                                                                            temp.VQS_Name = this.kvVQSSource.FirstOrDefault(x => x.IdKeyValue == temp.IdVQS).Name;
+                                                                                        }
+
+                                                                                        <p style="margin-bottom: -7px;">
+                                                                                            <button type="button" class="btn-row" @onclick="(() => this.ShowDOSInfo(doc))"><i class="fa fa-info-circle"></i></button> <b>
+                                                                                                @(
+                                                                                    $"{temp.CodeAndName}, {temp.VQS_Name}"
+                                                        ) <span style="color: gray" id="docInfo">
+                                                                                                    @(
+                                                                                        DOC
+                                                        )
+                                                                                                </span>
+                                                                                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                                                                {
+                                                                                                    <button type="button" class="btn-row" @onclick="(() => DeleteSpecialityBtn(speciality.IdSpeciality, candidateProviderTrainer.IdCandidateProviderTrainer, this.kvPractice.IdKeyValue))"><i class="fa fa-times"></i></button>
+                                                                                                }
+                                                                                                <br style="display: block; margin-bottom: 0em" />
+                                                                                            </b>
+                                                                                            <span style="color: gray">
+                                                                                                @(
+                                                                                    $"Добавена на: {speciality.ModifyDate.ToString(GlobalConstants.DATE_FORMAT)} г."
+                                                        )
+                                                                                            </span> <br style="display: block; margin-bottom: 2em" />
+                                                                                        </p>
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                </ContentTemplate>
+                                                            </TabItem>
+                                                            <TabItem Visible="this.DisableFieldsWhenUserIsNAPOO">
+                                                                <ChildContent>
+                                                                    <TabHeader Text="Проверка НАПОО"></TabHeader>
+                                                                </ChildContent>
+                                                                <ContentTemplate>
+                                                                    @{
+                                                                        var candidateProviderTrainer = specialitiesCtx as CandidateProviderTrainerVM;
+                                                                        var candidateProviderTrainerFromSource = this.trainersSource.FirstOrDefault(x => x.IdCandidateProviderTrainer == candidateProviderTrainer.IdCandidateProviderTrainer);
+                                                                        if (candidateProviderTrainerFromSource.CandidateProviderTrainerCheckings != null)
+                                                                        {
+                                                                            foreach (var checking in candidateProviderTrainerFromSource.CandidateProviderTrainerCheckings)
+                                                                            {
+                                                                                <p style="margin-bottom: -15px;">
+                                                                                    <b>
+                                                                                        @($"{(checking.CheckDone ? "Дата:" + checking.CheckingDate.Value.ToString(GlobalConstants.DATE_FORMAT) + " г." + ". Коментар:" + checking.Comment : string.Empty)}")
+                                                                                        <button type="button" class="btn-row"
+                                                                                        @onclick="(() => DeleteChecking(checking))">
+                                                                                            <i class="fa fa-times"></i>
+                                                                                        </button>
+                                                                                        <br style="display: block; margin-bottom: 0em" />
+                                                                                    </b>
+                                                                                    <br style="display: block; margin-bottom: 2em" />
+                                                                                </p>
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                </ContentTemplate>
+                                                            </TabItem>
+                                                        </TabItems>
+                                                    </ChildContent>
+                                                </SfTab>
+                                            </div>
+                                        </DetailTemplate>
+                                    </GridTemplates>
+                                }
+                                <GridColumns>
+                                    <GridColumn Field="IdCandidateProviderTrainer" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap font-size-10px" }})" TextAlign="TextAlign.Left" Width="10" HeaderText=" ">
+                                        <Template>
+                                            @GetRowNumber(this.trainersGrid, (context as CandidateProviderTrainerVM).IdCandidateProviderTrainer).Result
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                    <GridColumn Field="SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="45"></GridColumn>
+                                    <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="45"></GridColumn>
+                                    <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Center" Width="35"></GridColumn>
+                                    <GridColumn TextAlign="TextAlign.Center" Width="25">
+                                        <Template>
+                                            @{
+                                                var trainer = context as CandidateProviderTrainerVM;
+                                                string temp = "преподавател";
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на промените" OpensOn="Hover">
+                                                    <button type="button" class="btn-row" @onclick="(async () => await this.trainerStatusModal.OpenModal(trainer, temp))"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                        <div class="col-sm-7">
+                            <SfAccordion ExpandMode="ExpandMode.Single">
+                                <AccordionItems>
+                                    <AccordionItem ExpandedChanged="ChangeExpand" Expanded="this.isAccordionExpanded">
+                                        <HeaderTemplate>
+                                            Данни за @(this.IsCPO ? "преподавател" : "консултант/лице от адм. персонал") <span style="color: #01a9ac !important;">@this.trainerNameInformation</span>
+                                        </HeaderTemplate>
+                                        <ContentTemplate>
+                                            <EditForm EditContext="this.editContextGeneralData">
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Име:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderTrainerVM.FirstName" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Презиме:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderTrainerVM.SecondName" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <!-- text input -->
+                                                        <div class="form-group required">
+                                                            <label class="control-label">
+                                                                Фамилия:
+                                                            </label>
+                                                            <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderTrainerVM.FamilyName" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <!-- text input -->
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Номер на диплома за средно образование" OpensOn="Hover">
+                                                            <div class="form-group">
+                                                                <label class="control-label">
+                                                                    Диплома №:
+                                                                </label>
+                                                                <div>
+                                                                    <SfTextBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.candidateProviderTrainerVM.DiplomaNumber" />
+                                                                </div>
+                                                            </div>
+                                                        </SfTooltip>
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(this.candidateProviderTrainerVM?.Indent) && this.candidateProviderTrainerVM?.IdIndentType != null && !string.IsNullOrEmpty(this.candidateProviderTrainerVM?.DiplomaNumber))
+                                                    {
+                                                        <div class="col-sm-1">
+                                                            <!-- text input -->
+                                                            <div class="form-group">
+                                                                <label class="control-label">
+                                                                </label>
+                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Проверка на диплома за средно образование" OpensOn="Hover">
+                                                                    <button type="button" class="btn-row" @onclick="OpenRegiXDiplomaCheckModalAsync"><i class="fa fa-search-plus"></i></button>
+                                                                </SfTooltip>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Идентификатор:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdIndentType" DataSource="this.kvIndentTypeSource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                                <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="IdentValueChangedHandler" />
+                                                            </SfComboBox>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <!-- text input -->
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                @this.identType:
+                                                            </label>
+                                                            <SfTextBox @bind-Value="this.candidateProviderTrainerVM.Indent" OnChange="IndentChanged" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Гражданство:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdNationality" DataSource="this.kvNationalitySource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxTemplates TItem="KeyValueVM">
+                                                                    <ItemTemplate Context="kvCtx">
+                                                                        @{
+                                                                            var kv = kvCtx as KeyValueVM;
+                                                                            if (kv.Name == "България")
+                                                                            {
+                                                                                <div style="border-bottom: 1px solid gray; margin-bottom: 10px;">
+                                                                                    <span>@kv.Name</span>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @kv.Name
+                                                                            }
+                                                                        }
+                                                                    </ItemTemplate>
+                                                                </ComboBoxTemplates>
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            </SfComboBox>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <!-- text input -->
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Дата на раждане:
+                                                            </label>
+                                                            <div>
+                                                                <SfDatePicker Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="DateTime?" @bind-Value="this.candidateProviderTrainerVM.BirthDate" Format="dd.MM.yyyy" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Пол:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdSex" DataSource="this.kvSexSource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            </SfComboBox>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Образователно равнище:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdEducation" DataSource="this.kvEducationSource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            </SfComboBox>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Специалност по диплома:
+                                                            </label>
+                                                            <SfTextBox @bind-Value="this.candidateProviderTrainerVM.EducationSpecialityNotes" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @if (this.candidateProviderTrainerVM is not null && this.candidateProviderTrainerVM.IdEducation == this.kvMiddleEducation.IdKeyValue)
+                                                {
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Свидетелство за професионална квалификация:
+                                                                </label>
+                                                                <SfTextBox @bind-Value="this.candidateProviderTrainerVM.ProfessionalQualificationCertificate" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Свидетелство за правоспособност:
+                                                            </label>
+                                                            <SfTextBox @bind-Value="this.candidateProviderTrainerVM.EducationCertificateNotes" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Специална научна подготовка:
+                                                            </label>
+                                                            <SfTextBox @bind-Value="this.candidateProviderTrainerVM.EducationAcademicNotes" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Вид на договора:
+                                                            </label>
+                                                            <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdContractType" DataSource="this.kvContractTypeSource" AllowFiltering="true" AllowCustom="false">
+                                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            </SfComboBox>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <!-- text input -->
+                                                        <div class="form-group">
+                                                            <label class="control-label">
+                                                                Дата на договора:
+                                                            </label>
+                                                            <div>
+                                                                <SfDatePicker Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="DateTime?" @bind-Value="this.candidateProviderTrainerVM.ContractDate" Format="dd.MM.yyyy" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    @if (this.candidateProviderTrainerVM is not null && this.kvCandidateProviderTrainerStatusInactive != null && this.candidateProviderTrainerVM.IdStatus == this.kvCandidateProviderTrainerStatusInactive.IdKeyValue)
+                                                    {
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="control-label">
+                                                                    E-mail адрес:
+                                                                </label>
+                                                                <SfTextBox @bind-Value="candidateProviderTrainerVM.Email" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Статус:
+                                                                </label>
+                                                                <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdStatus" DataSource="this.kvCandidateProviderTrainerStatusSource" AllowFiltering="true" AllowCustom="false">
+                                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                                </SfComboBox>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Неактивен от:
+                                                                </label>
+                                                                <SfDatePicker Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="DateTime?" ShowClearButton="true" @bind-Value="this.candidateProviderTrainerVM.InactiveDate" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="control-label">
+                                                                    E-mail адрес:
+                                                                </label>
+                                                                <SfTextBox @bind-Value="this.candidateProviderTrainerVM.Email" Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Статус:
+                                                                </label>
+                                                                <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerVM.IdStatus" DataSource="this.kvCandidateProviderTrainerStatusSource" AllowFiltering="true" AllowCustom="false">
+                                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                                </SfComboBox>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="checkbox-fade fade-in-primary">
+                                                            <label class="form-label">
+                                                                <input type="checkbox" @bind-value="this.candidateProviderTrainerVM.IsAndragog" checked="@(this.candidateProviderTrainerVM.IsAndragog ? "checked" : null)" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation || this.DisableFieldsWhenActiveLicenceChange)">
+                                                                <span class="cr">
+                                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                                </span> <span>Андрагогическа квалификация</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </EditForm>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                    <AccordionItem Header="Преподавателска дейност" Visible="this.IsCPO">
+                                        <ContentTemplate>
+                                            <EditForm EditContext="editContextTrainerProfile">
+                                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                {
+                                                    <div class="row">
+                                                        <div class="col-sm-10">
+                                                            <!-- text input -->
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Професионално направление:
+                                                                </label>
+                                                                <SfComboBox Enabled="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange" TValue="int" TItem="ProfessionalDirectionVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.candidateProviderTrainerProfileVM.IdProfessionalDirection" DataSource="this.professionalDirectionsSource" AllowFiltering="true" AllowCustom="false">
+                                                                    <ComboBoxFieldSettings Text="DisplayNameAndCode" Value="IdProfessionalDirection" />
+                                                                </SfComboBox>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>&nbsp;</label>
+                                                                <p>
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на професионално направление за преподавателя" OpensOn="Hover">
+                                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="padding-bottom: 9px;" @onclick="AddProfessionalDirectionHandler">Добави</button>
+                                                                    </SfTooltip>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="checkbox-fade fade-in-primary">
+                                                                <label class="form-label">
+                                                                    <input type="checkbox" @bind-value="candidateProviderTrainerProfileVM.IsProfessionalDirectionQualified" checked="@(candidateProviderTrainerProfileVM.IsProfessionalDirectionQualified ? "checked" : null)" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)">
+                                                                    <span class="cr">
+                                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                                    </span> <span>Отговарящ на изискванията за това ПН</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="checkbox-fade fade-in-primary">
+                                                                <label class="form-label">
+                                                                    <input type="checkbox" @bind-value="candidateProviderTrainerProfileVM.IsTheory" checked="@(candidateProviderTrainerProfileVM.IsTheory ? "checked" : null)" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)">
+                                                                    <span class="cr">
+                                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                                    </span> <span>Преподава по теория</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="checkbox-fade fade-in-primary">
+                                                                <label class="form-label">
+                                                                    <input type="checkbox" @bind-value="candidateProviderTrainerProfileVM.IsPractice" checked="@(candidateProviderTrainerProfileVM.IsPractice ? "checked" : null)" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)">
+                                                                    <span class="cr">
+                                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                                    </span> <span>Преподава по практика</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <SfGrid DataSource="this.trainerProfilesSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                                AllowTextWrap="true" @ref="trainerProfilesGrid" AllowSelection="false">
+                                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                            <GridTemplates>
+                                                                <EmptyRecordTemplate Context="emptyRecord">
+                                                                    <span>Няма намерени резултати.</span>
+                                                                </EmptyRecordTemplate>
+                                                            </GridTemplates>
+                                                            <GridColumns>
+                                                                <GridColumn Width="40" Visible="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange">
+                                                                    <Template Context="trainerProfileCtx">
+                                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteProfessionalDirectionBtn(trainerProfileCtx as CandidateProviderTrainerProfileVM))">
+                                                                                <i class="fa fa-trash-o"></i>
+                                                                            </button>
+                                                                        </SfTooltip>
+                                                                    </Template>
+                                                                </GridColumn>
+                                                                <GridColumn Field="ProfessionalDirectionCodeAndName" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                                <GridColumn Field="IsProfessionalDirectionQualified" HeaderText="Отговарящ на изискванията" TextAlign="TextAlign.Left" Width="50%" DisplayAsCheckBox="true"></GridColumn>
+                                                                <GridColumn Field="IsTheory" HeaderText="Преподава по теория" TextAlign="TextAlign.Left" Width="50%" DisplayAsCheckBox="true"></GridColumn>
+                                                                <GridColumn Field="IsPractice" HeaderText="Преподава по практика" TextAlign="TextAlign.Left" Width="50%" DisplayAsCheckBox="true"></GridColumn>
+                                                            </GridColumns>
+                                                        </SfGrid>
+                                                    </div>
+                                                </div>
+                                            </EditForm>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                    <AccordionItem Header="Квалификация" Visible="this.IsCPO">
+                                        <ContentTemplate>
+                                            <nav>
+                                                <div class="row">
+                                                    <div class="col-sm-10">
+                                                        <!-- text input -->
+                                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                        {
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Добавяне на квалификация за преподавателя" OpensOn="Hover">
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewQualificationClickHandler" disabled="@(this.candidateProviderTrainerVM.IdCandidateProviderTrainer == 0)">Добави квалификация</button>
+                                                    </SfTooltip>
+                                                </li>
+                                                <li class="nav-item d-none d-sm-inline-block">
+
+                                                </li>
+                                                        }
+                        </div>
+                    </div>
+                    </nav>
+                    <div class="col-sm-12">
+                        <SfGrid DataSource="this.trainerQualificationsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                AllowTextWrap="true" @ref="trainerQualificationsGrid" AllowSelection="false">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridColumns>
+                                <GridColumn Width="40">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditQualificationBtn(context as CandidateProviderTrainerQualificationVM))">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                                {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(async () => await this.DeleteQualificationBtn(context as CandidateProviderTrainerQualificationVM))">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </button>
+                                            </SfTooltip>
+                                                                }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="QualificationName" HeaderText="Курс" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                <GridColumn Field="ProfessionName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                <GridColumn Field="QualificationDuration" HeaderText="Продължителност" TextAlign="TextAlign.Left" Width="50%">
+                                    <Template>
+                                                                @{
+                                                                    var trainerQualification = context as CandidateProviderTrainerQualificationVM;
+                                                                    if (trainerQualification.QualificationDuration is not null)
+                                                                    {
+                                                                        @(trainerQualification.QualificationDuration.Value + " " + (trainerQualification.QualificationDuration == 1 ? "час" : "часа"))
+                                                                    }
+                                                                }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="TrainingFrom" HeaderText="Дата от" TextAlign="TextAlign.Left" Width="50%" Format="dd.MM.yyyy">
+                                    <Template>
+                                                                @{
+                                                                    var ctx = context as CandidateProviderTrainerQualificationVM;
+                                                                    var date = ctx.TrainingFrom.HasValue ? $"{ctx.TrainingFrom.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                                                    @date
+                                                                }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="TrainingTo" HeaderText="Дата до" TextAlign="TextAlign.Left" Width="50%" Format="dd.MM.yyyy">
+                                    <Template>
+                                                                @{
+                                                                    var ctx = context as CandidateProviderTrainerQualificationVM;
+                                                                    var date = ctx.TrainingTo.HasValue ? $"{ctx.TrainingTo.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                                                    @date
+                                                                }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                    </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Документи">
+                        <ContentTemplate>
+                            <nav>
+                                <div class="row">
+                                    <div class="col-sm-10">
+                                        <!-- text input -->
+                                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange)
+                                                        {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="@(this.IsCPO ? "Добавяне на приложен документ за преподавателя" : "Добавяне на приложен документ за консултанта")" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewDocumentClickHandler" disabled="@(this.candidateProviderTrainerVM.IdCandidateProviderTrainer == 0)">Добави документ</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                                        }
+                </div>
+            </div>
+            </nav>
+            <div class="col-sm-12">
+                <SfGrid DataSource="trainerDocumentsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                        AllowTextWrap="true" @ref="trainerDocumentsGrid" AllowSelection="false">
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                    <GridColumns>
+                        <GridColumn Width="40" Visible="!this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenActiveLicenceChange">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(async () => await this.DeleteDocumentBtn(context as CandidateProviderTrainerDocumentVM))">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                        <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                        <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                            <Template Context="docContext">
+                                                                @{
+                                                                    var entry = (docContext as CandidateProviderTrainerDocumentVM);
+
+                                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                                    {
+                                                                        var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                                                        foreach (var item in files)
+                                                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                            <br />
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @entry.FileName
+                                                                    }
+                                                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="50%" Format="dd.MM.yyyy">
+                            <Template>
+                                                                @{
+                                                                    var ctx = context as CandidateProviderTrainerDocumentVM;
+                                                                    var date = ctx.CreationDate != null ? $"{ctx.CreationDate.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                                                    @date
+                                                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+            </ContentTemplate>
+            </AccordionItem>
+            </AccordionItems>
+            </SfAccordion>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+</div>
+</div>
+
+
+<style>
+    .color-elements {
+        color: red !important;
+    }
+
+    .e-grid .e-table .e-rowcell.font-size-10px {
+        font-size: 10px !important;
+    }
+
+</style>
+
+@if (this.IsCPO)
+{
+    <CandidateProviderTrainerQualificationModal @ref="candidateProviderTrainerQualificationModal" CallbackAfterModalSubmit="OnQualificationModalSubmit" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenActiveLicenceChange || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation" />
+    <CandidateProviderTrainerSpecialityModal @ref="candidateProviderTrainerSpecialityModal" CallbackAfterSpecialitiesSelected="OnTrainerSpecialityModalSubmit" />
+    <CandidateProviderTrainerCheckingModal @ref="candidateProviderTrainerCheckingModal" CallbackAfterModalSubmit="OnCheckingModalSubmit" />
+    <ShowDOCInfoModal @ref="docInfoModal" />
+}
+
+<CandidateProviderTrainerDocumentModal @ref="candidateProviderTrainerDocumentModal" CallbackAfterModalSubmit="OnDocumentModalSubmit" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.DisableFieldsWhenUserIsExternalExpertOrCommittee || this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenActiveLicenceChange || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation" />
+<CandidateProviderTrainerSearchModal @ref="searchModal" CallBackRefreshGrid="FilterApply" />
+<TrainerStatusModal @ref="trainerStatusModal" />
+<RegiXDiplomaCheckModal @ref="diplomaCheckModal" />
+

@@ -1,0 +1,176 @@
+﻿@page "/RegistrationFormList"
+@attribute [Authorize(Policy = "ShowRegistrationFormList")]
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Получени форми за регистрация</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-success btn-outline-success waves-effect md-trigger" @onclick="ApproveRegistration">Одобри регистрация</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="OpenRejectReasonModal">Откажи регистрация</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-warning btn-outline-warning" @onclick="SendApproveMail">Изпрати e-mail за потвърждение</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="candidateProviders" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true"
+                            AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport", "PdfExport" })">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents QueryCellInfo="CellInfoHandler" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CandidateProviderVM"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="CreationDate" Direction="SortDirection.Descending" />
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" Width="3%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Type="ColumnType.CheckBox" Width="2%"></GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори пълномощно" OpensOn="Hover">
+                                        <button @onclick="(() => OnDownloadClick(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-file-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Справка в RegiX за актуално състояние на юридическото лице" OpensOn="Hover">
+                                        <button @onclick="(() => CheckInRegix(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="PoviderBulstat" HeaderText="ЕИК" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ManagerName" HeaderText="Представлявано от" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="AttorneyName" HeaderText="Пълномощник" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="ProviderEmail" HeaderText="E-mail" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="CreationDate" HeaderText="Електронна регистрация на" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                        @{
+                                        var ctx = context as CandidateProviderVM;
+                                        var date = ctx.CreationDate != null ? $"{ctx.CreationDate.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ApplicationStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="12%">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var applicationStatus = context as CandidateProviderVM;
+                                            if (applicationStatus.IdRegistrationApplicationStatus is not null && applicationStatus.IdRegistrationApplicationStatus == this.kvApprovedRegistration.IdKeyValue)
+                                            {
+                                                
+                                                <span class="form-label-status label label-success" style="text-transform:none;">@applicationStatus.ApplicationStatus</span>
+                                            }
+                                            else if (applicationStatus.IdRegistrationApplicationStatus is not null && applicationStatus.IdRegistrationApplicationStatus == this.kvAwaitingRegistration.IdKeyValue)
+                                            {
+                                                <span class="form-label-status label label-warning" style="text-transform:none;">@applicationStatus.ApplicationStatus</span>
+                                            }
+                                            else if (applicationStatus.IdRegistrationApplicationStatus is not null && applicationStatus.IdRegistrationApplicationStatus == this.kvRejectRegistration.IdKeyValue)
+                                            {                                                  
+                                                     var ctx = context as CandidateProviderVM;
+                                                     var rejReason = ctx.RejectionReason;
+                                                          
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="@rejReason" OpensOn="Hover">
+                                                <span class="form-label-status label label-danger" style="text-transform:none;">@applicationStatus.ApplicationStatus</span>
+                                                </SfTooltip>    
+                                            }
+                                            else
+                                            {
+                                                <span class="form-label-status label label-danger" style="text-transform:none;">@applicationStatus.ApplicationStatus</span>
+                                            }
+                                         }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<SfDialog EnableResize="true" Width="50%" Height="60%" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="this.isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Причина за отказ
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnValidSubmit="RejectRegistration" id="mainForm">
+
+                <ValidationMessage For="@(() => this.model.RejectionReason)"></ValidationMessage>
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <!-- text input -->
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Причина за отказ:
+                                </label>
+                                @*<InputTextArea rows="7" ondrop="5" class="form-control" @bind-Value="this.model.RejectionReason" />*@
+                                <p>
+                                <CustomInputTextArea
+                                ondrop="5"
+                                          rows="7"
+                                          @bind-Value="this.model.RejectionReason"
+                                      maxlength="@MAX_TEXT_COUNT">
+                                    </CustomInputTextArea>
+                                <div style="float:right"><label>@this.model.RejectionReason.Length/@this.MAX_TEXT_COUNT</label></div>
+                                      </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-danger btn-outline-danger waves-effect md-trigger" form="mainForm">Откажи регистрация</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ShowRegixDataModal @ref="regixData" />
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

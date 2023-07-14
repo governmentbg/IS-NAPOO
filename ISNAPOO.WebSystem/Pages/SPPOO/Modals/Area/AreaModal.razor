@@ -1,0 +1,87 @@
+﻿@using ISNAPOO.Common.HelperClasses
+@using ISNAPOO.Core.Services.Common
+
+@inject IAreaService AreaService
+@inject IDataSourceService DataSourceService
+@inject IApplicationUserService ApplicationUserService
+
+@inherits BlazorBaseComponent
+<SfDialog @bind-Visible="this.isVisible" Width="70%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>Данни за област на образование <span style="font-size: 18px;color: white !important;">@this.areaVM.Code @this.areaVM.Name</span></Header>
+        <Content>
+            <EditForm id="submitFormAreaModal" EditContext="editContext" OnSubmit="SubmitHandler">
+                <ValidationSummary />
+
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Код: </label>
+                                        <InputText class="form-control" @bind-Value="areaVM.Code"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование на областта на образование: </label>
+                                        <InputText class="form-control" @bind-Value="areaVM.Name"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование на областта на образование (англ.): </label>
+                                        <InputText class="form-control" @bind-Value="areaVM.NameEN"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Статус на валидност: </label>
+                                        <SfComboBox ShowClearButton="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="statusSPOOOValues" AllowFiltering="true" @bind-Value="areaVM.IdStatus">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @areaVM.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @areaVM.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.areaVM.IdArea != 0)
+                            {
+                                <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" style="margin-right: 30px;" @onclick="SendNotificationAsync">Изпрати известие</button>
+                            }
+                            <button class="btn btn-info" type="submit" form="submitFormAreaModal">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

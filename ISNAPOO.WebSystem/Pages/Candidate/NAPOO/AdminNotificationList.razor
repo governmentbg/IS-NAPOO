@@ -1,0 +1,121 @@
+﻿@page "/AdminNotificationList"
+@inherits BlazorBaseComponent
+
+@using ISNAPOO.Core.Contracts.DOC
+@using ISNAPOO.Core.ViewModels.DOC
+@using Syncfusion.PdfExport
+
+@attribute [AuthorizeAttribute(Policy = "ShowAdminNotificationList")]
+
+@{
+    base.CheckUserActionPermission("ShowAdminNotificationList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Изпратени известия от ИС на НАПОО</h6>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="form-group">
+                                <label class="control-label">@this.providerType: </label>
+                                <SfAutoComplete @ref="this.cpAutoComplete" TValue="int?" @bind-Value="this.idCandidateProvider" TItem="CandidateProviderVM" DataSource="this.candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                    <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="MixCPOandCIPONameOwner"></AutoCompleteFieldSettings>
+                                    <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                    <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                        <NoRecordsTemplate>
+                                            Няма намерени резултати.
+                                        </NoRecordsTemplate>
+                                    </AutoCompleteTemplates>
+                                </SfAutoComplete>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <p>
+                                    <button type="button" class="btn btn-primary" @onclick="(async () => await this.FilterNotificationsBtn())">Филтър</button>
+                                </p>
+                            </div>
+                        </div>
+                        @if (this.isFilteredByCandidateProvider)
+                        {
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <p>
+                                        <button type="button" class="btn btn-warning" @onclick="(async () => await this.ClearFilterBtn())">Изчисти филтър</button>
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <SfGrid DataSource="@dataSource" AllowSorting="true"
+                                    EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true" AllowTextWrap="true" @ref="currentGrid"
+                                    AllowPaging=true Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                                    AllowExcelExport="true" AllowPdfExport="true">
+                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                <GridEvents TValue="NotificationVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" QueryCellInfo="CellInfoHandler"></GridEvents>
+                                <GridSortSettings>
+                                    <GridSortColumns>
+                                        <GridSortColumn Field="SendDateOnly" Direction="SortDirection.Descending" />
+                                    </GridSortColumns>
+                                </GridSortSettings>
+                                <GridColumns>
+                                    <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                        <Template>
+                                            @GetRowNumber(currentGrid, (context as NotificationVM).IdNotification).Result
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Width="15px">
+                                        <Template>
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                <button @onclick="(() => SelectedRow(context as NotificationVM))" class="btn-row"> <i class="fa fa-search-plus"></i> </button>
+                                            </SfTooltip>
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="IdNotification" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn Field="About" HeaderText="Относно" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                    <GridColumn Field="NotificationText" HeaderText="Коментар" Width="100"></GridColumn>
+                                    <GridColumn Field="SendDateAsStr" HeaderText="Дата на изпращане" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                    <GridColumn Field="ReviewDateAsStr" HeaderText="Дата на прочитане" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                    <GridColumn Field="PersonFrom.FullName" HeaderText="Изпратено от" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                    <GridColumn Field="PersonTo.FullName" HeaderText="Изпратено до" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                    <GridColumn Field="StatusNotificationName" HeaderText="Статус" TextAlign="TextAlign.Center" Width="60">
+                                        <Template>
+                                            <div class="text-center">
+                                                @{
+                                                    var ctx = context as NotificationVM;
+                                                    if (ctx.IdStatusNotification != 0)
+                                                    {
+                                                        switch (ctx.StatusNotificationName)
+                                                        {
+                                                            case "Непрочетено":
+                                                                <label class="form-label-status label label-warning">@ctx.StatusNotificationName</label>
+                                                                break;
+                                                            case "Прочетено":
+                                                                <label class="form-label-status label label-success">@ctx.StatusNotificationName</label>
+                                                                break;
+                                                        }
+                                                    }
+
+                                                }
+                                            </div>
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NotificationModal @ref="editModal"></NotificationModal>

@@ -1,0 +1,62 @@
+﻿@using ISNAPOO.WebSystem.Pages.Common.Nomenclatures
+@inject IDOCService docService
+@inject IJSRuntime JsRuntime
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+
+                <div class="card-body">
+                    <SfGrid @ref="eruGrid" DataSource="erusource" AllowSorting="true" AllowTextWrap="true" AllowFiltering="true" AllowPaging="true">
+                        <GridPageSettings PageSize="10" PageCount="5" PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+ 
+                            <GridColumn Field="Code" HeaderText="Шифър на ЕРУ" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Наименование на ЕРУ" TextAlign="TextAlign.Left" Width="100px"></GridColumn>
+                            <GridColumn Field="ProfessionalTrainingName" HeaderText="Вид професионална подготовка" TextAlign="TextAlign.Left" Width="100px"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+@code {
+
+    [Parameter]
+    public DocVM docVM { get; set; }
+    [Parameter]
+    public ValidationClientVM clientVM { get; set; }
+    List<ERUVM> erusource = new List<ERUVM>();
+    SfGrid<ERUVM> eruGrid = new SfGrid<ERUVM>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!this.erusource.Any() && this.docVM != null)
+        {
+            //this.erusource = (await this.docService.GetAllERUsByDocIdAsync(new ERUVM() { IdDOC = this.docVM.IdDOC })).ToList();
+            this.erusource = (await this.docService.GetAllERUsByIdSpecialityAsync(clientVM.IdSpeciality.Value)).ToList().Where(x => x.IdDOC == this.docVM.IdDOC).ToList();
+        }
+
+        this.StateHasChanged();
+    }
+
+   
+   
+
+    
+
+    
+}

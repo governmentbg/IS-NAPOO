@@ -1,0 +1,68 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Доклад</Header>
+        <Content>
+            <EditForm EditContext="editContext">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>
+                                    &nbsp;
+                                </label>
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateApplication11">Приложение 11</button>
+                            </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (this.procedureExternalExpertVM.HasUploadedFile)
+                            {
+                                <span class="align-text-bottom">
+                                    <button type="button" class="btn-row" @onclick="(() => OnRemoveClick())"><i class="fa fa-trash-o"></i></button>
+                                    <a @onclick="OnDownloadClick" href="#" class="link-primary">@this.procedureExternalExpertVM.FileName</a>
+                                </span>
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" @onclick="sendDoc">Подай към НАПОО</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

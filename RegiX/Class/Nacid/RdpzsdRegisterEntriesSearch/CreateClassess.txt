@@ -1,0 +1,3 @@
+﻿xsd E:\WORK\Projects\ISNAPOO.root.Local.Git\RegiX\Class\Nacid\RdpzsdRegisterEntriesSearch\RdpzsdRegisterEntriesSearchRequest.xsd /classes /n:RegiX.Class.Nacid.RdpzsdRegisterEntriesSearch /outputdir:E:\WORK\Projects\ISNAPOO.root.Local.Git\RegiX\Class\Nacid\RdpzsdRegisterEntriesSearch\
+
+xsd E:\WORK\Projects\ISNAPOO.root.Local.Git\RegiX\Class\Nacid\RdpzsdRegisterEntriesSearch\RdpzsdRegisterEntriesSearchResponse.xsd /classes /n:RegiX.Class.Nacid.RdpzsdRegisterEntriesSearch /outputdir:E:\WORK\Projects\ISNAPOO.root.Local.Git\RegiX\Class\Nacid\RdpzsdRegisterEntriesSearch\

@@ -1,0 +1,122 @@
+﻿@using Data.Models.Data.Training
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+
+
+@inherits BlazorBaseComponent
+<SfDialog Target="#target" Width="65%" Height="75%" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за заповед
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="courseOrderForm">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label"> 
+                                    Номер на заповедта:
+                                </label>
+                                <div>
+                                    <InputText class="form-control" @bind-Value="model.OrderNumber" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Дата на заповедта:
+                                </label>
+                                <div>
+                                    <SfDatePicker CssClass="form-control customPad" TValue="DateTime?" @bind-Value="model.OrderDate" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание на заповедта:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                 ondrop="5"
+                                                 rows="2"
+                                                 @bind-Value="this.model.Description"
+                                                 maxlength="1000">
+                            </CustomInputTextArea>
+                            <div style="float:right"><label>@(this.model.Description != null ? this.model.Description.Length : 0)/1000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                     <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (model.HasUploadedFile)
+                            {
+                                var files = this.model.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                foreach (var file in files)
+                                {
+                                    var fileName = file.Split(($"\\{this.model.IdValidationOrder}\\"), StringSplitOptions.RemoveEmptyEntries).ToArray().LastOrDefault();
+                                    <span class="align-text-bottom">
+                                        <button type="button" class="btn-row" @onclick="(() => OnRemoveClick(fileName))"><i class="fa fa-trash-o"></i></button>
+                                        <a @onclick="(() => OnDownloadClick(fileName))" href="#" class="link-primary">@fileName</a>
+                                    </span>
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader AutoUpload="false" AllowMultiple="true" Enabled="this.model.IdValidationOrder != 0" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove" ></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-info" form="courseOrderForm">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback"></ConfirmDialog>

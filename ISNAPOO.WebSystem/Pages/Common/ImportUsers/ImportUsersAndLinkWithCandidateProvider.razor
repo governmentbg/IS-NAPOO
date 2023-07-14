@@ -1,0 +1,90 @@
+﻿@page "/ImportUsersAndLinkWithCandidateProvider"
+@using ISNAPOO.Core.ViewModels.Identity;
+
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Roles = "ADMIN")]
+
+<SfDialog Width="70%" Height="70%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" @bind-Visible="@isVisible" ZIndex="2002">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            Импорт на потребители
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext">
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид на импорта: </label>
+                                        <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.importUsersTypeSource" AllowCustom="false" @bind-Value="this.model.IdImportType">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="OnChangeValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Роли: </label>
+                                        <SfMultiSelect TValue="List<ApplicationRoleVM>" TItem="ApplicationRoleVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.rolesSource" AllowFiltering="true" @bind-Value="this.model.Roles" AllowCustomValue="false">
+                                            <MultiSelectFieldSettings Text="RoleName" Value="Id" />
+                                        </SfMultiSelect>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                        </div>
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="this.model.AllowSentEmails" checked="@(this.model.AllowSentEmails ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Изпращане на имейли към регистрирани потребители</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="to-do-list">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <SfUploader @ref="@sfUpload" AutoUpload="false" AllowMultiple="false" Enabled="Enable">
+                                            <UploaderEvents ValueChange="OnChange"></UploaderEvents>
+                                        </SfUploader>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@ImportBtn">Импорт</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

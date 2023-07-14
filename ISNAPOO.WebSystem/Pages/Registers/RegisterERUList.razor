@@ -1,0 +1,58 @@
+﻿@page "/RegisterERUList"
+@attribute [Authorize(Policy = "ShowRegisterERUList")]
+
+@using ISNAPOO.WebSystem.Pages.DOC.ERU
+@using ISNAPOO.Common.Constants
+@inject IDOCService docService
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+             <h6 class="page-title-left">Регистър на ЕРУ по видове професионална подготовка</h6>
+            <div class="card">
+               @* <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                        </ul>
+                    </nav>
+				</div>*@
+
+                 <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="erusource" AllowSorting="true" @ref="sfGrid" AllowTextWrap="true"
+                        AllowFiltering="true" AllowPaging="true" AllowResizing="false" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                        
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ERUVM"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ERUVM).IdERU).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="15px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                    <button @onclick="(() => SelectedRow(context as ERUVM))" class="btn-row"> <i class="fa fa-search-plus"></i> </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdERU" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Width="40" Visible=false></GridColumn>
+                            <GridColumn Field="DOC.Name" HeaderText="Наименование на документа, съдържащ ДОС" TextAlign="TextAlign.Left" Width="150px"></GridColumn>
+                            <GridColumn Field="Code" HeaderText="Шифър на ЕРУ" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Наименование на ЕРУ" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                            <GridColumn Field="ProfessionalTrainingName" HeaderText="Вид професионална подготовка" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<ERUDataModal @ref="eruDataModal"></ERUDataModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

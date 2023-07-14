@@ -1,0 +1,283 @@
+﻿@using Data.Models.Data.Training
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+@using ISNAPOO.Core.Services.SPPOO
+
+
+@inject ITrainingService TrainingService
+@inject IUploadFileService UploadFileService
+@inject ILocService LocService
+@inject IJSRuntime JsRuntime
+@inject IDataSourceService DataSourceService
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Content="Добавяне на нов документ" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                    <button type="button" disabled="@(this.ConsultingClientVM.IsArchived == true)" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenNewModal">Добави документ</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="documentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ConsultingClientRequiredDocumentVM"></GridEvents>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ConsultingClientRequiredDocumentVM).IdConsultingClientRequiredDocument).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" disabled="@(this.ConsultingClientVM.IsArchived == true)" @onclick="(() => EditDocumentBtn(context as ConsultingClientRequiredDocumentVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" disabled="@(this.ConsultingClientVM.IsArchived == true)" @onclick="(() => DeleteDocumentBtn(context as ConsultingClientRequiredDocumentVM))"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdConsultingClientRequiredDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ConsultingRequiredDocumentNameType" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as ConsultingClientRequiredDocumentVM);
+
+                                        if (entry.HasUploadedFile)
+                                        {
+                                            var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                            foreach (var item in files)
+                                            {
+                                                <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                                <br />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @entry.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="30" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="CreatePersonName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ConsultingClientDocumentModal @ref="consultingClientDocumentModal" CallBackAfterSave="CallBackAfterSubmit"></ConsultingClientDocumentModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast" />
+@code {
+    private ToastMsg toast = new ToastMsg();
+    private SfGrid<ConsultingClientRequiredDocumentVM> sfGrid = new SfGrid<ConsultingClientRequiredDocumentVM>();
+    private ConsultingClientDocumentModal consultingClientDocumentModal = new ConsultingClientDocumentModal();
+    private IEnumerable<ConsultingClientRequiredDocumentVM> documentsSource;
+    private ConsultingClientRequiredDocumentVM documentForDeletion = new ConsultingClientRequiredDocumentVM();
+
+    [Parameter]
+
+    public ConsultingClientVM ConsultingClientVM { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.documentsSource = await this.TrainingService.GetAllConsultingClientRequiredDocumentsByIdConsultingClientAsync(this.ConsultingClientVM.IdConsultingClient);
+        foreach (var document in this.documentsSource)
+        {
+
+            if (document.HasUploadedFile)
+            {
+                await this.SetFileNameAsync(document);
+            }
+        }
+    }
+    private async Task SetFileNameAsync(ConsultingClientRequiredDocumentVM consultingClientRequiredDocument)
+    {
+        var settingResource = (await this.DataSourceService.GetSettingByIntCodeAsync("ResourcesFolderName")).SettingValue;
+        var fileFullName = settingResource + "\\" + consultingClientRequiredDocument.UploadedFileName;
+        if (Directory.Exists(fileFullName))
+        {
+            var files = Directory.GetFiles(fileFullName);
+            files = files.Select(x => x.Split(($"\\{consultingClientRequiredDocument.IdConsultingClientRequiredDocument}\\"), StringSplitOptions.RemoveEmptyEntries).LastOrDefault()).ToArray();
+            consultingClientRequiredDocument.FileName = string.Join(Environment.NewLine, files);
+        }
+    }
+    private void OpenNewModal()
+    {
+        consultingClientDocumentModal.OpenModal(new ConsultingClientRequiredDocumentVM() { IdConsultingClient = ConsultingClientVM.IdConsultingClient });
+    }
+
+    private void EditDocumentBtn(ConsultingClientRequiredDocumentVM model)
+    {
+        consultingClientDocumentModal.OpenModal(model);
+    }
+    private void DeleteDocumentBtn(ConsultingClientRequiredDocumentVM model)
+    {
+        this.ConfirmDialog.showDeleteConfirmDialog = !this.ConfirmDialog.showDeleteConfirmDialog;
+        documentForDeletion = model;
+    }
+
+    public async void ConfirmDeleteCallback()
+    {
+        await this.UploadFileService.RemoveFileByIdAsync<ConsultingClientRequiredDocument>(documentForDeletion.IdConsultingClientRequiredDocument);
+
+        var result = await this.TrainingService.DeleteConsultingClientRequiredDocumentAsync(documentForDeletion.IdConsultingClient, documentForDeletion.IdConsultingClientRequiredDocument);
+        if (result.HasErrorMessages)
+        {
+            await this.ShowErrorAsync(string.Join("", result.ListErrorMessages));
+        }
+        else
+        {
+            await this.ShowSuccessAsync(string.Join("", result.ListMessages));
+        }
+        await CallBackAfterSubmit();
+        documentForDeletion = new ConsultingClientRequiredDocumentVM();
+    }
+    private async Task CallBackAfterSubmit()
+    {
+        this.documentsSource = await this.TrainingService.GetAllConsultingClientRequiredDocumentsByIdConsultingClientAsync(this.ConsultingClientVM.IdConsultingClient);
+        foreach (var document in this.documentsSource)
+        {
+
+            if (document.HasUploadedFile)
+            {
+                await this.SetFileNameAsync(document);
+            }
+        }
+        this.StateHasChanged();
+    }
+
+    protected async Task ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Id == "sfGrid_pdfexport")
+        {
+            int temp = sfGrid.PageSettings.PageSize;
+            sfGrid.PageSettings.PageSize = documentsSource.Count();
+            await sfGrid.Refresh();
+            PdfExportProperties ExportProperties = new PdfExportProperties();
+            List<GridColumn> ExportColumns = new List<GridColumn>();
+#pragma warning disable BL0005
+            ExportColumns.Add(new GridColumn() { HeaderText = " ", Width = "30" });
+            ExportColumns.Add(new GridColumn() { Field = "ConsultingRequiredDocumentNameType", HeaderText = "Вид на документа", Width = "180", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "Description", HeaderText = "Описание на документа", Width = "80", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "UploadedFileName", HeaderText = "Прикачен файл", Width = "80", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "CreationDate", HeaderText = "Дата на прикачване", Width = "80", Format = "d", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "CreatePersonName", HeaderText = "Прикачено от", Width = "80", TextAlign = TextAlign.Left });
+#pragma warning restore BL0005
+
+            ExportProperties.Columns = ExportColumns;
+            ExportProperties.PageOrientation = PageOrientation.Landscape;
+            ExportProperties.IncludeTemplateColumn = true;
+            PdfTheme Theme = new PdfTheme();
+            PdfThemeStyle RecordThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Regular, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+
+            PdfThemeStyle HeaderThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Bold, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+            Theme.Record = RecordThemeStyle;
+            Theme.Header = HeaderThemeStyle;
+
+            ExportProperties.Theme = Theme;
+            ExportProperties.FileName = $"ConsultingRequiredDocuments_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.pdf";
+
+            await this.sfGrid.ExportToPdfAsync(ExportProperties);
+            sfGrid.PageSettings.PageSize = temp;
+            await sfGrid.Refresh();
+        }
+        else if (args.Item.Id == "sfGrid_excelexport")
+        {
+            ExcelExportProperties ExportProperties = new ExcelExportProperties();
+            List<GridColumn> ExportColumns = new List<GridColumn>();
+#pragma warning disable BL0005
+            ExportColumns.Add(new GridColumn() { Field = "ConsultingRequiredDocumentNameType", HeaderText = "Вид на документа", Width = "250", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "Description", HeaderText = "Описание на документа", Width = "150", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "UploadedFileName", HeaderText = "Прикачен файл", Width = "120", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "CreationDate", HeaderText = "Дата на прикачване", Width = "120", Format = "d", TextAlign = TextAlign.Left });
+            ExportColumns.Add(new GridColumn() { Field = "CreatePersonName", HeaderText = "Прикачено от", Width = "150", TextAlign = TextAlign.Left });
+#pragma warning restore BL0005
+
+            ExportProperties.Columns = ExportColumns;
+            ExportProperties.FileName = $"ConsultingRequiredDocuments{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.xlsx";
+            await this.sfGrid.ExportToExcelAsync(ExportProperties);
+        }
+    }
+
+    public void PdfQueryCellInfoHandler(PdfQueryCellInfoEventArgs<ConsultingClientRequiredDocumentVM> args)
+    {
+        if (args.Column.HeaderText == " ")
+        {
+            args.Cell.Value = GetRowNumber(sfGrid, args.Data.IdConsultingClientRequiredDocument).Result.ToString();
+        }
+    }
+
+    private async Task OnDownloadClick(string fileName, ConsultingClientRequiredDocumentVM consultingClientRequiredDocument)
+    {
+        this.SpinnerShow();
+
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+
+            var hasFile = await this.UploadFileService.CheckIfExistUploadedFileAsync<ConsultingClientRequiredDocument>(consultingClientRequiredDocument.IdConsultingClientRequiredDocument, fileName);
+            if (hasFile)
+            {
+                var documentStream = await this.UploadFileService.GetUploadedFileAsync<ConsultingClientRequiredDocument>(consultingClientRequiredDocument.IdConsultingClientRequiredDocument, fileName);
+
+                if (!string.IsNullOrEmpty(documentStream.FileNameFromOldIS))
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, documentStream.FileNameFromOldIS, documentStream.MS!.ToArray());
+                }
+                else
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, fileName, documentStream.MS!.ToArray());
+                }
+            }
+            else
+            {
+                var msg = this.LocService.GetLocalizedHtmlString("NotExistingFileForDownload");
+
+                await this.ShowErrorAsync(msg);
+            }
+        }
+        finally
+        {
+            this.loading = false;
+        }
+
+        this.SpinnerHide();
+    }
+}

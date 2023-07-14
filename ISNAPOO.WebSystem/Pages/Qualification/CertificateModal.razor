@@ -1,0 +1,67 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="1200px" Height="1200px" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="@isVisible" CssClass="@dialogClass" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+           Справки за РИДПК
+        </Header>
+        <Content>
+            <SfTab @bind-SelectedItem="selectedTab">
+                <TabEvents Selected="SelectedEventHandler"></TabEvents>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Дейност на експертите"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <ExpertsActivityModal @ref="expertsActivityModal"></ExpertsActivityModal>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Справка за документи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Обществена информация"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @model.CreationDate.ToString("dd.MM.yyyy")</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @model.ModifyDate.ToString("dd.MM.yyyy")</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-info" form="docDataFormId">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

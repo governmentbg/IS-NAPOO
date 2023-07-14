@@ -1,0 +1,89 @@
+﻿@page "/LegalCapacityOrdinancesList"
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.LegalCapacityOrdinance
+
+@inject ILegalCapacityOrdinanceService LegalCapacityOrdinanceService
+@inject IUploadFileService UploadFileService
+@inject IJSRuntime JsRuntime
+@inject ILocService LocService
+
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ShowLegalCapacityOrdinancesList")]
+
+@{
+    base.CheckUserActionPermission("ShowLegalCapacityOrdinancesList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Наредби за правоспособност</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNew">Нов</button>
+                            </li>
+                            @*@onclick="OpenAddNewModal"*@
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@ordinancesSource" AllowSorting="true" EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true"
+                            @ref="sfGrid" AllowPaging=true AllowReordering=true 
+                            AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport"})">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="LegalCapacityOrdinanceUploadedFileVM"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as LegalCapacityOrdinanceUploadedFileVM).IdLegalCapacityOrdinanceUploadedFile).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as LegalCapacityOrdinanceUploadedFileVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button @onclick="(() => DeleteDocument(context as LegalCapacityOrdinanceUploadedFileVM))" class="btn-row"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdLegalCapacityOrdinanceUploadedFile" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Width="40" Visible=false></GridColumn>
+                            <GridColumn Field="LegalCapacityOrdinanceTypeName" HeaderText="Наредба за правоспособност" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="25">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as LegalCapacityOrdinanceUploadedFileVM);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry))">@entry.FileName</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.UploadedFileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<LegalCapacityOrdinanceModal @ref="legalCapacityOrdinanceModal" CallBackAfterSave="UpdateAfterSave"></LegalCapacityOrdinanceModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

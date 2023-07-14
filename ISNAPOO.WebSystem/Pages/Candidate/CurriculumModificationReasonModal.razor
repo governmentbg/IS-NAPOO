@@ -1,0 +1,49 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="65%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="this.isVisible" ZIndex="2005">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @((MarkupString)this.title)
+        </Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">Причина за промяна: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvModificationReasonsSource" AllowCustom="false" @bind-Value="this.model.IdModificationReason">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">Дата на влизане в сила: </label>
+                                <SfDatePicker TValue="DateTime?" @bind-Value="this.model.ValidFromDate" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button style="margin-right: 5px;" class="btn btn-info" type="button" @onclick="(async () => { await this.SubmitBtn(); })">Запиши и продължи</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+<CurriculumModificationModal @ref="curriculumModificationModal" />
+

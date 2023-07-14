@@ -1,0 +1,89 @@
+﻿@page "/aa"
+
+<PageTitle>Weather forecast</PageTitle>
+
+@using NapooMigration.Data
+@using NapooMigration.Models
+@inject ImportService ForecastService
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (listCodeVetGroup == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>IntVetListId</td>
+                <td>IntVetGroupNumber</td>
+                <td>VcVetGroupName</td>
+                <td>BoolIsValid</td>
+                <td>IntVetGroupCorrection</td>
+                <td>IntVetGroupCorrectionParent</td>
+                <td>VcVetGroupCorrectionNotes</td>
+                <td>VcVetGroupNameEn</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var res in listCodeVetGroup)
+            {
+                <tr>
+                    <td>@res.Id</td>
+                    <td>@res.IntVetListId</td>
+                    <td>@res.IntVetGroupNumber</td>
+                    <td>@res.VcVetGroupName</td>
+                    <td>@res.BoolIsValid</td>                    
+                    <td>@res.IntVetGroupCorrection</td>
+                    <td>@res.IntVetGroupCorrectionParent</td>
+                    <td>@res.VcVetGroupCorrectionNotes</td>
+                    <td>@res.VcVetGroupNameEn</td>
+                </tr>
+            }
+       
+        </tbody>
+    </table>
+
+    <table class="table">
+        <thead>
+            <tr>
+                    <td>idSetting</td>
+                    <td>SettingName</td>
+                    <td>SettingDescription</td>
+                    <td>SettingIntCode</td>
+                    <td>SettingValue</td>
+                    <td>SettingClass</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var res in ForecastService.GetSettings())
+            {
+                <tr>
+                    <td>@res.idSetting</td>
+                    <td>@res.SettingName</td>
+                    <td>@res.SettingDescription</td>
+                    <td>@res.SettingIntCode</td>
+                    <td>@res.SettingValue</td>
+                    <td>@res.SettingClass</td>
+                   
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+
+@code {
+    
+    private List<CodeVetGroup> listCodeVetGroup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listCodeVetGroup = ForecastService.GetCodeVetGroups().ToList();
+    }
+}

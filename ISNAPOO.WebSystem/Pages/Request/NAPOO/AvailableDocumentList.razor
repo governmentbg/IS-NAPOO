@@ -1,0 +1,88 @@
+﻿@page "/AvailableDocumentList"
+@attribute [Authorize(Policy = "ShowNAPOOControlDocumentList")]
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Наличие на свободни документи</h6>
+            <div class="card">
+                <div class="card-body">
+                    @if (this.UserProps.IdCandidateProvider == 0)
+                    {
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="form-group required">
+                                    <label class="control-label">ЦПО: </label>
+                                    <SfAutoComplete @ref="this.cpAutoComplete" TValue="int?" @bind-Value="this.idCandidateProvider" TItem="CandidateProviderVM" DataSource="this.candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="CPONameAndOwner"></AutoCompleteFieldSettings>
+                                        <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <p>
+                                        <button type="button" class="btn btn-primary" @onclick="(async () => await this.LoadDataForCandidateProviderBtn())">Зареди данни</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <SfGrid DataSource="requestDocumentManagementsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                    AllowTextWrap="true" @ref="requestDocumentManagementsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                                    AllowExcelExport="true" AllowPdfExport="true">
+                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                <GridEvents TValue="RequestDocumentManagementControlModel" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" />
+                                <GridColumns>
+                                    <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="4%">
+                                        <Template>
+                                            @GetRowNumber(requestDocumentManagementsGrid, (context as RequestDocumentManagementControlModel).EntityId).Result
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Width="5%">
+                                        <Template>
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(() => OpenDocumentSerialNumberModal(context as RequestDocumentManagementControlModel))"><i class="fa fa-search-plus"></i></button>
+                                            </SfTooltip>
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="EntityId" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn Field="Provider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                    <GridColumn Field="Provider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                                    <GridColumn Field="DocumentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="8%"></GridColumn>
+                                    <GridColumn Field="TypeOfRequestedDocument.NumberWithName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="33%"></GridColumn>
+                                    <GridColumn Field="AvailableCount" HeaderText="Свободни" TextAlign="TextAlign.Left" Width="10%">
+                                        <Template>
+                                            <div class="text-right">
+                                                @{
+                                                    var ctx = context as RequestDocumentManagementControlModel;
+                                                    var countAsStr = $"{ctx.AvailableCount} бр.";
+
+                                                    @countAsStr
+                                                }
+                                            </div>
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NAPOOTypeOfRequestedDocumentReferenceModal @ref="napooTypeOfRequestedDocumentReferenceModal" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

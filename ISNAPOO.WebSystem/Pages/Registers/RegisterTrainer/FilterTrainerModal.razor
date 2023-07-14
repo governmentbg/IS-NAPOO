@@ -1,0 +1,267 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="85%" EnableResize="true" AllowDragging="true" Height="85%" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@this.isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Юридическо лице: </label>
+                                    <SfAutoComplete @ref="cpAutoComplete" TValue="int?" @bind-Value="this.model.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="this.candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="ProviderOwner"></AutoCompleteFieldSettings>
+                                        <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        № на лицензия:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.LicenseNumber" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на издаване на лицензия:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.LicenseDate"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Статус:
+                                    </label>
+                                    <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdStatus" DataSource="kvCandidateProviderTrainerStatusSource" AllowFiltering="true" AllowCustom="false">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Име:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.FirstName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Презиме:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.SecondName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Фамилия:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.FamilyName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        ЕГН/ИДН/ЛНЧ:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.Indent" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Образователно-квалификационна степен:
+                                    </label>
+                                    <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdEducation" DataSource="kvEducationSource" AllowFiltering="true" AllowCustom="false">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Вид на договора:
+                                    </label>
+                                    <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdContractType" DataSource="kvContractTypeSource" AllowFiltering="true" AllowCustom="false">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Специалност по диплома:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.EducationSpecialityNotes" />
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Свидетелство за правоспособност:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.model.EducationCertificateNotes" />
+                                </div>
+                            </div>
+                        </div>
+                        @if (this.isCPO)
+                        {
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Професионално направление:
+                                        </label>
+                                        <SfComboBox TValue="int?" TItem="ProfessionalDirectionVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdProfessionalDirection" DataSource="this.professionalDirectionsSource" AllowFiltering="true" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="DisplayNameAndCode" Value="IdProfessionalDirection" />
+                                            <ComboBoxEvents TItem="ProfessionalDirectionVM" TValue="int?" ValueChange="OnProfessionalDirectionSelectedHandler" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Професия:
+                                        </label>
+                                        <SfComboBox TValue="int?" TItem="ProfessionVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdProfession" DataSource="this.professionsSource" AllowFiltering="true" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="CodeAndName" Value="IdProfession" />
+                                            <ComboBoxEvents TItem="ProfessionVM" TValue="int?" ValueChange="OnProfessionSelectedHandler" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Специалност:
+                                        </label>
+                                        <SfComboBox TValue="int?" TItem="SpecialityVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdSpeciality" DataSource="this.specialitiesSource" AllowFiltering="true" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="ComboBoxName" Value="IdSpeciality" />
+                                            <ComboBoxEvents TItem="SpecialityVM" TValue="int?" ValueChange="OnSpecialitySelectedHandler" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Вид на провежданото обучение:
+                                        </label>
+                                        <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdTrainingType" DataSource="kvPracticeOrTheorySource" AllowFiltering="true" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на създаване от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.CreationDateFrom"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на създаване до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.CreationDateTo"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на последна актуализация от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.ModifyDateFrom"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на последна актуализация до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.ModifyDateTo"></SfDatePicker>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Извършена проверка от експерт на НАПОО:
+                                    </label>
+                                    <SfDropDownList TValue="int?" TItem="KeyValueVM" PopupHeight="230px" @bind-Value="this.model.IdFilterDataType" DataSource="filterDataTypeSource" ShowClearButton="true">
+                                        <DropDownListFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на проверка от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.NAPOOCheckDateFrom"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на проверка до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" @bind-Value="this.model.NAPOOCheckDateTo"></SfDatePicker>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <button type="submit" class="btn btn-info" @onclick="@(async () => await this.SubmitBtn())">Търси</button>
+            <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="CancelClickedHandler">Отказ</button>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

@@ -1,0 +1,93 @@
+﻿@page "/NAPOODocumentRequestList"
+@attribute [Authorize(Policy = "ShowNAPOODocumentRequestList")]
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Получени заявки за документация от ЦПО</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="SummarizeRequests">Обобщаване на заявки</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="providerRequestSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel">
+                            <GridFilterColumns>
+                                <GridFilterColumn Field="RequestStatus" MatchCase="true" Operator="Operator.Equal" Value="initialFilterValue"></GridFilterColumn>
+                            </GridFilterColumns>
+                        </GridFilterSettings>
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ProviderRequestDocumentVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" RowSelected="RequestSelected" RowDeselected="RequestDeselected" />
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ProviderRequestDocumentVM).IdProviderRequestDocument).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Type="ColumnType.CheckBox" Width="10"></GridColumn>
+                            <GridColumn Field="IdProviderRequestDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="RequestNumber" HeaderText="Заявка №" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="RequestDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="30" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                        @{
+                                        var ctx = context as ProviderRequestDocumentVM;
+                                        var date = ctx.RequestDate.HasValue ? $"{ctx.RequestDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="CandidateProvider.CPONameAndOwner" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Отговорно лице" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="Position" HeaderText="Длъжност" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            <GridColumn Field="CurrentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="NAPOORequestDoc.NAPOORequestNumber" HeaderText="Обобщена заявка №" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="RequestStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="60">
+                                <Template>
+                                <div class="text-center">
+                                    @{
+                                        var providerReqDoc = context as ProviderRequestDocumentVM;
+
+                                        switch (providerReqDoc.RequestStatus)
+                                        {
+                                            case "Създадена":
+                                                <label class="form-label-status label label-warning">@providerReqDoc.RequestStatus</label>
+                                                break;
+                                            case "Подадена":
+                                                <label class="form-label-status label label-danger">@providerReqDoc.RequestStatus</label>
+                                                break;
+                                            case "Обработена":
+                                                <label class="form-label-status label label-primary">@providerReqDoc.RequestStatus</label>
+                                                break;
+                                            case "Обобщена":
+                                                <label class="form-label-status label label-success">@providerReqDoc.RequestStatus</label>
+                                                break;
+                                        }
+                                    }
+                                </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NAPOOSummarizeRequestsModal @ref="napooSummarizeRequestsModal" CallbackAfterSummarizeSubmit="UpdateAfterSummarizeSubmit" />

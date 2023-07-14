@@ -1,0 +1,333 @@
+﻿@using ISNAPOO.Core.Contracts.Common
+@using ISNAPOO.Core.Contracts.DOC
+@using ISNAPOO.Core.ViewModels.Common
+@using ISNAPOO.Core.ViewModels.DOC
+@using ISNAPOO.WebSystem.Pages.Test
+@using Syncfusion.Blazor.Spinner
+@using global::Data.Models.Data.DOC
+
+@inject IDOCService docService
+@inject IProfessionService profService
+@inject ISpecialityService specService
+@inject IJSRuntime JsRuntime
+@inject IUploadFileService uploadService
+@inject ILocService LocService
+@inject INKPDService NKPDService
+@inject IDataSourceService dataSourceService
+@inherits BlazorBaseComponent
+
+
+<EditForm EditContext="editContext" OnSubmit="Save" id="docDataFormId">
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        Наименование на документа, съдържащ ДОС:
+                    </label>
+                    <InputTextArea rows="2" class="form-control" @bind-Value="this.DocVM.Name" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        Наредба:
+                    </label>
+                    <InputTextArea rows="2" class="form-control" @bind-Value="this.DocVM.Regulation" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        В сила от:
+                    </label>
+                    <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.DocVM.StartDate"></SfDatePicker>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <!-- text input -->
+                <div class="form-group">
+                    <label class="control-label">
+                        В сила до:
+                    </label>
+                    <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @onfocusout="() => IsEndDateValid()" @bind-Value="this.DocVM.EndDate"></SfDatePicker>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group required">
+                    <label class="control-label">
+                        Професия:
+                    </label>
+                    <SfComboBox Enabled="this.DocVM.IdDOC == 0" TValue="int" TItem="ProfessionVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.DocVM.IdProfession" DataSource="professionSource" AllowFiltering="true">
+                        <ComboBoxEvents TValue="int" TItem="ProfessionVM" ValueChange="ClearProfession"></ComboBoxEvents>
+                        <ComboBoxFieldSettings Text="ComboBoxName" Value="IdProfession" />
+                    </SfComboBox>
+
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group required">
+                    <label class="control-label">Статус: </label>
+                    <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="statusValues" AllowCustom="false" @bind-Value="this.DocVM.IdStatus">
+                        <ComboBoxEvents TValue="int" TItem="KeyValueVM" ValueChange="OnDOCStatusChange"></ComboBoxEvents>
+                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                    </SfComboBox>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class="control-label">
+                        Държавен вестник (брой):
+                    </label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="this.DocVM.NewspaperNumber" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label class="control-label">
+                        Дата на обнародване:
+                    </label>
+                    <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.DocVM.PublicationDate"></SfDatePicker>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="form-group">
+                    <label class="control-label">
+                        Специалност:
+                    </label>
+                    <SfComboBox Enabled="this.DocVM.IdStatus != 0 && this.DocVM.IdProfession != 0" TValue="int" TItem="SpecialityVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="@SpecialityValue" DataSource="specialitySource" AllowFiltering="true">
+                        <ComboBoxEvents TValue="int" TItem="SpecialityVM" Filtering="FilteringSpeciality" OnOpen="HandleSpecialitiesSourceData"></ComboBoxEvents>
+                        <ComboBoxFieldSettings Text="ComboBoxName" Value="IdSpeciality" />
+                    </SfComboBox>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <p>
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OnAddSpecialityClick">Добави</button>
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="new-task">
+                        <div class="to-do-list">
+                            <div class="checkbox-fade fade-in-primary">
+                                <label class="form-label">
+                                    <input type="checkbox" @bind-value="this.DocVM.IsDOI" checked="@(this.DocVM.IsDOI ? "checked" : null)">
+                                    <span class="cr">
+                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                    </span> <span>ДОИ</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <SfGrid ID="defaultGrid" @ref="specialityGrid" DataSource="addedSpecialitys" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                    <GridTemplates>
+                        <EmptyRecordTemplate Context="emptyRecord">
+                            <span>Няма намерени резултати.</span>
+                        </EmptyRecordTemplate>
+                    </GridTemplates>
+                    <GridColumns>
+                        <GridColumn Width="25px">
+                            <Template Context="specialityContext">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(() => DeleteRowSpeciality(specialityContext as SpecialityVM))"><i class="fa fa-trash-o"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="ComboBoxName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                        <GridColumn Field="Profession.ComboBoxName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                        <GridColumn Field="Profession.ProfessionalDirection.DisplayNameAndCode" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <p><button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenNkpdSelectorModal">Добави НКПД</button></p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <SfGrid ID="defaultGrid1" @ref="sfGridNKPD" DataSource="nKPDVMList" EnablePersistence="true" AllowSorting="false" AllowFiltering="false">
+                    <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" CheckboxOnly="true"></GridSelectionSettings>
+                    <GridTemplates>
+                        <EmptyRecordTemplate Context="emptyRecord">
+                            <span>Няма намерени резултати.</span>
+                        </EmptyRecordTemplate>
+                    </GridTemplates>
+                    <GridColumns>
+                        <GridColumn Width="25px">
+                            <Template Context="nkpdContext">
+                                <button type="button" class="btn-row" @onclick="(() => DeleteRowNkpd((nkpdContext as NKPDVM).IdNKPD))"><i class="fa fa-trash-o"></i></button>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="Code" HeaderText="Код" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                        <GridColumn Field="Name" HeaderText="Наименование" TextAlign="TextAlign.Left" Width="300"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            &nbsp;
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        Изисквания към кандидатите:
+                    </label>
+                    <p>
+                        <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                             ondrop="5"
+                                             rows="7"
+                                             @bind-Value="this.DocVM.RequirementsCandidates"                
+                                             maxlength="10000">
+                        </CustomInputTextArea>
+                        <div style="float:right"><label>@(this.DocVM.RequirementsCandidates != null ? this.DocVM.RequirementsCandidates.Length : 0)/10000</label></div>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        Описание на професията:
+                    </label>
+
+                    <p>
+                        <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                             ondrop="5"
+                                             rows="7"
+                                             @bind-Value="this.DocVM.DescriptionProfession"              
+                                             maxlength="10000">
+                        </CustomInputTextArea>
+                        <div style="float:right"><label>@(this.DocVM.DescriptionProfession != null ? this.DocVM.DescriptionProfession.Length : 0)/10000</label></div>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        Изисквания към материалната база:
+                    </label>
+
+                    <p>
+                        <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                             ondrop="5"
+                                             rows="7"
+                                             @bind-Value="this.DocVM.RequirementsMaterialBase"                
+                                             maxlength="10000">
+                        </CustomInputTextArea>
+                        <div style="float:right"><label>@(this.DocVM.RequirementsMaterialBase != null ? this.DocVM.RequirementsMaterialBase.Length : 0)/10000</label></div>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group required">
+                    <label class="control-label">
+                        Изисквания към обучаващите:
+                    </label>
+                    <p>
+                        <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                             ondrop="5"
+                                             rows="7"
+                                             @bind-Value="this.DocVM.RequirementsТrainers"
+                                             maxlength="10000">
+                        </CustomInputTextArea>
+                        <div style="float:right"><label>@(this.DocVM.RequirementsТrainers != null ? this.DocVM.RequirementsТrainers.Length : 0)/10000</label></div>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <label>
+            Прикачен файл:
+        </label>
+        <div class="row e-upload" style="margin-left:0px">
+            <div class="col-sm-8">
+                @if (this.DocVM.HasUploadedFile)
+                {
+                    <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.DocVM.FileName</a></span>
+                }
+                else
+                {
+                    <label>
+                        Няма прикачен файл
+                    </label>
+                }
+            </div>
+            <div hidden="@(!this.DocVM.HasUploadedFile)" class="col-sm-4" style="text-align: right;">
+                @*bitbucket*@
+                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                    <button type="button" class="btn-row" disabled="@(!this.DocVM.HasUploadedFile)" @onclick="OnRemoveClick"><i class="fa fa-trash-o"></i></button>
+                </SfTooltip>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <SfUploader AutoUpload="false" AllowMultiple="false" Enabled="@(this.DocVM.IdDOC > 0)" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                        <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove"></UploaderEvents>
+                    </SfUploader>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+<NkpdSelectorModal @ref="nkpdSelectorModal" OnSelect="NKPDOnSelectHandler"></NkpdSelectorModal>
+
+<style>
+    .code {
+        right: 2px;
+        position: absolute;
+    }
+
+    .test {
+        width: 80%;
+        left: 2px;
+    }
+
+    
+</style>
+

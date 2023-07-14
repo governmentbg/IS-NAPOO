@@ -1,0 +1,142 @@
+﻿@inject IDistrictService DistrictService
+@inject IMunicipalityService MunicipalityService
+@inject ILocationService LocationService
+
+<EditForm Model="locationVM" OnValidSubmit="SubmitHandler">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label><b>Избери област</b></label>
+        <SfComboBox TValue="int?" TItem="DistrictVM" PopupHeight="230px" Placeholder="Област" DataSource="districts" @bind-Value="idDistrict">
+            <ComboBoxEvents TValue="int?" TItem="DistrictVM" ValueChange="ChangeDistrict" />
+            <ComboBoxFieldSettings Text="DistrictName" Value="idDistrict" />
+        </SfComboBox>
+    </div>
+    <br />
+    <div class="form-group">
+        <label><b>Избери община</b></label>
+        <SfComboBox Enabled="enableMunicipalityDropDown" TValue="int?" TItem="MunicipalityVM" PopupHeight="230px" Placeholder="Община" DataSource="municipalities" @bind-Value="idMunicipality">
+            <ComboBoxEvents TValue="int?" TItem="MunicipalityVM" ValueChange="ChangeMunicipality" />
+            <ComboBoxFieldSettings Text="MunicipalityName" Value="idMunicipality" />
+        </SfComboBox>
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Име на нас. място:</label>
+        <InputText class="form-control" @bind-Value="locationVM.LocationName" />
+    </div>
+    <div class="form-group">
+        <label>Код на нас. място:</label>
+        <InputText class="form-control" @bind-Value="locationVM.LocationCode" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Кметство:</label>
+        <InputText class="form-control" @bind-Value="locationVM.kati" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label>ЕКАТТЕ:</label>
+        <InputText class="form-control" @bind-Value="locationVM.Cat" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Надм. височина:</label>
+        <InputText class="form-control" @bind-Value="locationVM.Height" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Пощ. код:</label>
+        <InputNumber class="form-control" @bind-Value="locationVM.PostCode" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Тел. код:</label>
+        <InputNumber class="form-control" @bind-Value="locationVM.PhoneCode" />
+    </div>
+    <br />
+    <div class="text-center">
+        <SfButton Content="Запази" IsPrimary="true" Type="submit"></SfButton>
+    </div>
+</EditForm>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    ToastMsg toast;
+
+    LocationVM locationVM = new LocationVM();
+    IEnumerable<DistrictVM> districts = new List<DistrictVM>();
+    IEnumerable<MunicipalityVM> municipalities = new List<MunicipalityVM>();
+    int? idDistrict;
+    int? idMunicipality;
+    bool enableMunicipalityDropDown = false;
+
+    [Parameter]
+    public int LocationId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.districts = await this.DistrictService.GetAllDistrictsAsync();
+        this.municipalities = await this.MunicipalityService.GetAllMunicipalitiesAsync();
+
+        if (this.LocationId != 0)
+        {
+            this.locationVM = await this.LocationService.GetLocationByIdAsync(this.LocationId);
+            this.idMunicipality = this.locationVM.idMunicipality;
+            MunicipalityVM municipalityVM = this.municipalities.FirstOrDefault(x => x.idMunicipality == this.idMunicipality);
+            this.idDistrict = municipalityVM.idDistrict;
+        }
+    }
+
+    private async Task ChangeDistrict(ChangeEventArgs<int?, DistrictVM> args)
+    {
+        this.enableMunicipalityDropDown = args.Value != 0
+            ? true
+            : false;
+
+        if (args.ItemData != null)
+        {
+            this.idDistrict = args.ItemData.idDistrict;
+            this.municipalities = await this.MunicipalityService.GetAllMunicipalitiesByDistrictIdAsync(this.idDistrict);
+        }
+    }
+
+    private void ChangeMunicipality(ChangeEventArgs<int?, MunicipalityVM> args)
+    {
+        if (args.ItemData != null)
+        {
+            this.idMunicipality = args.ItemData.idMunicipality;
+        }
+    }
+
+    private async Task SubmitHandler()
+    {
+        int result;
+        this.locationVM.idMunicipality = this.idMunicipality;
+
+        if (this.LocationId != 0)
+        {
+            result = await this.LocationService.UpdateLocationAsync(this.locationVM);
+        }
+        else
+        {
+            result = await this.LocationService.CreateLocationAsync(this.locationVM);
+        }
+
+        if (result == 1)
+        {
+            toast.sfSuccessToast.Content = "Записът e успешeн!";
+            await toast.sfSuccessToast.ShowAsync();
+            await this.OnSubmit.InvokeAsync();
+        }
+        else
+        {
+            toast.sfErrorToast.Content = "Грешка при запис в базата!";
+            await toast.sfErrorToast.ShowAsync();
+        }
+    }
+}

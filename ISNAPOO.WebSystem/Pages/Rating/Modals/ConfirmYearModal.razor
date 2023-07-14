@@ -1,0 +1,39 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="50%" EnableResize="true" AllowDragging="true" Height="38%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            <span>Изчисли точки</span>
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+                    <p>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group required">
+                                    <label class="control-label">Година</label>
+                                    <SfNumericTextBox @bind-Value="this.Year" Min="1900" ShowSpinButton="false" ShowClearButton="false" Format="##.##" TValue="int" />
+                                </div>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="CalculateData">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

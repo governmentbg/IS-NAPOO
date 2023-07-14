@@ -1,0 +1,72 @@
+﻿@using ISNAPOO.WebSystem.Pages.DOC.ERU
+
+@inherits BlazorBaseComponent
+<SfDialog Width="1200px" Height="1200px" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" @bind-Visible="@isVisible" CssClass="@dialogClass" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnClose"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за Държавен образователен стандарт - <span style="font-size: 18px;color: white !important;">@this.ProfessionHeaderName</span>
+        </Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <SfTab EnablePersistence="false" LoadOn="ContentLoad.Dynamic" >
+                <TabEvents Selecting="Select"></TabEvents>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="ДОС"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <DOCDataModal @ref="docData" CallbackAfterSave="UpdateAfterSave" DocVM="model" ValidationWhenSave="ValidationMsg"> </DOCDataModal>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.model.IdDOC != 0">
+                        <ChildContent>
+                            <TabHeader Text="ЕРУ"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <ERUList @ref="eruList" docVM="this.model"></ERUList>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" style="margin-right: 30px;" @onclick="SendNotificationAsync" disabled="@(this.model.IdDOC == 0)">Изпрати известие</button>
+                        <button type="submit" class="btn btn-info" form="docDataFormId">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="ModalClose">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

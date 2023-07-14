@@ -1,0 +1,95 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="90%" EnableResize="true" AllowDragging="true" Height="90%" IsModal="true" ZIndex="2009" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header><span style="font-size: 18px;color: white !important;">@docName</span></Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    <ul class="navbar-nav">
+
+                                        @*<li class="nav-item d-none d-sm-inline-block">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSelectedERU">Добави</button>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                        &nbsp;
+                                        </li>*@
+
+                                    </ul>
+                                </nav>
+                            </div>
+
+                            <div class="card-body">
+                                <SfGrid ID="eruGrid" @ref="eruGrid" DataSource="eruDataSource" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true" EnableVirtualization="true" Height="500">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                        <DetailTemplate>
+                                            <div style="padding:20px">
+                                                <SfTab>
+                                                    <TabItems>
+                                                        <TabItem>
+                                                            <ChildContent>
+                                                                <TabHeader Text="РУ, Знания, умения, компетентности, Средства за оценяване, Условия за провеждане на оценяването, Критерии за оценяване"></TabHeader>
+                                                            </ChildContent>
+                                                            <ContentTemplate>
+                                                                @{
+                                                                    var eru = context as ERUVM;
+                                                                }
+
+                                                                <span class="e-wrap">@((MarkupString)eru.RUText)</span>
+                                                            </ContentTemplate>
+                                                        </TabItem>
+                                                    </TabItems>
+                                                </SfTab>
+                                            </div>
+                                        </DetailTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="10"></GridColumn>
+                                        <GridColumn Field="Code" HeaderText="Шифър" TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                                        <GridColumn Field="Name" HeaderText="ЕРУ" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                        <GridColumn Field="ProfessionalTrainingName" HeaderText="Вид" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                        <GridColumn Field="NKRLevelName" HeaderText="Ниво НКР" TextAlign="TextAlign.Center" Width="23"></GridColumn>
+                                        <GridColumn Field="EKRLevelName" HeaderText="Ниво ЕКР" TextAlign="TextAlign.Center" Width="23"></GridColumn>
+                                    </GridColumns>
+                                    <GridEvents TValue="ERUVM" RowSelected="ERUSelectedHandler" RowDeselected="ERUDeselectedHandler" />
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="button" @onclick="AddSelectedERUsHandler">Добави</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .e-wrap {
+        white-space: normal;
+        word-wrap: break-word;
+    }
+</style>
+
+<ToastMsg @ref="toast" />

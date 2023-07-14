@@ -1,0 +1,85 @@
+﻿@using ISNAPOO.Core.Contracts.Candidate
+
+@inject ICandidateProviderService candidateProviderService
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="IsVisible" Width="85%"
+          EnableResize="true" AllowDragging="true" Height="70%" IsModal="true" ZIndex="3000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>Лицензирани специалности за ЦПО</Header>
+        <Content>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid @ref="sfGrid" DataSource="candidateProviderSpecialityVMs" AllowSorting="true" AllowTextWrap="true" AllowFiltering="true"
+                            AllowPaging="true" AllowSelection="true">
+
+                        <GridPageSettings PageCount="5" PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CandidateProviderSpecialityVM).IdSpeciality).Result
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Field="IdSpeciality" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Width="40" Visible=false></GridColumn>
+                            <GridColumn Field="Speciality.CodeAndNameProfession" HeaderText="Професия" TextAlign="TextAlign.Left" Width="50px">
+                                <HeaderTemplate>
+                                    <b>Професия</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="Speciality.CodeAndNameAndVQS" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="70px">
+                                <HeaderTemplate>
+                                    <b>Специалност</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceDate" HeaderText="Дата на лицензиране" TextAlign="TextAlign.Left" Width="40px" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <HeaderTemplate>
+                                    <b>Дата на лицензиране</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn HeaderText="Протокол/Заповед Номер" TextAlign="TextAlign.Left" Width="40px">
+                                <HeaderTemplate>
+                                    <b>Протокол/Заповед Номер</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn HeaderText="Бележки" TextAlign="TextAlign.Left" Width="70px">
+                                <HeaderTemplate>
+                                    <b>Бележки</b>
+                                </HeaderTemplate>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+
+            </div>
+
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+
+    DialogEffect AnimationEffect = DialogEffect.Zoom;
+    IEnumerable<CandidateProviderSpecialityVM> candidateProviderSpecialityVMs;
+    public bool IsVisible { get; set; } = false;
+    SfGrid<CandidateProviderSpecialityVM> sfGrid = new SfGrid<CandidateProviderSpecialityVM>();
+
+    public async Task OpenModal(CandidateProviderVM model)
+    {
+        candidateProviderSpecialityVMs = await candidateProviderService.GetAllCandidateProviderSpecialitiesByIdCandidateProvider(model.IdCandidate_Provider);
+       
+        IsVisible = true;
+        this.StateHasChanged();
+    }
+
+}

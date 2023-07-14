@@ -1,0 +1,67 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="50%" EnableResize="true" AllowDragging="true" Height="40%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за серия на документи по Наредба №8</Header>
+        <Content>
+            @{
+                if (errorMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var errorMessage in errorMessages)
+                        {
+                            <li class="validation-message">@errorMessage</li>
+                        }
+                    </ul>
+                }
+            }
+            <EditForm EditContext="editContext" id="saveForm" OnSubmit="Save">
+                <div class="row">
+                    <div class="col-sm-12">
+                         <div class="form-group required">
+                        <label class="control-label">
+                            Вид на документа:
+                        </label>
+                        <SfComboBox TValue="int" Enabled="isNew" TItem="TypeOfRequestedDocumentVM" PopupHeight="230px" DataSource="@typeOfRequestedDocuments" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdTypeOfRequestedDocument" AllowCustom="false" AllowFiltering="true">
+                            <ComboBoxFieldSettings Text="DocTypeName" Value="IdTypeOfRequestedDocument" />
+                        </SfComboBox>
+                    </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                         <div class="form-group required">
+                        <label class="control-label">
+                            Година:
+                        </label>
+                            <InputNumber onkeydown="return false" class="form-control" @bind-Value="model.Year" />
+                    </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                         <div class="form-group required">
+                        <label class="control-label">
+                            Серия:
+                        </label>
+                        <InputText class="form-control" @bind-Value="model.SeriesName" />
+                    </div>
+                    </div>
+                </div>
+            </EditForm>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float-">
+                        <button class="btn btn-info" type="submit" form="saveForm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

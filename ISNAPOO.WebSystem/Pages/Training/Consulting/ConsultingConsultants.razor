@@ -1,0 +1,55 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Content="Добавяне на преподавател" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddTrainerBtn">Добави консултант</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="trainersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="trainersGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ConsultingTrainerVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10">
+                                <Template>
+                                    @GetRowNumber(trainersGrid, (context as ConsultingTrainerVM).IdConsultingTrainer).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="8" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.DeleteTrainerBtn(context as ConsultingTrainerVM))"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdConsultingTrainer" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="CandidateProviderTrainer.Email" HeaderText="E-mail адрес" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SelectConsultingTrainerModal @ref="selectConsultingTrainerModal" CallbackAfterSubmit="UpdateAfterTrainerSelectAsync" />

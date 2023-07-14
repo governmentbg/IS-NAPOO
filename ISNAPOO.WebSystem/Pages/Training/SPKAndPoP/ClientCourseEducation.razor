@@ -1,0 +1,95 @@
+﻿@using ISNAPOO.Core.Contracts.Training
+
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @if (this.IsEditEnabled)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на нов документ" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenNewModal">Добави документ</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="documentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ClientRequiredDocumentVM"></GridEvents>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ClientRequiredDocumentVM).IdClientRequiredDocument).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5">
+                                <Template>
+                                    @if (this.IsEditEnabled)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => EditDocumentBtn(context as ClientRequiredDocumentVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5">
+                                <Template>
+                                    @if (this.IsEditEnabled)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => DeleteDocument(context as ClientRequiredDocumentVM))">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdClientRequiredDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CourseRequiredDocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="25">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as ClientRequiredDocumentVM);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry))">@entry.UploadedFileName</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.UploadedFileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="30" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="CreatePersonName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ToastMsg @ref="toast"></ToastMsg>
+<ClientCourseEducationModal @ref="clientCourseEducationModal" CourseVM="this.CourseVM" CallBackAfterSave="CallBackAfterSubmit"></ClientCourseEducationModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+

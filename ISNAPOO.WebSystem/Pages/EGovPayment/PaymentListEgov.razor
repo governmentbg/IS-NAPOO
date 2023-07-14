@@ -1,0 +1,63 @@
+﻿@page "/PaymentListEgov"
+@using ISNAPOO.Core.ViewModels.EGovPayment
+@inherits BlazorBaseComponent
+
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Търсене на Заявки за плащания по ЕГН/ЛНЧ или БУЛСТАТ</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <input type="text" @bind-value="@ApplicantUin"/>
+                                <button type="button" class="btn btn-info btn-primary" @onclick="SearchRequestPayments">Търси</button>                              
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <SfGrid DataSource="requestObjJson" AllowSorting="true" EnableAltRow="true" EnableHover="false"
+                       AllowTextWrap="true" @ref="paymentsListGrid" AllowSelection="false" AllowPaging="true">
+                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                    <GridColumns>
+                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" Width="8">
+                            <Template>                           
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="aisPaymentId" HeaderText="Номер на заявка в pay.egov.bg" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="paymentTypeCode" HeaderText="Код на плащане" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="paymentAmount" HeaderText="Сума" TextAlign="TextAlign.Left" Width="20">
+                            <Template>
+                                @{
+                                    var ctx = context as RequestJson;
+                                    string amount = $"{ctx.paymentAmount:0.00}";
+                                    @amount
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="paymentReason" HeaderText="Основание" TextAlign="TextAlign.Center" Width="30"></GridColumn>
+                        <GridColumn Field="applicantUinTypeId" HeaderText="Тип на идент." TextAlign="TextAlign.Center" Width="20"></GridColumn>
+                        <GridColumn Field="applicantUin" HeaderText="Идентификатор" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="applicantName" HeaderText="Имена" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="paymentReferenceType" HeaderText="Тип док." TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                        <GridColumn Field="paymentReferenceNumber" HeaderText="Ном. док." TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                        <GridColumn Field="paymentReferenceDate" HeaderText="Дата док." TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                        <GridColumn Field="expirationDate" HeaderText="Дата на изтичане" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                        <GridColumn Field="additionalInformation" HeaderText="Доп.инф." TextAlign="TextAlign.Center" Width="50"></GridColumn>
+                    </GridColumns>                
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+@code {
+
+}

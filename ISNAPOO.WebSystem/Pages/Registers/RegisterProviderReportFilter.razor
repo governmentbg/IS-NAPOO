@@ -1,0 +1,89 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="90%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.validationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-block" style="">
+                    <EditForm EditContext="editContext" OnSubmit="Save" id="mainForm">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Юридическо лице: </label>
+                                    <SfAutoComplete TValue="int" @ref="sfAutoCompleteCPO" @bind-Value="model.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="candidateProviders" AllowCustom="false">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="ProviderOwner"></AutoCompleteFieldSettings>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteEvents TValue="int" TItem="CandidateProviderVM" Filtering="OnFilterCPO"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>№ на лицензия: </label>
+                                    <InputText class="form-control" @bind-Value="model.LicenceNumber"></InputText>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Начална дата на провеждане от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.StartFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Начална дата на провеждане до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.StartTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Крайна дата на провеждане от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.EndFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Крайна дата на провеждане до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.EndTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="submit" class="btn btn-info" form="mainForm">Справка</button>
+                        <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

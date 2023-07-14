@@ -1,0 +1,116 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @*<li class="nav-item d-none d-sm-inline-block">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                            &nbsp;
+                            </li>*@
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="courseSubjectSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="courseSubjectGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="CourseSubjectVM" OnToolbarClick="ToolbarClick" QueryCellInfo="CustomizeCellHours" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(courseSubjectGrid, (context as CourseSubjectVM).IdCourseSubject).Result
+                                </Template>
+                            </GridColumn>
+                            @* <GridColumn Width="10">
+                            <Template>
+                            @{
+                            var ctx = context as CourseVM;
+                            var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx.IdCourse, "TrainingCourse");
+                            if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                            {
+                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                            <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                            </SfTooltip>
+                            }
+                            }
+                            </Template>
+                            </GridColumn>*@
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="7" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Въвеждане на оценки" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditStudentsGradesBtn(context as CourseSubjectVM))"><i class="fa fa-list-alt"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdCourseSubject" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ProfessionalTrainingName" HeaderText="Р" TextAlign="TextAlign.Left" Width="8"></GridColumn>
+                            <GridColumn Field="Subject" HeaderText="Предмет" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                            <GridColumn Field="TheoryHours" HeaderText="Уч. часове Теория" TextAlign="TextAlign.Left" Width="20">
+                                <Template Context="theory">
+                                    <div class="text-right" style="font-size: 20px !important;">
+                                        @{
+                                            var courseSubject = theory as CourseSubjectVM;
+                                            @courseSubject.TheoryHours
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="PracticeHours" HeaderText="Уч. часове Практика" TextAlign="TextAlign.Left" Width="20">
+                                <Template Context="practice">
+                                    <div class="text-right" style="font-size: 20px !important;">
+                                        @{
+                                            var courseSubject = practice as CourseSubjectVM;
+                                            @courseSubject.PracticeHours
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="EnteredTheoryGradesCount" HeaderText="Въведени оценки теория" TextAlign="TextAlign.Left" Width="18">
+                                <Template>
+                                    <div class="text-right">
+                                        @if ((context as CourseSubjectVM).TheoryHours != 0)
+                                        {
+                                            @((context as CourseSubjectVM).EnteredTheoryGradesCount)
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="EnteredPracticeGradesCount" HeaderText="Въведени оценки практика" TextAlign="TextAlign.Left" Width="18">
+                                <Template>
+                                    <div class="text-right">
+                                        @if ((context as CourseSubjectVM).PracticeHours != 0)
+                                        {
+                                            @((context as CourseSubjectVM).EnteredPracticeGradesCount)
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ClientCourseSubjectGradeModal @ref="clientCourseSubjectGradeModal" CallbackAfterGradeSaved="UpdateEnteredGradesAfterSaveAsync" />

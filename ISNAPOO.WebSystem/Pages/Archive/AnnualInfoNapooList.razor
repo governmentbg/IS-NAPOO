@@ -1,0 +1,326 @@
+﻿@page "/AnnualInfoNapooList"
+
+@inherits BlazorBaseComponent
+@using ISNAPOO.WebSystem.Pages.Archive.SelfAssessment
+@using ISNAPOO.WebSystem.Pages.Mail
+@using ISNAPOO.WebSystem.Pages.Archive.CIPO
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Годишна информация за дейността</h6>
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-start">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <EditForm EditContext="this.editContext" OnSubmit="ReloadData">
+                                    <nav class="navbar navbar-expand  ">
+                                        <!-- Left navbar links -->
+                                        <ul class="navbar-nav">
+
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <SfNumericTextBox @bind-Value="this.model.Year" ShowSpinButton="false" Format="##.##" TValue="int" />
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                &nbsp;
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button class="btn btn-info" type="submit">Зареди данни</button>
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                &nbsp;
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <div class="">
+                                                    @if (this.LicensingType == "LicensingCPO" || this.LicensingType == "InfoNAPOOCPO")
+                                                    {
+                                                        <SfDropDownButton Content="Справка" style="color: #fff; background-color: #2DCEE3; border-color: #2DCEE3; border-radius: 2px; padding-top: 5px; padding-bottom: 6px;">
+                                                            <DropDownMenuItems>
+                                                                <DropDownMenuItem Text="Материално-техническа база" id="HandleMTBReport"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Актуализиране на учебните планове и програми" id="HandleCurriculumsReport"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Курсисти А: Курсисти по дата на раждане" id="HandleStudentReportA"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Курсисти Б: Курсисти по гражданство" id="HandleStudentReportB"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Повишаване на квалификацията на обучителите" id="HandleTrainerQualificationsReport"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Обучение A: курсове за придобиване на СПК" id="HandleAnnualTrainingCourseA"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Обучение B: курсове по част от професията" id="HandleAnnualTrainingCourseB"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Обучение C: придобили СПК чрез валидиране" id="HandleAnnualTrainingCourseC"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Обучение D: други курсове" id="HandleAnnualTrainingCourseD"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Обучение E: курсове за правоспособност" id="HandleAnnualTrainingCourseE"></DropDownMenuItem>
+                                                            </DropDownMenuItems>
+                                                            <DropDownButtonEvents ItemSelected="OnBtnSelectHandler" />
+                                                        </SfDropDownButton>
+                                                    }
+                                                    else if (this.LicensingType == "LicensingCIPO" || this.LicensingType == "InfoNAPOOCIPO")
+                                                    {
+                                                        <SfDropDownButton Content="Справка" style="color: #fff; background-color: #2DCEE3; border-color: #2DCEE3; border-radius: 2px; padding-top: 5px; padding-bottom: 6px;">
+                                                            <DropDownMenuItems>
+                                                                <DropDownMenuItem Text="Данни за клиентите на ЦИПО" id="HandleTotalConsultedClients"></DropDownMenuItem>
+                                                                <DropDownMenuItem Text="Услуги предлагани от ЦИПО" id="HandleConsultings"></DropDownMenuItem>
+                                                            </DropDownMenuItems>
+                                                            <DropDownButtonEvents ItemSelected="OnCIPOBtnSelectHandler" />
+                                                        </SfDropDownButton>
+                                                    }
+
+                                                </div>
+                                            </li>
+@*                                            <li class="nav-item d-none d-sm-inline-block">
+                                                &nbsp;
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button style="display:none" type="button" class="btn btn-warning btn-outline-warning" @onclick="sendEmail">Изпрати e-mail</button>
+                                            </li>*@
+@*                                            <li class="nav-item d-none d-sm-inline-block">
+                                                &nbsp;
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="OpenRejectAnnualModal">Връщане на отчета</button>
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                &nbsp;
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-success btn-outline-success waves-effect md-trigger" @onclick="OpenApproveAnnualModal">Одобрение на отчета</button>
+                                            </li>*@
+                                        </ul>
+                                    </nav>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                    @if (this.LicensingType == "LicensingCPO" || this.LicensingType == "InfoNAPOOCPO")
+                    {
+                        <SfGrid DataSource="annualInfoSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                            <GridEvents TValue="CandidateProviderVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" RowSelected="RowSelectedHandler" RowDeselected="RowDeselectedHandler" />
+                            <GridColumns>                              
+                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                    <Template>
+                                        @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Type="ColumnType.CheckBox" Width="10" HeaderText="Отчета е подаден"></GridColumn>
+                                <GridColumn Width="15px">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => OpenProfileModalBtn(context as CandidateProviderVM))"><i class="fa fa-search-plus"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="5%" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед на Доклад за самооценка" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.OpenSelfAssessmentReportListModal(context as CandidateProviderVM))"><i class="fa fa-file-text-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                               @* <GridColumn Width="5%">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Данни за отчета" OpensOn="Hover" Width="100px">
+                                            <button @onclick="(() => SelectedRow(context as CandidateProviderVM))" class="btn-row"><i class="fa fa-file-text-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>*@
+                                <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field="LicenceNumberString" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                <GridColumn Field="CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                <GridColumn Field="LocationCorrespondence.LocationName" Type="ColumnType.String" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                <GridColumn Field="AnnualInfoStatusName" HeaderText="Статус на годишния отчет" TextAlign="TextAlign.Left" Width="10%">
+                                    <Template>
+                                        <div class="text-center">
+                                            @{
+                                                var candidateProviderVM = context as CandidateProviderVM;
+
+                                                switch (candidateProviderVM.AnnualInfoStatusIntCode)
+                                                {
+                                                    case "Submitted":
+                                                        <label class="form-label label label-info">@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                    case "Returned":
+                                                        <label class="form-label label label-danger">@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                    case "Approved":
+                                                        <label class="form-label label label-success">@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                    case "":
+                                                        <label>@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                }
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="AnnualInfoDate" HeaderText="Дата на отчета" TextAlign="TextAlign.Left" Width="40" Format="dd.MM.yyyy">
+                                    <Template>
+                                        @{
+                                            var ctx = context as CandidateProviderVM;
+                                            var date = ctx.AnnualInfoDate.HasValue ? $"{ctx.AnnualInfoDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="SelfAssessmentReportStatusName" HeaderText="Статус на доклада за самооценка" TextAlign="TextAlign.Left" Width="10%">
+                                    <Template>
+                                        <div class="text-center">
+                                            @{
+                                                var candidateProviderVM = context as CandidateProviderVM;
+
+                                                switch (candidateProviderVM.SelfAssessmentReportStatusIntCode)
+                                                {
+                                                    case "Submitted":
+                                                        <label class="form-label label label-info">@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                    case "Returned":
+                                                        <label class="form-label label label-danger">@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                    case "Approved":
+                                                        <label class="form-label label label-success">@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                        case "":
+                                                        <label>@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                }
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="SelfAssessmentReportStatusDate" HeaderText="Дата на доклада" TextAlign="TextAlign.Left" Width="40" Format="dd.MM.yyyy">
+                                    <Template>
+                                        @{
+                                            var ctx = context as CandidateProviderVM;
+                                            var date = ctx.SelfAssessmentReportStatusDate.HasValue ? $"{ctx.SelfAssessmentReportStatusDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    }
+                    else if (this.LicensingType == "LicensingCIPO" || this.LicensingType == "InfoNAPOOCIPO")
+                    {
+                        <SfGrid DataSource="annualInfoSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                            <GridEvents TValue="CandidateProviderVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" RowSelected="RowSelectedHandler" RowDeselected="RowDeselectedHandler" />
+                            <GridColumns>                              
+                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                    <Template>
+                                       @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Type="ColumnType.CheckBox" Width="10" HeaderText="Отчета е подаден"></GridColumn>
+                                <GridColumn Width="15px">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => OpenCipoApplicationModal(context as CandidateProviderVM))"><i class="fa fa-search-plus"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="5%" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед на Доклад за самооценка" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.OpenSelfAssessmentReportListModal(context as CandidateProviderVM))"><i class="fa fa-file-text-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field="LicenceNumberString" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                <GridColumn Field="CIPONameOwnerGrid" HeaderText="ЦИПО" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                                <GridColumn Field="LocationCorrespondence.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                <GridColumn Field="AnnualInfoStatusName" HeaderText="Статус на годишния отчет" TextAlign="TextAlign.Left" Width="10%">
+                                    <Template>
+                                        <div class="text-center">
+                                            @{
+                                                var candidateProviderVM = context as CandidateProviderVM;
+
+                                                switch (candidateProviderVM.AnnualInfoStatusIntCode)
+                                                {
+                                                    case "Submitted":
+                                                        <label class="form-label label label-info">@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                    case "Returned":
+                                                        <label class="form-label label label-danger">@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                    case "Approved":
+                                                        <label class="form-label label label-success">@candidateProviderVM.AnnualInfoStatusName</label>
+                                                        break;
+                                                }
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="AnnualInfoDate" HeaderText="Дата на отчета" TextAlign="TextAlign.Left" Width="40" Format="dd.MM.yyyy">
+                                    <Template>
+                                        @{
+                                            var ctx = context as CandidateProviderVM;
+                                            var date = ctx.AnnualInfoDate.HasValue ? $"{ctx.AnnualInfoDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="SelfAssessmentReportStatusName" HeaderText="Статус на доклада за самооценка" TextAlign="TextAlign.Left" Width="10%">
+                                    <Template>
+                                        <div class="text-center">
+                                            @{
+                                                var candidateProviderVM = context as CandidateProviderVM;
+
+                                                switch (candidateProviderVM.SelfAssessmentReportStatusIntCode)
+                                                {
+                                                    case "Submitted":
+                                                        <label class="form-label label label-info">@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                    case "Returned":
+                                                        <label class="form-label label label-danger">@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                    case "Approved":
+                                                        <label class="form-label label label-success">@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                     case "":
+                                                        <label>@candidateProviderVM.SelfAssessmentReportStatusName</label>
+                                                        break;
+                                                }
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="SelfAssessmentReportStatusDate" HeaderText="Дата на доклада" TextAlign="TextAlign.Left" Width="40" Format="dd.MM.yyyy">
+                                    <Template>
+                                        @{
+                                            var ctx = context as CandidateProviderVM;
+                                            var date = ctx.SelfAssessmentReportStatusDate.HasValue ? $"{ctx.SelfAssessmentReportStatusDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                            @date
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<AnnualInfoReportDataModal @ref="reportDataModal"></AnnualInfoReportDataModal>
+<AnnualMTBModal @ref="mtbModal" />
+<AnnualCurriculumModal @ref="curriculumModal" />
+<AnnualStudentsModal @ref="studentModal" />
+<AnnualTrainingCourseModal @ref="reporTrainingCourse"></AnnualTrainingCourseModal>
+<AnnualTrainerQualificationsModal @ref="trainerQualificationsModal" />
+@*<AnnualInfoRejectModal @ref="annualInfoRejectModal"></AnnualInfoRejectModal>
+<AnnualInfoApproveModal @ref="annualInfoApproveModal"></AnnualInfoApproveModal>*@
+<ApplicationModal @ref="applicationModal" />
+<SendMailModal CallbackAfterSubmit="sendEmails" @ref="sendMailModal"></SendMailModal>
+<AnnualStudentByNationalityModal @ref="annualStudentByNationalityModal"></AnnualStudentByNationalityModal>
+<AnnualTrainingValidationClientModal @ref="reportTrainingValidationCourse"></AnnualTrainingValidationClientModal>
+<SelfAssessmentReportModal @ref="selfAssessmentReportModal" CallbackAfterSubmit="UpdateAfterModalSubmit" />
+<HandleTotalConsultedClients @ref="handleTotalConsultedClients"></HandleTotalConsultedClients>
+<ISNAPOO.WebSystem.Pages.Archive.CIPO.AnnualConsulting @ref="annualConsultingModal" />
+<ToastMsg @ref="toast"></ToastMsg>

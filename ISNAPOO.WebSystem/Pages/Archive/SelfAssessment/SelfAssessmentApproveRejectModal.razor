@@ -1,0 +1,76 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="50%" Height="50%" IsModal="true" ZIndex="4000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @if (this.rejectOrApprove == "Approve")
+                {
+                <p>Одобрение на доклада за самооценка</p>
+                }
+            else if (this.rejectOrApprove == "Reject")
+                {
+                <p>Връщане на доклада за самооценка</p>
+                }     
+        </Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Коментар:
+                                        </label>
+                                        <textarea style="width:-webkit-fill-available; border-block:"
+                                                  ondrop="5"
+                                                  rows="3"
+                                                  @bind="this.selfAssessmentReportStatusVM.Comment"
+                                                  @bind:event="oninput"
+                                                  maxlength="1000"
+                                                  class="form-control">                                              
+                                            </textarea>
+                                        <div style="float:right"><label>@(this.selfAssessmentReportStatusVM.Comment != null ? this.selfAssessmentReportStatusVM.Comment.Length : 0)/1000</label></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <div class="text-right">
+                        @if (this.rejectOrApprove == "Approve")
+                        {
+                            <button type="button" class="btn btn-info btn-primary" @onclick="Submit">Одобри</button>
+                        }
+                        else if (this.rejectOrApprove == "Reject")
+                        {
+                            <button type="button" class="btn btn-info btn-primary" @onclick="Submit">Върни</button>
+                        }                        
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

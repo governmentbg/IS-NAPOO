@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<RdpzsdRegisterEntriesRequest xmlns="http://egov.bg/RegiX/NACID/Rdpzsd/RdpzsdRegisterEntriesRequest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Uan>VK11454</Uan>
+  <Uin>6305156261</Uin>
+  <IdNumber>1234567</IdNumber>
+  <FullName>Йордан Любомиров Чорбаджийски</FullName>
+</RdpzsdRegisterEntriesRequest>

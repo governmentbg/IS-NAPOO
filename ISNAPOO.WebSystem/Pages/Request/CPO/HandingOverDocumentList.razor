@@ -1,0 +1,97 @@
+﻿@page "/HandingOverDocumentList"
+@attribute [Authorize(Policy = "ShowHandingOverDocumentList")]
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Предаване на документи на друго ЦПО</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block float-none">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewHandOverDocument">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block float-none">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateProtocol">Печат протокол</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="requestDocumentManagementsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="requestDocumentManagementsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="RequestDocumentManagementVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" RowSelected="RequestDocumentManagementSelected" RowDeselected="RequestDocumentManagementDeselected"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(requestDocumentManagementsGrid, (context as RequestDocumentManagementVM).IdRequestDocumentManagement).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10" Type="ColumnType.CheckBox"></GridColumn>
+                            <GridColumn Width="8">
+                                <Template>
+                                     <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(() => EditHandOverDocumentModal(context as RequestDocumentManagementVM))"><i class="fa fa-edit"></i></button>
+                                </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdRequestDocumentManagement" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CandidateProvider.ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="TypeOfRequestedDocument.NumberWithName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="DocumentSeriesName" HeaderText="Серия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="DocumentCount" HeaderText="Брой" TextAlign="TextAlign.Left" Width="30">
+                                <Template>
+                                    @{
+                                        var ctx = context as RequestDocumentManagementVM;
+
+                                        <div class="text-center">
+                                            @($"{ctx.DocumentCount} бр.")
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ReceiveDocumentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="DocumentDate" HeaderText="Дата на предаване" TextAlign="TextAlign.Left" Width="30" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as RequestDocumentManagementVM;
+
+                                        @($"{ctx.DocumentDate.Value.ToString("dd.MM.yyyy")} г.")
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProviderPartner.ProviderOwner" HeaderText="Предадени на" TextAlign="TextAlign.Left" Width="30">
+                                <Template>
+                                    @{
+                                        var reqDocManagement = context as RequestDocumentManagementVM;
+                                        if (reqDocManagement.CandidateProviderPartner != null) 
+                                        {
+                                            @($"ЦПО към {reqDocManagement.CandidateProviderPartner.ProviderOwner}")
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ToastMsg @ref="toast" />
+<HandingOverDocumentModal @ref="handingOverDocumentModal" CallbackAfterSubmit="UpdateAfterModalSubmit" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

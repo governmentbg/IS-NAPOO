@@ -1,0 +1,20 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="90%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+           <span style="font-size: 18px;color: white !important;"> </span> 
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+
+                    </div>
+                </div>
+        </Content>
+
+    </DialogTemplates>
+</SfDialog>

@@ -1,0 +1,61 @@
+﻿@page "/TrainingValidationClientList"
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@header</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="openNewModal">Нов</button>
+                            </li>
+                        </ul>
+
+
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="refGrid" ID="roleGrid" DataSource="@validationClients" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true"
+                            AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents OnToolbarClick="ToolbarClick" TValue="ValidationClientVM" />
+
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                                <Template>
+                                    @GetRowNumber(refGrid, (context as ValidationClientVM).IdValidationClient).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="8">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="( ()=>SelectRow(context as ValidationClientVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdValidationClient" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            @*<GridColumn Field="Indent" HeaderText="ЕГН" TextAlign="TextAlign.Left" Width="25"></GridColumn>*@
+                            <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            @*<GridColumn Field="FrameworkProgram.Name" HeaderText="Рамкова програма" TextAlign="TextAlign.Left" Width="35"></GridColumn>*@
+                            <GridColumn Field="Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="55"></GridColumn>
+                            <GridColumn Field="Speciality.CodeAndNameAndVQS" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="55"></GridColumn>
+                            <GridColumn Field="FinishType.Name" HeaderText="Статус на завършване" TextAlign="TextAlign.Left" Width="55"></GridColumn>
+                            
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<TrainingValidationClientModal CallbackAfterSubmit="updateTable" @ref="validationModal" PageType="IdTypeCourse"></TrainingValidationClientModal>

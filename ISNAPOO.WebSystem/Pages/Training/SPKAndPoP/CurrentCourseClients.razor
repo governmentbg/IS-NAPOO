@@ -1,0 +1,203 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header" hidden="@(!this.IsEditable)">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Content="Добавяне на нов курсист" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                    <button type="button" class="btn btn-info" @onclick="AddClientBtn">Добави курсист</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            @*@if (this.CourseVM.IdStatus == this.kvCourseFinished.IdKeyValue)
+                            {*@
+                            @*<li class="nav-item d-none d-sm-inline-block">
+                            <SfTooltip Content="Данни за завършване курсисти" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                            <button disabled="@this.IsEditable" type="button" class="btn btn-info btn-outline-info waves-effect md-trigger" @onclick="FinishedDataBtn">Данни за завършване</button>
+                            </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                            &nbsp;
+                            </li>*@
+                            @*}*@
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Изтегляне на бланка за автоматично зареждане на курсисти" OpensOn="Hover">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="CourseClientsTemplateDownloadBtn">Шаблон за импорт</button>
+                                </SfTooltip>
+                            </li>
+                            <label>&nbsp</label>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Зареждане на курсисти от файл" OpensOn="Hover">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="CourseClientsImportBtn">Импорт курсисти</button>
+                                </SfTooltip>
+                            </li>
+                            <label>&nbsp</label>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="clientsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="clientsGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ClientCourseVM" OnToolbarClick="ToolbarClick" QueryCellInfo="CheckForRequiredDocuments" />
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridColumns>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Type="ColumnType.CheckBox" Width="8"></GridColumn>
+                            }
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(clientsGrid, (context as ClientCourseVM).IdClientCourse).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Документи на курсист" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.EditClientBtn(context as ClientCourseVM))"><i class="fa fa-folder-open"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10" HeaderText=" ">
+                                <Template>
+                                    @{
+                                        var clientCtx = context as ClientCourseVM;
+                                        if (this.IsEditable && !clientCtx!.ClientCourseDocuments.Any(x => x.IdDocumentStatus != null && (x.IdDocumentStatus == this.kvSubmittedStatusValue.IdKeyValue || x.IdDocumentStatus == this.kvEnteredInRegsiterStatusValue.IdKeyValue)))
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(async () => await this.DeleteClientBtn(context as ClientCourseVM))"><i class="fa fa-trash-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdClientCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Indent" HeaderText="ЕГН/ЛНЧ/ИДН" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                            <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="ClientFamilyName" HeaderText="Документи" TextAlign="TextAlign.Center" Width="40">
+                                <Template>
+                                    @{
+                                        var client = context as ClientCourseVM;
+                                        foreach (var kvp in client.ClientDocuments)
+                                        {
+                                            var idDoc = kvp.Key;
+                                            var docData = kvp.Value;
+                                            if (docData.Count > 1)
+                                            {
+                                                <div style="line-height: 14px;">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="@docData[1]" OpensOn="Hover">
+                                                        <a class="btn-row-link" href="#" @onclick="(async () => await this.DownloadClientUploadedDocumentAsync(idDoc))">@(docData[0])</a>
+                                                    </SfTooltip>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div style="line-height: 14px;">
+                                                    <a class="btn-row-link" href="#" @onclick="(async () => await this.DownloadClientUploadedDocumentAsync(idDoc))">@(docData[0])</a>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ClientFamilyName" HeaderText="Протоколи" TextAlign="TextAlign.Center" Width="40">
+                                <Template>
+                                    @{
+                                        var client = context as ClientCourseVM;
+                                        foreach (var kvp in client.CourseProtocolsWithGrades)
+                                        {
+                                            var idProtocol = kvp.Key;
+                                            var protocolData = kvp.Value.Split(" - ", StringSplitOptions.RemoveEmptyEntries);
+                                            if (protocolData.Count() > 1)
+                                            {
+                                                var protocolName = protocolData[0];
+                                                var grade = protocolData[1];
+
+                                                <div style="line-height: 14px;">
+                                                    <a class="btn-row-link" href="#" @onclick="(async () => await this.DownloadProtocolUploadedDocumentAsync(idProtocol))">@(protocolName)</a>
+
+                                                    <span class="text-inverse"> - </span><span class="text-gray"><b>@grade</b></span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                var protocolName = protocolData[0];
+                                                <div style="line-height: 14px;">
+                                                    <a class="btn-row-link" href="#" @onclick="(async () => await this.DownloadProtocolUploadedDocumentAsync(idProtocol))">@(protocolName)</a>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="FinishedTypeName" HeaderText="Статус на завършване" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="8">
+                                    <Template>
+                                        @{
+                                            var ctx = context as ClientCourseVM;
+                                            var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx.IdClientCourse, "TrainingClientCourse");
+                                            if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                            {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                    <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn TextAlign="TextAlign.Center" Width="10" Visible="this.CourseVM.IsArchived || this.CourseVM.IdStatus == this.kvCourseFinished.IdKeyValue">
+                                <Template>
+                                    @{
+                                        var ctx = context as ClientCourseVM;
+                                        if (ctx.ClientCourseDocuments.All(x => x.CourseDocumentUploadedFiles.Any() && x.CourseDocumentUploadedFiles.All(y => !string.IsNullOrEmpty(y.UploadedFileName))))
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с документа" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(() => OpenFileWithDocumentBtn(context as ClientCourseVM))"><i class="fa fa-file-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn TextAlign="TextAlign.Center" Width="10" Visible="(this.CourseVM.IsArchived || this.CourseVM.IdStatus == this.kvCourseFinished.IdKeyValue) && this.CourseVM.IdTrainingCourseType == this.kvSPK.IdKeyValue">
+                                <Template>
+                                    @{
+                                        var ctx = context as ClientCourseVM;
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на статуса" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => OpenStatusHistoryBtn(context as ClientCourseVM))"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .color-elements {
+        color: red !important;
+    }
+</style>
+
+<CurrentCourseClientModal @ref="currentCourseClientModal" EntryFromRIDPKModule="this.ClientCourseIds is not null && this.ClientCourseIds.Any()" IsEditable="this.IsEditable" CallbackAfterSubmit="UpdateAfterCourseClientModalSubmitAsync" CallbackAfterDocSubmit="UpdateAfterCourseClientModalSubmitAsync" />
+<CourseClientFinishedDataModal @ref="courseClientFinishedDataModal" CallbackAfterSubmit="UpdateAfterCourseClientModalSubmitAsync" />
+<CourseClientsImportModal @ref="courseClientsImportModal" CallbackAfterImport="UpdateAfterCourseClientModalSubmitAsync" />
+<DocumentStatusModal @ref="documentStatusModal" />

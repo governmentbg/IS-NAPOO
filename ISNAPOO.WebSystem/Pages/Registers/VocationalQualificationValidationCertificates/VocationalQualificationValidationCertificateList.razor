@@ -1,0 +1,64 @@
+﻿@page "/VocationalQualificationValidationCertificateList"
+@inherits BlazorBaseComponent
+@using ISNAPOO.Core.ViewModels.Training;
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@header</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="validationClients" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ValidationClientVM" />
+                        <GridSortSettings>
+
+                            <GridSortColumns>
+                                <GridSortColumn Field="FamilyName" Direction="SortDirection.Ascending"></GridSortColumn>
+                            </GridSortColumns>
+                            <GridSortColumns>
+                                <GridSortColumn Field="FirstName" Direction="SortDirection.Ascending"></GridSortColumn>
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            <GridColumn Field="IdValidationClient" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn AllowFiltering="false" HeaderText=" " AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="45">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ValidationClientVM).IdValidationClient).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="35px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" Target="#btn" OpensOn="Hover">
+                                        <button id="btn" @onclick="(() => openModal(context as ValidationClientVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия"></GridColumn>
+                            <GridColumn Field="CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Field="FullName" HeaderText="Име на лицето" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Field="Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Field="Speciality.CodeAndNameAndVQS" HeaderText="Специалност" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Field="timeSpan" HeaderText="Период на провеждане"></GridColumn>
+                            <GridColumn Field="CandidateProvider.Location.LocationName" HeaderText="Населено място"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<VocationalQualificationValidationCertificateListModal @ref="modal"></VocationalQualificationValidationCertificateListModal>
+<VocationalQualificationValidationCertificateListFilter @ref="filterModal" CallbackAfterSubmit="Filter"></VocationalQualificationValidationCertificateListFilter>

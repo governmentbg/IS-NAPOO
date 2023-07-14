@@ -1,0 +1,110 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" Width="80%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за документ, приложен към центъра</Header>
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.editContext.GetValidationMessages())
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <EditForm EditContext="this.editContext">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на документа:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="candidateProviderDocumentVM.IdDocumentType" DataSource="kvDocumentTypeSource" AllowFiltering="true" AllowCustom="false">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Описание на документа:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="candidateProviderDocumentVM.DocumentTitle" />
+                            </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (candidateProviderDocumentVM.HasUploadedFile)
+                            {
+                                var files = this.candidateProviderDocumentVM.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                foreach (var file in files)
+                                {
+                                    var fileName = file.Split(($"\\{this.candidateProviderDocumentVM.IdCandidateProviderDocument}\\"), StringSplitOptions.RemoveEmptyEntries).ToArray().LastOrDefault();
+                                    <span class="align-text-bottom">
+                                        <button type="button" class="btn-row" @onclick="(() => OnRemove(fileName))"><i class="fa fa-trash-o"></i></button>
+                                        <a @onclick="(() => OnDownloadClick(fileName))" href="#" class="link-primary">@fileName</a>
+                                    </span>
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    @if (this.candidateProviderDocumentVM.IdCandidateProviderDocument != 0)
+                    {
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                @if (this.candidateProviderDocumentVM.IdCandidateProviderDocument != 0)
+                                {
+                                    <SfUploader @ref="this.uploader" Enabled="this.candidateProviderDocumentVM.IdCandidateProviderDocument != 0" AutoUpload="false" AllowMultiple="true" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                        <UploaderEvents ValueChange="OnChange" FileSelected="FilesSelectedHandler"></UploaderEvents>
+                                    </SfUploader>
+                                }
+                                else 
+                                {
+                                    <SfUploader Enabled="false" AutoUpload="false" AllowMultiple="true">
+                                        <UploaderEvents ValueChange="OnChange"></UploaderEvents>
+                                    </SfUploader>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.candidateProviderDocumentVM.HasUploadedFile)
+                            {
+                                <button style="margin-right: 15px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitAndContinueBtn())"><i class="fa fa-save"></i>Запиши и добави нов</button>
+                            }
+                            <button class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitDocumentHandler())">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

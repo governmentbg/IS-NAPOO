@@ -1,0 +1,14 @@
+﻿@model CertAuthViewModel
+  <form id="requestAuthForm" action="@Model.TargetUrl" method="post"> 
+            <input type="hidden" name="SAMLRequest" value="@Model.EncodedRequest" />
+            <input type="hidden" name="RelayState" value="@Model.EncodedRelayState" /> 
+            <noscript>
+                <div>
+                    <input type="submit" value="ButtonSendRequest" />
+                </div>
+            </noscript>
+        </form>
+@section scripts
+{
+    <script>$(function () {$('#requestAuthForm').submit();});</script>
+}

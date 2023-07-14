@@ -1,0 +1,298 @@
+﻿@inherits BlazorBaseComponent
+@using Syncfusion.Blazor.DocumentEditor
+
+<SfDialog @bind-Visible="isVisible" Width="68%" EnableResize="false" AllowDragging="true" Height="92%" IsModal="true" ZIndex="3050" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnClose" />
+    <DialogTemplates>
+        <Header>Протокол <span style="color:#ffffff">@(this.ProtocolTitle)</span> за курс: <span style="color:#ffffff">@(CourseVM.CourseName)</span></Header>
+        <Content>
+            <EditForm EditContext="editContext">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <div class="row">
+                            @if (this.ProtocolNumber == "3-79")
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Председател на комисия: </label>
+                                            <SfComboBox AllowCustom="false"
+                                                    DataSource="courseProtocol1.ChairmenCommisisonMembers"
+                                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    TValue="int" TItem="CourseCommissionMemberVM"
+                                                    ShowClearButton="false"
+                                                    @bind-Value="courseProtocol1.IdChairman">
+                                                <ComboBoxFieldSettings Value="IdCourseCommissionMember" Text="WholeName"></ComboBoxFieldSettings>
+                                                <ComboBoxEvents TValue="int" OnValueSelect="SelectChairman" TItem="CourseCommissionMemberVM" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="control-label">Членове на комисия: </label>
+                                        <SfGrid DataSource="courseProtocol1.CommisisonMembers" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridColumns>
+                                                <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%" Context="GridContext">
+                                                    <Template>
+                                                        @GetRowNumber(sfGrid, (GridContext as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Context="GridContext" Width="3%">
+                                                    <Template>
+                                                        @{
+                                                            var context = (GridContext as CourseCommissionMemberVM);
+                                                        }
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Премахни от списъка" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="() => RemoveCommissionMember(context, 1)">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="WholeName" HeaderText="Име" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            }
+                            @if (this.ProtocolNumber == "3-80p")
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Председател на комисия: </label>
+                                            <SfComboBox AllowCustom="false"
+                                                    DataSource="courseProtocol2.ChairmenCommisisonMembers"
+                                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    TValue="int" TItem="CourseCommissionMemberVM"
+                                                    ShowClearButton="false"
+                                                    @bind-Value="courseProtocol2.IdChairman">
+                                                <ComboBoxFieldSettings Value="IdCourseCommissionMember" Text="WholeName"></ComboBoxFieldSettings>
+                                                <ComboBoxEvents TValue="int" OnValueSelect="SelectChairman" TItem="CourseCommissionMemberVM" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="control-label">Членове на комисия: </label>
+                                        <SfGrid DataSource="courseProtocol2.CommisisonMembers" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridColumns>
+                                                <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%" Context="GridContext">
+                                                    <Template>
+                                                        @GetRowNumber(sfGrid, (GridContext as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Context="GridContext" Width="3%">
+                                                    <Template>
+                                                        @{
+                                                            var context = (GridContext as CourseCommissionMemberVM);
+                                                        }
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Премахни от списъка" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="() => RemoveCommissionMember(context, 2)">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="WholeName" HeaderText="Име" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            }
+                            @if (this.ProtocolNumber == "3-80t")
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Председател на комисия: </label>
+                                            <SfComboBox AllowCustom="false"
+                                                    DataSource="courseProtocol3.ChairmenCommisisonMembers"
+                                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    TValue="int" TItem="CourseCommissionMemberVM"
+                                                    ShowClearButton="false"
+                                                    @bind-Value="courseProtocol3.IdChairman">
+                                                <ComboBoxFieldSettings Value="IdCourseCommissionMember" Text="WholeName"></ComboBoxFieldSettings>
+                                                <ComboBoxEvents TValue="int" OnValueSelect="SelectChairman" TItem="CourseCommissionMemberVM" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="control-label">Членове на комисия: </label>
+                                        <SfGrid DataSource="courseProtocol3.CommisisonMembers" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridColumns>
+                                                <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%" Context="GridContext">
+                                                    <Template>
+                                                        @GetRowNumber(sfGrid, (GridContext as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Context="GridContext" Width="3%">
+                                                    <Template>
+                                                        @{
+                                                            var context = (GridContext as CourseCommissionMemberVM);
+                                                        }
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Премахни от списъка" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="() => RemoveCommissionMember(context, 3)">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="WholeName" HeaderText="Име" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            }
+                            @if (this.ProtocolNumber == "3-81B")
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Председател на комисия: </label>
+                                            <SfComboBox AllowCustom="false"
+                                                    DataSource="courseProtocol4.ChairmenCommisisonMembers"
+                                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    TValue="int" TItem="CourseCommissionMemberVM"
+                                                    ShowClearButton="false"
+                                                    @bind-Value="courseProtocol4.IdChairman">
+                                                <ComboBoxFieldSettings Value="IdCourseCommissionMember" Text="WholeName"></ComboBoxFieldSettings>
+                                                <ComboBoxEvents TValue="int" OnValueSelect="SelectChairman" TItem="CourseCommissionMemberVM" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="control-label">Членове на комисия: </label>
+                                        <SfGrid DataSource="courseProtocol4.CommisisonMembers" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridColumns>
+                                                <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%" Context="GridContext">
+                                                    <Template>
+                                                        @GetRowNumber(sfGrid, (GridContext as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Context="GridContext" Width="3%">
+                                                    <Template>
+                                                        @{
+                                                            var context = (GridContext as CourseCommissionMemberVM);
+                                                        }
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Премахни от списъка" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="() => RemoveCommissionMember(context, 4)">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="WholeName" HeaderText="Име" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            }
+                            @if (this.ProtocolNumber == "3-82")
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Председател на комисия: </label>
+                                            <SfComboBox AllowCustom="false"
+                                                    DataSource="courseProtocol5.ChairmenCommisisonMembers"
+                                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    TValue="int" TItem="CourseCommissionMemberVM"
+                                                    ShowClearButton="false"
+                                                    @bind-Value="courseProtocol5.IdChairman">
+                                                <ComboBoxFieldSettings Value="IdCourseCommissionMember" Text="WholeName"></ComboBoxFieldSettings>
+                                                <ComboBoxEvents TValue="int" OnValueSelect="SelectChairman" TItem="CourseCommissionMemberVM" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="control-label">Квестори: </label>
+                                        <SfGrid DataSource="courseProtocol5.CommisisonMembers" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridColumns>
+                                                <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%" Context="GridContext">
+                                                    <Template>
+                                                        @GetRowNumber(sfGrid, (GridContext as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Context="GridContext" Width="3%">
+                                                    <Template>
+                                                        @{
+                                                            var context = (GridContext as CourseCommissionMemberVM);
+                                                        }
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Премахни от списъка" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="() => RemoveCommissionMember(context, 5)">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="WholeName" HeaderText="Име" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.ProtocolNumber == "3-79")
+                            {
+                                <button class="btn btn-info" @onclick="SaveProtocol1">Избор на комисия</button>
+                            }
+                            @if (this.ProtocolNumber == "3-80p")
+                            {
+                                <button class="btn btn-info" @onclick="SaveProtocol2">Избор на комисия</button>                                
+                            }
+                            @if (this.ProtocolNumber == "3-80t")
+                            {
+                                <button class="btn btn-info" @onclick="SaveProtocol3">Избор на комисия</button>                                
+                            }
+                            @if (this.ProtocolNumber == "3-81B")
+                            {
+                                <button class="btn btn-info" @onclick="SaveProtocol4">Избор на комисия</button>
+                            }
+                            @if (this.ProtocolNumber == "3-82")
+                            {
+                                <button class="btn btn-info" @onclick="SaveProtocol5">Избор на комисия</button>
+                            }
+                            <button style="margin-left:0.10em" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="OnClose">Затвори</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <description>$description$</description>
+    <dependencies>
+      <dependency id="RegiX.WebServiceAdapterService" version="1.0.43"/>
+    </dependencies>
+    <contentFiles>
+      <files include="any/any/XMLSchemas/$title$/*.xsd" buildAction="Content" copyToOutput="true" flatten="false" />
+      <files include="any/any/XMLSchemas/$title$/Transformations/*.xslt" buildAction="Content" copyToOutput="true" flatten="false" />
+      <files include="any/any/XMLSamples/$title$/*.xml" buildAction="Content" copyToOutput="true" flatten="false" />
+      <files include="any/any/XMLMetaData/$title$/*.xml" buildAction="Content" copyToOutput="true" flatten="false" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="XMLSchemas\$title$\*.xsd" target="contentFiles\any\any\XMLSchemas\$title$" />
+    <file src="XMLSchemas\$title$\Transformations\*.xslt" target="contentFiles\any\any\XMLSchemas\$title$\Transformations" />
+    <file src="XMLSamples\$title$\*.xml" target="contentFiles\any\any\XMLSamples\$title$" />
+    <file src="XMLMetaData\$title$\*.xml" target="contentFiles\any\any\XMLMetaData\$title$" />
+  </files>
+</package>

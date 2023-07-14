@@ -1,0 +1,30 @@
+﻿
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="30%" EnableResize="true" AllowDragging="true" Height="25%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+
+    <DialogAnimationSettings Effect="DialogEffect.Zoom" Duration="500" />
+    <DialogTemplates>
+        <Header>Избор на център</Header>
+        <Content>
+
+
+            <div class="form-group required">
+                <label class="control-label">
+                    Моля, изберете център, за който имате направена регистрация:
+                </label>
+                <SfComboBox AllowCustom="false" TValue="int" TItem="CandidateProviderVM" DataSource="@candidates" Placeholder="ЦПО/ЦИПО">
+                    <ComboBoxFieldSettings Value="IdCandidate_Provider" Text="ProviderName"></ComboBoxFieldSettings>
+                    <ComboBoxEvents TItem="CandidateProviderVM" TValue="int" ValueChange="@ValueChangeHandler"></ComboBoxEvents>
+                </SfComboBox>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float-right">
+                        <button type="submit" class="btn btn-info" onclick="@login">Вход</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

@@ -1,0 +1,207 @@
+﻿@inherits BlazorBaseComponent
+@using Syncfusion.Blazor.Navigations
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="90%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за лицето: <span style="color: #fff">@model.Client.FirstName @model.Client.FamilyName</span>
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+
+                    <SfAccordion>
+                        <AccordionItems>
+
+                            <AccordionItem Expanded="true">
+                                <HeaderTemplate>
+                                    Информация за ЦПО: <span style="color: #01a9ac !important;">@header1</span>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    № на лицензия:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.LicenceNumber"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    ЦПО:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderOwner"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Лице за контакт:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.AttorneyName"></input>
+                                            </div>
+                                        </div>                                                                                                           
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Населено място:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.Location.LocationName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    Адрес за кореспонденция с административния офис на ЦПО:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderAddress"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Телефон:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderPhone"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    E-mail:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderEmail"></input>
+                                            </div>
+                                        </div>                                      
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem Expanded="true">
+                                <HeaderTemplate>
+                                    Информация за лицето, на което е издаден документа за ПК: <span style="color: #01a9ac !important;">@header2</span>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Име:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.Client.FirstName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Презиме:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.Client.SecondName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Фамилия:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.Client.FamilyName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Пол:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="sex.Name"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    ЕГН/ЛНЧ/ИДН:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.Client.Indent"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    Гражданство:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="nationality.Name"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    Период на провеждане:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="timeSpan"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem Expanded="true">
+                                <HeaderTemplate>
+                                    Информация за документа за ПК: <span style="color: #01a9ac !important;">@header3</span>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-7">
+                                            <div class="form-group">
+                                                <label>
+                                                    Вид на документа:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="validationClientDocument.DocumentTypeName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Номер на документа:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="validationClientDocument.DocumentRegNo"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Дата на документа:
+                                                </label>
+                                                <SfDatePicker TValue="DateTime?" @bind-Value="validationClientDocument.DocumentDate" Enabled="false" Format="dd.MM.yyyy" />
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <label>
+
+                                            </label>
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Target="#download-button" Content="Отвори документа" OpensOn="Hover">
+                                                <button id="download-button" type="button" @onclick="downloadDocuments" class="btn-row"><i class="fa fa-file-o"></i></button>
+                                            </SfTooltip>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                        </AccordionItems>
+                    </SfAccordion>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

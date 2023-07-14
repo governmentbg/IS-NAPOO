@@ -1,0 +1,81 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="60%" Height="60%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="this.isVisible" ZIndex="3010">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @((MarkupString)this.title)
+        </Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card" style="margin-bottom: 0px;">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                </nav>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid @ref="this.filesGrid" DataSource="this.filesSource" AllowSelection="false" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true"
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true" AllowPaging="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                    <GridEditSettings AllowDeleting="true" />
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Field="IdGrid" HeaderText="" TextAlign="TextAlign.Center" Width="5" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" AllowFiltering="false">
+                                            <Template Context="idContext">
+                                                @if ((idContext as TrainingCurriculumUploadedFileVM).IdGrid != 0)
+                                                {
+                                                    @GetRowNumber(this.filesGrid, (idContext as TrainingCurriculumUploadedFileVM).IdGrid).Result
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdGrid" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Width="5" Visible="!this.hideDeleteBtn">
+                                            <Template Context="uploadedFileCtx">
+                                                <button type="button" class="btn-row" @onclick="(async () => await this.DeleteUploadedFileBtn(uploadedFileCtx as TrainingCurriculumUploadedFileVM))">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </button>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="ModificationReasonValue" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="100">
+                                            <Template Context="uploadedFileCtx">
+                                                @{
+                                                    var entry = (uploadedFileCtx as TrainingCurriculumUploadedFileVM);
+                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                    {
+                                                        <a href="#" @onclick="(async () => await this.DownloadFileBtn(entry))">@entry.FileName</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        @entry.FileName
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

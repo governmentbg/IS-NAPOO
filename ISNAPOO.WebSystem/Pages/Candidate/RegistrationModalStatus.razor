@@ -1,0 +1,41 @@
+﻿@page "/RegistrationModalStatus"
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.WebSystem.Extensions
+@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+@using System.Web
+
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Http.Extensions
+
+@using ISNAPOO.Core.ViewModels
+@using ISNAPOO.Common.Framework
+@using System.IdentityModel.Tokens.Jwt
+@using global::Data.Models.Data.ProviderData
+@inject IConfiguration Configuration
+@inject ICommonService CommonService
+
+<SfDialog Target="#target" Width="600px" EnableResize=true AllowDragging="true" IsModal="true" ShowCloseIcon="false" AllowPrerender="true" Visible=true>
+	<DialogTemplates>
+		<Header>
+			Внимание!
+		</Header>
+		<Content>
+			<p>@Messages</p>
+		</Content>
+		<FooterTemplate>
+			<div class="footer-modal-body">
+				<div class="row">
+					<div class="col-12">
+						<!-- text input -->
+						<div class="form-group">
+							<button type="submit" class="btn btn-info" @onclick="@this.RedirectToLogin"><i class="icofont icofont-post"></i>OK</button>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+

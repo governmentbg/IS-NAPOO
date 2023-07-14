@@ -1,0 +1,1677 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://egov.bg/RegiX/AV/TR/ActualStateResponseV2" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:f="http://egov.bg/RegiX/AV/TR/ActualStateResponseV2" targetNamespace="http://egov.bg/RegiX/AV/TR/ActualStateResponseV2" elementFormDefault="qualified">
+  <xs:simpleType name="FieldCodes">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="00010">
+        <xs:annotation>
+          <xs:documentation>ЕИК/ПИК</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00011">
+        <xs:annotation>
+          <xs:documentation>Номер по национален регистър</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00012">
+        <xs:annotation>
+          <xs:documentation>Номер по национален регистър</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00020">
+        <xs:annotation>
+          <xs:documentation>Фирма</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00030">
+        <xs:annotation>
+          <xs:documentation>Правна форма</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00040">
+        <xs:annotation>
+          <xs:documentation>Изписване на чужд език</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00050">
+        <xs:annotation>
+          <xs:documentation>Седалище и адрес на управление</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00051">
+        <xs:annotation>
+          <xs:documentation>Адрес за кореспонденция с НАП на територията на страната</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00060">
+        <xs:annotation>
+          <xs:documentation>Предмет на дейност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00061">
+        <xs:annotation>
+          <xs:documentation>Основна дейност по НКИД</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00070">
+        <xs:annotation>
+          <xs:documentation>Управители</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00071">
+        <xs:annotation>
+          <xs:documentation>Лица, на които е възложено управлението</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00080">
+        <xs:annotation>
+          <xs:documentation>Начин на управление</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00090">
+        <xs:annotation>
+          <xs:documentation>Председател</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00100">
+        <xs:annotation>
+          <xs:documentation>Представители</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00101">
+        <xs:annotation>
+          <xs:documentation>Представители</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00102">
+        <xs:annotation>
+          <xs:documentation>Представители</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00110">
+        <xs:annotation>
+          <xs:documentation>Начин на представляване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00120">
+        <xs:annotation>
+          <xs:documentation>Съвет на директорите</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00121">
+        <xs:annotation>
+          <xs:documentation>Управителен орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00122">
+        <xs:annotation>
+          <xs:documentation>Административен орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00123">
+        <xs:annotation>
+          <xs:documentation>Заместници на членовете на административния орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00130">
+        <xs:annotation>
+          <xs:documentation>Управителен съвет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00131">
+        <xs:annotation>
+          <xs:documentation>Подгласници в управителния  съвет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00132">
+        <xs:annotation>
+          <xs:documentation>Управителен съвет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00133">
+        <xs:annotation>
+          <xs:documentation>Ръководен орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00134">
+        <xs:annotation>
+          <xs:documentation>Заместници на членовете на управителния орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00140">
+        <xs:annotation>
+          <xs:documentation>Надзорен съвет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00142">
+        <xs:annotation>
+          <xs:documentation>Надзорен орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00143">
+        <xs:annotation>
+          <xs:documentation>Заместници на членовете на надзорния орган</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00150">
+        <xs:annotation>
+          <xs:documentation>Контролен съвет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00151">
+        <xs:annotation>
+          <xs:documentation>Подгласници в контролния  съвет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00160">
+        <xs:annotation>
+          <xs:documentation>Срок на дружеството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00161">
+        <xs:annotation>
+          <xs:documentation>Срок на съществуване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00162">
+        <xs:annotation>
+          <xs:documentation>Срок на европейско обединение по икономически интереси</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00170">
+        <xs:annotation>
+          <xs:documentation>Специални условия</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00180">
+        <xs:annotation>
+          <xs:documentation>Физическо лице-търговец</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00190">
+        <xs:annotation>
+          <xs:documentation>Съдружници</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00200">
+        <xs:annotation>
+          <xs:documentation>Неограничено отговорни съдружници</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00201">
+        <xs:annotation>
+          <xs:documentation>Неограничено отговорни членове на европейското обединение по икономически интереси</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00210">
+        <xs:annotation>
+          <xs:documentation>Ограничено отговорни съдружници</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00220">
+        <xs:annotation>
+          <xs:documentation>Чуждестранен търговец</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00221">
+        <xs:annotation>
+          <xs:documentation>Прекратяване и ликвидация на чуждестранен търговец</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00222">
+        <xs:annotation>
+          <xs:documentation>Несъстоятелност на чуждестранния търговец</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00223">
+        <xs:annotation>
+          <xs:documentation>Европейско обединение по икономически интереси</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00224">
+        <xs:annotation>
+          <xs:documentation>Прекратяване и ликвидация на европейското обединение по икономически интереси</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00225">
+        <xs:annotation>
+          <xs:documentation>Несъстоятелност на ЕОИИ</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00230">
+        <xs:annotation>
+          <xs:documentation>Едноличен собственик на капитала</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00231">
+        <xs:annotation>
+          <xs:documentation>Собственик</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00232">
+        <xs:annotation>
+          <xs:documentation>Холдингово европейско дружество като акционер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00240">
+        <xs:annotation>
+          <xs:documentation>Прехвърляне на дружествен дял</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00241">
+        <xs:annotation>
+          <xs:documentation>Скрита непарична вноска</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00250">
+        <xs:annotation>
+          <xs:documentation>Отговорност над дялови вноски</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00251">
+        <xs:annotation>
+          <xs:documentation>Стойност на имуществото, предоставено от държавата или общината</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00260">
+        <xs:annotation>
+          <xs:documentation>Прекратяване на търговската дейност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00270">
+        <xs:annotation>
+          <xs:documentation>Заличаване на търговеца</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00271">
+        <xs:annotation>
+          <xs:documentation>Заличаване поради преместване на седалището в друга дъжвава-членка</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00272">
+        <xs:annotation>
+          <xs:documentation>Заличаване на запазването</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00273">
+        <xs:annotation>
+          <xs:documentation>Закриване на партида</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00280">
+        <xs:annotation>
+          <xs:documentation>Закриване на клона на чуждестранен търговец</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00281">
+        <xs:annotation>
+          <xs:documentation>Заличаване на поделението на ЕОИИ</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00290">
+        <xs:annotation>
+          <xs:documentation>Заинтересовано лице</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00310">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00311">
+        <xs:annotation>
+          <xs:documentation>Акции</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00312">
+        <xs:annotation>
+          <xs:documentation>Минимален размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00320">
+        <xs:annotation>
+          <xs:documentation>Внесен капитал</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00330">
+        <xs:annotation>
+          <xs:documentation>Непарична вноска </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00340">
+        <xs:annotation>
+          <xs:documentation>Решение за обратно изкупуване на акции</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00410">
+        <xs:annotation>
+          <xs:documentation>Прокуристи</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00420">
+        <xs:annotation>
+          <xs:documentation>Специални правомощия</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00430">
+        <xs:annotation>
+          <xs:documentation>Начин на представляване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00440">
+        <xs:annotation>
+          <xs:documentation>Заличаване на прокура</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00510">
+        <xs:annotation>
+          <xs:documentation>Седалище и адрес на управление на клон</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00511">
+        <xs:annotation>
+          <xs:documentation>Фирма на клон</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00512">
+        <xs:annotation>
+          <xs:documentation>ЕИК на клон</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00520">
+        <xs:annotation>
+          <xs:documentation>Предмет на дейност на клон</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00521">
+        <xs:annotation>
+          <xs:documentation>Основна дейност по НКИД</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00530">
+        <xs:annotation>
+          <xs:documentation>Управител на клон</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00540">
+        <xs:annotation>
+          <xs:documentation>Обем на представителна власт</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00541">
+        <xs:annotation>
+          <xs:documentation>Обем на представителна власт</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00550">
+        <xs:annotation>
+          <xs:documentation>Закриване на клон</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00600">
+        <xs:annotation>
+          <xs:documentation>Поделения на европейско обединение по икономически интереси, регистрирани в други държави-членки</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00700">
+        <xs:annotation>
+          <xs:documentation>Начин на учредяване на европейското дружество</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00701">
+        <xs:annotation>
+          <xs:documentation>Начин на учредяване на европейското кооперативно дружество</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="00710">
+        <xs:annotation>
+          <xs:documentation>Преместване на седалището от друга държава-членка в Република България</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01000">
+        <xs:annotation>
+          <xs:documentation>Наименование</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01010">
+        <xs:annotation>
+          <xs:documentation>Ограничаване предмета на дейност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01020">
+        <xs:annotation>
+          <xs:documentation>Лиценз</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01021">
+        <xs:annotation>
+          <xs:documentation>Поставяне под особен надзор</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01030">
+        <xs:annotation>
+          <xs:documentation>Разрешение</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01040">
+        <xs:annotation>
+          <xs:documentation>Квестори</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01050">
+        <xs:annotation>
+          <xs:documentation>Други обстоятелства</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01060">
+        <xs:annotation>
+          <xs:documentation>Ограничаване предмета на дейност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01070">
+        <xs:annotation>
+          <xs:documentation>Разпореждане с активи на дружеството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01080">
+        <xs:annotation>
+          <xs:documentation>Лиценз</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01090">
+        <xs:annotation>
+          <xs:documentation>Квестори</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01100">
+        <xs:annotation>
+          <xs:documentation>Други обстоятелства</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01110">
+        <xs:annotation>
+          <xs:documentation>Ограничаване предмета на дейност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01120">
+        <xs:annotation>
+          <xs:documentation>Разпореждане с активи на дружеството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01130">
+        <xs:annotation>
+          <xs:documentation>Квестори</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01140">
+        <xs:annotation>
+          <xs:documentation>Други обстоятелства</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01150">
+        <xs:annotation>
+          <xs:documentation>Отказ за издаване на лиценз</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01160">
+        <xs:annotation>
+          <xs:documentation>Особен търговски управител</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="01170">
+        <xs:annotation>
+          <xs:documentation>Други обстоятелства</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02000">
+        <xs:annotation>
+          <xs:documentation>Номер по ред на залог</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02010">
+        <xs:annotation>
+          <xs:documentation>Залогодател/Залогодатели</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02030">
+        <xs:annotation>
+          <xs:documentation>Длъжник/ длъжници по обезпеченото вземане</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02050">
+        <xs:annotation>
+          <xs:documentation>Заложен кредитор/Заложни кредитори</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02070">
+        <xs:annotation>
+          <xs:documentation>Основание</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02080">
+        <xs:annotation>
+          <xs:documentation>Предмет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02090">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02100">
+        <xs:annotation>
+          <xs:documentation>Лихви</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02110">
+        <xs:annotation>
+          <xs:documentation>Лихви и неустойки за забава</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02120">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02130">
+        <xs:annotation>
+          <xs:documentation>Описание</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02140">
+        <xs:annotation>
+          <xs:documentation>Цена</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02150">
+        <xs:annotation>
+          <xs:documentation>Срок</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02160">
+        <xs:annotation>
+          <xs:documentation>Условия</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02170">
+        <xs:annotation>
+          <xs:documentation>Част от вземането, която се търси</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02180">
+        <xs:annotation>
+          <xs:documentation>Имущество, върху което се насочва изпълнението</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02190">
+        <xs:annotation>
+          <xs:documentation>Депозитар</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02200">
+        <xs:annotation>
+          <xs:documentation>Данни за запора</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02210">
+        <xs:annotation>
+          <xs:documentation>Вдигане на запора</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02220">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02230">
+        <xs:annotation>
+          <xs:documentation>Имущество, което престава да е обект на изпълнение</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02240">
+        <xs:annotation>
+          <xs:documentation>Дата</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="02250">
+        <xs:annotation>
+          <xs:documentation>Заличен залог</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03000">
+        <xs:annotation>
+          <xs:documentation>Номер по ред на залог</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03010">
+        <xs:annotation>
+          <xs:documentation>Длъжник/ длъжници по обезпеченото вземане</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03030">
+        <xs:annotation>
+          <xs:documentation>Заложен кредитор/Заложни кредитори</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03050">
+        <xs:annotation>
+          <xs:documentation>Основание</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03060">
+        <xs:annotation>
+          <xs:documentation>Предмет</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03070">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03080">
+        <xs:annotation>
+          <xs:documentation>Лихви</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03090">
+        <xs:annotation>
+          <xs:documentation>Лихви и неустойки за забава</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03100">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03110">
+        <xs:annotation>
+          <xs:documentation>Описание</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03120">
+        <xs:annotation>
+          <xs:documentation>Цена</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03130">
+        <xs:annotation>
+          <xs:documentation>Срок</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03140">
+        <xs:annotation>
+          <xs:documentation>Условия</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03150">
+        <xs:annotation>
+          <xs:documentation>Част от вземането, която се търси</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03160">
+        <xs:annotation>
+          <xs:documentation>Имущество, върху което се насочва изпълнението</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03170">
+        <xs:annotation>
+          <xs:documentation>Депозитар</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03180">
+        <xs:annotation>
+          <xs:documentation>Покана за назначаване на управител на предприятие</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03190">
+        <xs:annotation>
+          <xs:documentation>Управител на търговското предприятие</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03200">
+        <xs:annotation>
+          <xs:documentation>Възстановено право на управление</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03210">
+        <xs:annotation>
+          <xs:documentation>Данни за запора</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03220">
+        <xs:annotation>
+          <xs:documentation>Вдигане на запора</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03230">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03240">
+        <xs:annotation>
+          <xs:documentation>Имущество, което престава да е обект на изпълнение</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03250">
+        <xs:annotation>
+          <xs:documentation>Заличен залог</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03251">
+        <xs:annotation>
+          <xs:documentation>Частично заличен залог</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="03260">
+        <xs:annotation>
+          <xs:documentation>Дата</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04000">
+        <xs:annotation>
+          <xs:documentation>Номер по ред на запор</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04010">
+        <xs:annotation>
+          <xs:documentation>Лице, в полза на което е наложен запорът</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04030">
+        <xs:annotation>
+          <xs:documentation>Основание</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04040">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04041">
+        <xs:annotation>
+          <xs:documentation>Мораторни/ изтекли лихви</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04050">
+        <xs:annotation>
+          <xs:documentation>Лихви</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04060">
+        <xs:annotation>
+          <xs:documentation>Описание</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04080">
+        <xs:annotation>
+          <xs:documentation>Вдигане на запора</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04090">
+        <xs:annotation>
+          <xs:documentation>Размер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="04100">
+        <xs:annotation>
+          <xs:documentation>Имущество, което престава да е обект на изпълнение</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05010">
+        <xs:annotation>
+          <xs:documentation>Срок на ликвидацията</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05020">
+        <xs:annotation>
+          <xs:documentation>Ликвидатори</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05030">
+        <xs:annotation>
+          <xs:documentation>Представител</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05040">
+        <xs:annotation>
+          <xs:documentation>Продължаване на търговската дейност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05050">
+        <xs:annotation>
+          <xs:documentation>Спиране или прекратяване на производството по ликвидация</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05060">
+        <xs:annotation>
+          <xs:documentation>Възобновяване на ликвидацията</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05300">
+        <xs:annotation>
+          <xs:documentation>Номер по ред</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05310">
+        <xs:annotation>
+          <xs:documentation>Фирма</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05320">
+        <xs:annotation>
+          <xs:documentation>Изписване на чужд език</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05330">
+        <xs:annotation>
+          <xs:documentation>Седалище и адрес на управление</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05340">
+        <xs:annotation>
+          <xs:documentation>Представители</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05350">
+        <xs:annotation>
+          <xs:documentation>Начин на представляване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05360">
+        <xs:annotation>
+          <xs:documentation>Специални условия</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05370">
+        <xs:annotation>
+          <xs:documentation>Дружество, контролирано пряко от дружество регистрирано в ЮПДР</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05371">
+        <xs:annotation>
+          <xs:documentation>Представители на дружество, контролирано пряко от дружество регистрирано в ЮПДР</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05380">
+        <xs:annotation>
+          <xs:documentation>Дружество, контролирано непряко от дружество регистрирано в ЮПДР</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05381">
+        <xs:annotation>
+          <xs:documentation>Представители на дружество, контролирано непряко от дружество регистрирано в ЮПДР</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05400">
+        <xs:annotation>
+          <xs:documentation>Обстоятелства по чл. 4 от ЗИФОДРЮПДРСЛДС</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05500">
+        <xs:annotation>
+          <xs:documentation>Действителни собственици - физически лица, участващи пряко или косвено в дружеството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="05510">
+        <xs:annotation>
+          <xs:documentation>Заличен действителен собственик</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="06000">
+        <xs:annotation>
+          <xs:documentation>Прехвърляне или поемане на търговско предприятие</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="06010">
+        <xs:annotation>
+          <xs:documentation>Отчуждител/ наследодател</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="06020">
+        <xs:annotation>
+          <xs:documentation>Правоприемник</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07010">
+        <xs:annotation>
+          <xs:documentation>Форма на преобразуване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07020">
+        <xs:annotation>
+          <xs:documentation>Преобразуващо се дружество</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07021">
+        <xs:annotation>
+          <xs:documentation>Преобразуващи се дружества</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07030">
+        <xs:annotation>
+          <xs:documentation>Правоприемник</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07040">
+        <xs:annotation>
+          <xs:documentation>Клонове на преобразуващото се дружество</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07050">
+        <xs:annotation>
+          <xs:documentation>Входящ номер на заявлението за преобразуване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="07060">
+        <xs:annotation>
+          <xs:documentation>Входящ номер на исковата молба</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="08010">
+        <xs:annotation>
+          <xs:documentation>Форма на преобразуване</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="08011">
+        <xs:annotation>
+          <xs:documentation>Форма на преобразуване с участие на ЕКД</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="08020">
+        <xs:annotation>
+          <xs:documentation>Преобразуваща се кооперация</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="08021">
+        <xs:annotation>
+          <xs:documentation>Преобразуващо се ЕКД или кооперация</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="08030">
+        <xs:annotation>
+          <xs:documentation>Правоприемник</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="08040">
+        <xs:annotation>
+          <xs:documentation>Клонове на преобразучащата се кооперация</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09010">
+        <xs:annotation>
+          <xs:documentation>Откриване на производство по несъстоятелност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09012">
+        <xs:annotation>
+          <xs:documentation>Откриване на производство по несъстоятелност / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09013">
+        <xs:annotation>
+          <xs:documentation>Откриване на производство по несъстоятелност / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09020">
+        <xs:annotation>
+          <xs:documentation>Начална дата на неплатежоспособността/свръхзадължеността</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09021">
+        <xs:annotation>
+          <xs:documentation>Начална дата на неплатежоспособността/ свръхзадължеността</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09022">
+        <xs:annotation>
+          <xs:documentation>Начална дата на неплатежоспособността/свръхзадължеността / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09023">
+        <xs:annotation>
+          <xs:documentation>Начална дата на неплатежоспособността/свръхзадължеността / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09030">
+        <xs:annotation>
+          <xs:documentation>Органи на длъжника</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09032">
+        <xs:annotation>
+          <xs:documentation>Органи на длъжника / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09033">
+        <xs:annotation>
+          <xs:documentation>Органи на длъжника / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09040">
+        <xs:annotation>
+          <xs:documentation>Спиране на производството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09042">
+        <xs:annotation>
+          <xs:documentation>Спиране на производството / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09043">
+        <xs:annotation>
+          <xs:documentation>Спиране на производството / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09050">
+        <xs:annotation>
+          <xs:documentation>Възобновяване на производството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09052">
+        <xs:annotation>
+          <xs:documentation>Възобновяване на производството / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09053">
+        <xs:annotation>
+          <xs:documentation>Възобновяване на производството / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09060">
+        <xs:annotation>
+          <xs:documentation>Прекратяване на производството</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09061">
+        <xs:annotation>
+          <xs:documentation>Отказ за утвърждаване на оздравителен план</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09062">
+        <xs:annotation>
+          <xs:documentation>Прекратяване на производството / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09063">
+        <xs:annotation>
+          <xs:documentation>Прекратяване на производството / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09064">
+        <xs:annotation>
+          <xs:documentation>Отказ за утвърждаване на оздравителен план / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09065">
+        <xs:annotation>
+          <xs:documentation>Отказ за утвърждаване на оздравителен план / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09070">
+        <xs:annotation>
+          <xs:documentation>Ограничаване разпоредителната власт на длъжника</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09072">
+        <xs:annotation>
+          <xs:documentation>Ограничаване разпоредителната власт на длъжника / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09073">
+        <xs:annotation>
+          <xs:documentation>Ограничаване разпоредителната власт на длъжника / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09080">
+        <xs:annotation>
+          <xs:documentation>Общ запор и възбрана</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09082">
+        <xs:annotation>
+          <xs:documentation>Общ запор и възбрана / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09083">
+        <xs:annotation>
+          <xs:documentation>Общ запор и възбрана / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09090">
+        <xs:annotation>
+          <xs:documentation>Осребряване и разпределение</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09092">
+        <xs:annotation>
+          <xs:documentation>Осребряване и разпределение / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09093">
+        <xs:annotation>
+          <xs:documentation>Осребряване и разпределение / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09100">
+        <xs:annotation>
+          <xs:documentation>Обявяване в несъстоятелност</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09102">
+        <xs:annotation>
+          <xs:documentation>Обявяване в несъстоятелност / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09103">
+        <xs:annotation>
+          <xs:documentation>Обявяване в несъстоятелност / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09110">
+        <xs:annotation>
+          <xs:documentation>Възстановяване в права</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09111">
+        <xs:annotation>
+          <xs:documentation>Възстановяване в права – отхвърляне на молбата</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09112">
+        <xs:annotation>
+          <xs:documentation>Възстановяване в права / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09113">
+        <xs:annotation>
+          <xs:documentation>Възстановяване в права / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09114">
+        <xs:annotation>
+          <xs:documentation>Възстановяване в права – отхвърляне на молбата / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09115">
+        <xs:annotation>
+          <xs:documentation>Възстановяване в права – отхвърляне на молбата / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09120">
+        <xs:annotation>
+          <xs:documentation>Синдици</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09122">
+        <xs:annotation>
+          <xs:documentation>Синдици / втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09123">
+        <xs:annotation>
+          <xs:documentation>Синдици / трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09150">
+        <xs:annotation>
+          <xs:documentation>Надзорни органи</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09151">
+        <xs:annotation>
+          <xs:documentation>Надзорен орган/ Комитета на кредиторите</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09152">
+        <xs:annotation>
+          <xs:documentation>Надзорен орган/ Комитета на кредиторите - втора инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="09153">
+        <xs:annotation>
+          <xs:documentation>Надзорен орган/ Комитета на кредиторите - трета инстанция</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="X1080">
+        <xs:annotation>
+          <xs:documentation>Изходящ номер</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LiquidationOrInsolvency">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Liquidation">
+        <xs:annotation>
+          <xs:documentation>
+            Ликвидация
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Insolvency">
+        <xs:annotation>
+          <xs:documentation>
+            Несъстоятелност
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="InsolvencySecIns">
+        <xs:annotation>
+          <xs:documentation>
+            В несъстоятелност (на II инстанция)
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="InsolvencyThirdIns">
+        <xs:annotation>
+          <xs:documentation>
+            В несъстоятелност (на III инстанция)
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="DeedStatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="N">
+        <xs:annotation>
+          <xs:documentation>
+            Нова
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="E">
+        <xs:annotation>
+          <xs:documentation>
+            Пререгистрирана фирма по Булстат
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="C">
+        <xs:annotation>
+          <xs:documentation>
+            Нова партида затворена
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="L">
+        <xs:annotation>
+          <xs:documentation>
+            Пререгистрирана фирма по Булстат затворена
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LegalFormType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ET">
+        <xs:annotation>
+          <xs:documentation>
+            Едноличен търговец
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="SD">
+        <xs:annotation>
+          <xs:documentation>
+            Събирателно дружество
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="KD">
+        <xs:annotation>
+          <xs:documentation>
+            Командитно дружество
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="OOD">
+        <xs:annotation>
+          <xs:documentation>
+            Дружество с ограничена отговорност
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EOOD">
+        <xs:annotation>
+          <xs:documentation>
+            Еднолично Дружество с ограничена отговорност
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AD">
+        <xs:annotation>
+          <xs:documentation>
+            Акционерно дружество
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EAD">
+        <xs:annotation>
+          <xs:documentation>
+            Еднолично Акционерно дружество
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="IAD">
+        <xs:annotation>
+          <xs:documentation>
+            Акционерно дружество със специално инвестиционна цел
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="IEAD">
+        <xs:annotation>
+          <xs:documentation>
+            Еднолично Акционерно дружество със специално инвестиционна цел
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="KDA">
+        <xs:annotation>
+          <xs:documentation>
+            Командитно дружество с акции
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="K">
+        <xs:annotation>
+          <xs:documentation>
+            Кооперация
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="KCHT">
+        <xs:annotation>
+          <xs:documentation>
+            Клон на чуждестранен търговец
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="TPPD">
+        <xs:annotation>
+          <xs:documentation>
+            Търговец публично предприятие -държавно
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="TPPO">
+        <xs:annotation>
+          <xs:documentation>
+            Търговец публично предприятие -общинско
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="TPP">
+        <xs:annotation>
+          <xs:documentation>
+            Търговец публично предприятие да премехне и да се замени с горните две
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EUIE">
+        <xs:annotation>
+          <xs:documentation>
+            Европейско обединение по икономически интереси ЕОИИ
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="DEUIE">
+        <xs:annotation>
+          <xs:documentation>
+            Поделение на ЕОИИ
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ED">
+        <xs:annotation>
+          <xs:documentation>
+            Европейско дружество
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EKD">
+        <xs:annotation>
+          <xs:documentation>
+            Европейско кооперативно дружество
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="LEKD">
+        <xs:annotation>
+          <xs:documentation>
+            Европейско кооперативно дружество с ограничена отговорност
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CHD">
+        <xs:annotation>
+          <xs:documentation>
+            Дружество регистрирано в юрисдикция с преференциален данъчен режим
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CHDF">
+        <xs:annotation>
+          <xs:documentation>
+            Чуждестранно дружество - физическо лице
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CHDU">
+        <xs:annotation>
+          <xs:documentation>
+            Чуждестранно дружество - юридическо лице
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="SDR">
+        <xs:annotation>
+          <xs:documentation>
+            Сдружение
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="FOND">
+        <xs:annotation>
+          <xs:documentation>
+            Фондация
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="KLCHULNC">
+        <xs:annotation>
+          <xs:documentation>
+            Клон на ЧЮЛНЦ
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NCH">
+        <xs:annotation>
+          <xs:documentation>
+            Народно читалище
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="-1"/>
+      <!--PROGRAMER1-->
+      <!--PROGRAMER1-->
+      <!--
+				  
+		ET		= 1, //	Едноличен търговец
+		SD		= 2, //	Събирателно дружество
+		KD		= 3, //	Командитно дружество
+		OOD		= 4, //	Дружество с ограничена отговорност
+		EOOD	= 10, //Еднолично Дружество с ограничена отговорност
+		AD		= 5, //	Акционерно дружество
+		EAD		= 11,// Еднолично Акционерно дружество
+		IAD		= 12,// Акционерно дружество със специално инвестиционна цел
+    IEAD    = 15,// Еднолично Акционерно дружество със специално инвестиционна цел
+		KDA		= 6, //	Командитно дружество с акции
+		K		= 7, //	Кооперация
+		KCHT	= 8, //	Клон на чуждестранен търговец
+		TPPD	= 13,//	Търговец публично предприятие -държавно
+		TPPO	= 14,//	Търговец публично предприятие -общинско
+		TPP		= 9,//	Търговец публично предприятие да премехне и да се замени с горните две
+	  EUIE    = 16,// Европейско обединение по икономически интереси ЕОИИ
+    DEUIE   = 17,// Поделение на ЕОИИ (Division Of EUIE)
+    ED      = 18,// Европейско дружество
+    EKD     = 19,// Европейско кооперативно дружество
+    LEKD    = 20 // Европейско кооперативно дружество с ограничена отговорност (Limited EKD)		 
+				 -->
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="Field">
+    <xs:sequence>
+      <xs:element name="GroupId" type="xs:int" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Идентификатор на група полета</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="GroupName" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Наименование на група полета</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SectionId" type="xs:int" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Идентификатор на раздел на полета</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SectionName" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Наименование на раздел на полета</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MainFieldIdent" type="FieldCodes" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Служебен идентификатор на вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MainFieldCode" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Код на вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MainFieldName" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Наименование на вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DeedType">
+    <xs:sequence>
+      <xs:element name="DeedStatus" type="DeedStatusType">
+        <xs:annotation>
+          <xs:documentation>Статус на партида</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CompanyName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Наименование</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="GUID" type="xs:string"/>
+      <xs:element name="UIC" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>ЕИК</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="LegalForm" type="LegalFormType">
+        <xs:annotation>
+          <xs:documentation>Правна форма</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CaseNo" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Номер на решението на съда, с което се учредява фирмата</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CaseYear" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Годинана решението на съда, с което се учредява фирмата</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CourtNo" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Съда издал на решението, с което се учредява фирмата</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="LiquidationOrInsolvency" type="LiquidationOrInsolvency" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Статус за ликвидация или несъстоятелност</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Records" type="Records" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Вписани обстоятелства</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Record">
+    <xs:sequence>
+      <xs:element name="RecordData" type="xs:anyType">
+        <xs:annotation>
+          <xs:documentation>Данни за вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="RecordId" type="xs:int">
+        <xs:annotation>
+          <xs:documentation>Идентификатор на записа</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IncomingId" type="xs:int"/>
+      <xs:element name="FieldIdent" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Служебен идентификатор на поле от вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MainField" type="Field" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="FieldEntryNumber" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Вписване</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="FieldActionDate" type="xs:dateTime">
+        <xs:annotation>
+          <xs:documentation>В сила от</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Records">
+    <xs:sequence>
+      <xs:element name="Record" type="Record" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Вписано обстоятелство</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ActualStateResponseV2">
+    <xs:sequence>
+      <xs:element name="Deed" type="DeedType" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Вписани обстоятелства по партида на търговец</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DataValidForDate" type="xs:dateTime" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Дата на валидност на данните</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ActualStateResponseV2" type="ActualStateResponseV2">
+    <xs:annotation>
+      <xs:documentation>Справка за актуално състояние</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,16 @@
+﻿@page "/ConfirmNewRegistration"
+
+@using ISNAPOO.Core.Contracts.Candidate
+@using ISNAPOO.Core.Contracts.Mailing
+@using ISNAPOO.WebSystem.Extensions
+
+@inject ICandidateProviderService CandidateProviderService
+@inject ILocationService LocationService
+@inject IMailService MailService
+@inject ICommonService CommonService
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+
+
+

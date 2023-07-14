@@ -1,0 +1,379 @@
+﻿@page "/ExpertsList"
+@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using ISNAPOO.WebSystem.Pages.ExternalExpertCommission.Modals.Expert
+@using ISNAPOO.WebSystem.Pages.Candidate.CIPO.ProcedureModalReports;
+@attribute [AuthorizeAttribute(Policy = "ShowExpertsList")]
+
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@Header</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" hidden="@this.IsRegister" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            @if (!string.IsNullOrEmpty(contentReport))
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="@contentReport" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenReport">Справка</button>
+                                    </SfTooltip>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="expertsGrid" DataSource="@experts" AllowSorting="true" EnableAltRow="true" AllowTextWrap="true" EnableHover="false" AllowSelection="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowFiltering="true" @ref="expertsGrid"
+                            AllowPaging="true" AllowReordering="true" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ExpertVM" RowSelected="RowSelected" RowDeselected="RowDeselected"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            @*<GridColumn Type="ColumnType.CheckBox" Width="10"></GridColumn>*@
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="20">
+                                <Template>
+                                    @GetRowNumber(expertsGrid, (context as ExpertVM).IdExpert).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="35px">
+                                <Template>
+                                    @if (!this.IsRegister)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button @onclick="(() => SelectedRow(context as ExpertVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    }
+                                    else
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                            <button @onclick="(() => SelectedRow(context as ExpertVM, false))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                        </SfTooltip>
+                                    }
+
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdExpert" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            @*<GridColumn Field="Person.Title" HeaderText="Титла" TextAlign="TextAlign.Left" Width="50px"></GridColumn>*@
+                            <GridColumn Field="Person.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Person.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                            <GridColumn Field="Person.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                            <GridColumn Field="Person.Phone" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="60px"></GridColumn>
+                            <GridColumn Field="Person.Email" HeaderText="E-mail" TextAlign="TextAlign.Left" Width="100px"></GridColumn>
+                            @if(this.LicensingType == "ExternalExperts")
+                            {
+                                <GridColumn Field="ProfessionalDirectionsInfo" HeaderText="Професионални направления" TextAlign="TextAlign.Left" Width="150px" DisableHtmlEncode="false"></GridColumn>
+                            }
+
+                            @if(this.LicensingType == "ExpertCommissions")
+                            {
+                                <GridColumn Field="CommissionsInfo" HeaderText="Експертни комисии" TextAlign="TextAlign.Left" Width="150px" DisableHtmlEncode="false"></GridColumn>
+                            }
+
+                            @if(this.LicensingType == "DocWorkGroup")
+                            {
+                                <GridColumn Field="DOCsInfo" HeaderText="РГ/Рецензенти на ДОС" TextAlign="TextAlign.Left" Width="150px" DisableHtmlEncode="false"></GridColumn>
+                            }
+                             @if(this.LicensingType == "NapooEmployees")
+                            {
+                                <GridColumn Field="IsNapooExpert" HeaderText="Служител" TextAlign="TextAlign.Center" Width="50px">
+                                    <Template>
+                                        <div class="text-center">
+                                            @{
+                                                var ctx = context as ExpertVM;
+                                                if (ctx.IsNapooExpert)
+                                                {
+                                                    <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                }
+                                                else
+                                                {
+                                                    <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                }
+
+                                            }
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                            }
+                             <GridColumn Field="Person.PasswordResetDateOnly" HeaderText="E-mail на" TextAlign="TextAlign.Left" Width="60" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as ExpertVM;
+                                        var date = ctx.Person.PasswordResetDateOnly.HasValue ? $"{ctx.Person.PasswordResetDateOnly.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                           
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Filter Panel*@
+<SfDialog @ref="@sfFilter" Target="#target" Width="65%" EnableResize="true" AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="@IsVisibleAddModal" CssClass="@dialogClass">
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <EditForm EditContext="editFilterContext" OnValidSubmit="Search" id="filterForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Име:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.FirstName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Презиме:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.SecondName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Фамилия:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.FamilyName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Вид на идентификатора:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="model.Person.IdIndentType" DataSource="@kvIndentTypeSourceFlr" AllowFiltering="true">
+                                    @*<ComboBoxEvents TValue="int?" TItem="KeyValueVM" Filtering="FilteringKeyValueIndentType"></ComboBoxEvents>*@
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    ЕГН/ЛНЧ/ИДН:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.Indent" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-sm-2">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Номер на ЛК:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.PersonalID" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Издадена от:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.PersonalIDIssueBy" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <!-- text input -->
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Дата на раждане:
+                                </label>
+                                <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @bind-Value="model.Person.BirthDate" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Пол:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="model.Person.IdSex" DataSource="@kvSexSourceFlr" AllowFiltering="true">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Населено място:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="LocationVM" PopupHeight="230px" CssClass="form-control customPad"
+                                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="model.Person.IdLocation" DataSource="@locationSourceAll" AllowFiltering="true" Query="@localDataQuery">
+                                    @*<ComboBoxEvents TValue="int?" TItem="LocationVM" Filtering="FilteringLocation"></ComboBoxEvents>*@
+                                    <ComboBoxFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Пощенски код:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.PostCode" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Адрес:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.Address" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Телефон:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.Phone" />
+                            </div>
+                        </div>
+                        <div class="col-sm-5">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    E-mail:
+                                </label>
+                                <InputText class="form-control" @bind-Value="model.Person.Email" />
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <h6 class="page-title-left">Данни за професионално направление на експерт</h6>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Вид експерт:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="model.IdExpertTypeFilter" DataSource="@kvExpertTypeSourceFlr" AllowFiltering="true">
+                                    @*<ComboBoxEvents TValue="int" TItem="KeyValueVM" Filtering="FilteringKeyValueExpertType"></ComboBoxEvents>*@
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Професионално направление:
+                                </label>
+                                <SfComboBox TValue="int" TItem="ProfessionalDirectionVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="model.IdProfessionalDirectionFilter" DataSource="@professionalDirectionSourceFlr" AllowFiltering="true">
+                                    @*<ComboBoxEvents TValue="int" TItem="ProfessionalDirectionVM" Filtering="FilteringProfessionalDirection"></ComboBoxEvents>*@
+                                    <ComboBoxFieldSettings Text="DisplayNameAndCode" Value="IdProfessionalDirection" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Дата на утвърждаване, като външен експерт:
+                                </label>
+                                <div>
+                                    <SfDatePicker CssClass="form-control customPad" TValue="DateTime?" @bind-Value="model.DateApprovalExternalExpertFilter" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Номер на заповед за утвърждаване, като външен експерт:
+                                </label>
+                                <div>
+                                    <InputText class="form-control" @bind-Value="model.OrderNumberFilter" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Дата на заповедта с която е включен в ЕК:
+                                </label>
+                                <div>
+                                    <SfDatePicker CssClass="form-control customPad" TValue="DateTime?" @bind-Value="model.DateOrderIncludedExpertCommissionFilter" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Статус:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="100px" CssClass="form-control customPad"
+                                            @bind-Value="model.IdStatusFilter" DataSource="@kvStatusSourceFlr">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="filterForm">Търси</button>
+                            <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="Cancel">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+<ExpertModal @ref="expertModal" IsRegister="@this.IsRegister" CallbackAfterSave="UpdateAfterSave"></ExpertModal>
+<ExternalExpertsReport @ref="this.externalExpertsReport"></ExternalExpertsReport>
+<ExpertCommissionsReport @ref="this.expertCommissionsReport"></ExpertCommissionsReport>
+<ToastMsg @ref="toast"></ToastMsg>

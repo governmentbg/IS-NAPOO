@@ -1,0 +1,181 @@
+﻿@page "/UserProfile"
+@inherits BlazorBaseComponent
+
+@using global::Data.Models.Data.ProviderData
+@using System.Security.Principal
+@using ISNAPOO.Core.ViewModels.Identity
+@using ISNAPOO.Common.Framework
+
+@inject UserManager<ApplicationUser> UserManager;
+@inject NavigationManager NavMgr
+@inject IPersonService PersonService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ILocService LS
+
+<SfDialog Target="#target" ZIndex="2000" Width="950px" Height="625px" EnableResize=true AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="isVisible">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за потребителски профил
+        </Header>
+        <Content>
+            @{
+                if (errorMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var errorMessage in errorMessages)
+                        {
+                            <li class="validation-message">@errorMessage</li>
+                        }
+                    </ul>
+                }
+            }
+            <div class="modal-body">
+                <div class="row offset-md-1 align-items-center">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="row dialogText">
+                                <label class="control-label">
+                                    Потребителско име:
+                                </label>
+                                <p class="text-muted">@user.UserName</p>
+                            </span>
+                            <span class="row dialogText">
+                                <div class="col required">
+                                    <label class="control-label">
+                                        Име:
+                                    </label>
+                                    <p class="text-muted">@person.FirstName @person.FamilyName</p>
+
+                                </div>
+                            </span>
+
+
+                        </div>
+                        <div class="col-md-6">
+
+                            @if (candidateProvider.ProviderOwner != null && !candidateProvider.ProviderOwner.Equals(""))
+                            {
+                                <span class="row dialogText">
+                                    <div class="col">
+                                        <label class="control-label">
+                                            Юридическо лице:
+                                        </label>
+                                        <p class="text-muted">@candidateProvider.ProviderOwner</p>
+
+                                    </div>
+                                </span>
+                                <span class="row dialogText">
+                                    <div class="col">
+                                        <label class="control-label">
+                                            ЦПО/ЦИПО:
+                                        </label>
+                                        <p class="text-muted">@candidateProvider.ProviderName</p>
+
+                                    </div>
+                                </span>
+                            }
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <EditForm EditContext="editContext" OnSubmit="@OnInformationReset" id="changeInformation">
+
+                                <h6>Промяна на данни за потребителя:</h6>
+                                <br />
+                                <div class="dialogContent">
+                                    <div class="row col-9">
+                                        <div class="form-group required">
+
+                                            <label class="control-label">
+                                                E-mail:
+                                            </label>
+                                            <InputText class="form-control" @bind-Value="@changeInformationModel.Email"> </InputText>
+                                        </div>
+                                    </div>
+
+                                    @if (this.isPositionVisible)
+                                    {
+                                        <div class="row col-9">
+                                            <div class="form-group required">
+                                                <label class="control-label">
+                                                    Длъжност:
+                                                </label>
+                                                <InputText class="form-control" @bind-Value="@changeInformationModel.Title"> </InputText>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                            </EditForm>
+                        </div>
+
+                        <div class="col-md-6">
+                            <EditForm EditContext="editContextPassword" OnSubmit="@OnReset" id="changePassword">
+                                <h6>Промяна на парола:</h6>
+                                <br />
+                                <div class="row col-9">
+                                    <!-- text input -->
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Стара парола:
+                                        </label>
+                                        <div class="password-input-icons">
+                                            <i class="@(this.oldPasswordIconClass)" @onclick="ShowOldPassword"></i>
+                                            <InputText id="oldPassword" class="form-control" type="@(this.inputOldPasswordType)" @bind-Value="@changePasswordModel.OldPassword"></InputText>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row col-9">
+                                    <!-- text input -->
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Нова парола:
+                                        </label>
+                                        <div class="password-input-icons">
+                                            <i class="@(this.newFirstPasswordIconClass)" @onclick="ShowNewFirstPassword"></i>
+                                            <InputText id="password" class="form-control" type="@(this.inputNewFirstPasswordType)" @bind-Value="@changePasswordModel.NewPassword"></InputText>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row col-9">
+                                    <!-- text input -->
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Потвърждение на паролата:
+                                        </label>
+                                        <div class="password-input-icons">
+                                            <i class="@(this.newSecondPasswordIconClass)" @onclick="ShowNewSecondPassword"></i>
+                                            <InputText id="confirmPassword" class="form-control" type="@(this.inputNewSecondPasswordType)" @bind-Value="@changePasswordModel.ConfirmPassword"></InputText>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" class="form-control" @bind-value="@changePasswordModel.UserName" />
+                                <div class="col-9 row">
+                                    <div class="text-right">
+                                        <button type="submit" class="btn btn-primary btn-outline-primary waves-effect md-trigger" form="changePassword">Промени парола</button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="submit" class="btn btn-primary btn-outline-primary waves-effect md-trigger" form="changeInformation">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="() => {CancelClickedHandler(); Redirect();}">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

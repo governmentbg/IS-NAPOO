@@ -1,0 +1,294 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="this.editContext">
+    <div class="card">
+        <div class="card-block" style="">
+            <p>
+                <SfAccordion>
+                    <AccordionItems>
+                        <AccordionItem Header="Данни за юридическото лице" Expanded="true">
+                            <ContentTemplate>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label>Юридическо лице: </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.ProviderOwner" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>ЕИК/Булстат: </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.PoviderBulstat" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            @if (string.IsNullOrEmpty(this.CandidateProviderVM.AttorneyName))
+                                            {
+                                                <label>Регистрирано от (представляващ): </label>
+                                                <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.ManagerName" />
+                                            }
+                                            else
+                                            {
+                                                <label>Регистрирано от (упълномощено лице): </label>
+                                                <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.AttorneyName" />
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group required">
+                                            <label class="control-label">Регистрирано в: </label>
+                                            <SfComboBox Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.providerRegisteredAtValues" AllowCustom="false" @bind-Value="this.CandidateProviderVM.IdProviderRegistration">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Форма на собственост: </label>
+                                            <SfComboBox Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.providerOwnershipValues" AllowCustom="false" @bind-Value="this.CandidateProviderVM.IdProviderOwnership">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label>Населено място: </label>
+                                            <SfTextBox Enabled="false" @bind-Value="@this.CandidateProviderVM.Location.DisplayJoinedNames" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <div class="form-group">
+                                            <label>Пощ. код: </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.ZipCode" />
+                                        </div>
+                                    </div>
+                                    @if (this.CandidateProviderVM.IdRegionAdmin.HasValue)
+                                    {
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>Район: </label>
+                                                <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.RegionAdmin.RegionName" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label>Адрес по регистрация: </label>
+                                                <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.ProviderAddress" />
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-sm-7">
+                                            <div class="form-group">
+                                                <label>Адрес по регистрация: </label>
+                                                <SfTextBox Enabled="false" @bind-Value="this.CandidateProviderVM.ProviderAddress" />
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Телефон: </label>
+                                            <SfTextBox Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" @bind-Value="this.CandidateProviderVM.ProviderPhone" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>Факс: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderFax" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group required">
+                                            <label class="control-label">E-mail адрес: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderEmail" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label>Интернет страница: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderWeb" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </ContentTemplate>
+                        </AccordionItem>
+                        <AccordionItem Header="@(this.IsCPO ? "Данни за Център за професионално обучение (ЦПО)" : "Данни за центъра за информация и професионално ориентиране (ЦИПО)")" Expanded="true">
+                            <ContentTemplate>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label">Име на @(this.IsCPO ? "ЦПО" : "ЦИПО"): </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderName" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group required">
+                                            <label class="control-label">Вид на обучаващата институция: </label>
+                                            <SfComboBox Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.providerStatusValues" AllowCustom="false" @bind-Value="this.CandidateProviderVM.IdProviderStatus">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group required">
+                                            <label class="control-label">Населено място на административния офис на @(this.IsCPO ? "ЦПО" : "ЦИПО"): </label>
+                                            <SfAutoComplete @ref="this.sfAutoCompleteLocationCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" TValue="int?" TItem="LocationVM" PopupHeight="230px" ShowClearButton="true"
+                                            @bind-Value="this.CandidateProviderVM.IdLocationCorrespondence"
+                                                            DataSource="this.locationCorrespondenceSource" AllowFiltering="true">
+                                                <AutoCompleteTemplates TItem="LocationVM">
+                                                    <NoRecordsTemplate>
+                                                        Няма намерени резултати.
+                                                    </NoRecordsTemplate>
+                                                </AutoCompleteTemplates>
+                                                <AutoCompleteFieldSettings Text="DisplayJoinedNamesForTrainingInstitution" Value="idLocation" />
+                                                <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence" ValueChange="SetZIPCodeAndRegionDataAsync"></AutoCompleteEvents>
+                                            </SfAutoComplete>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <div class="form-group required">
+                                            <label class="control-label">Пощ. код: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ZipCodeCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    @if (this.municipalitiesIds.Any(x => x == this.selectedLocation.idMunicipality))
+                                    {
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Район: </label>
+                                                <SfComboBox Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" ShowClearButton="true" TValue="int?" TItem="RegionVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.regionSource" AllowCustom="false" @bind-Value="this.CandidateProviderVM.IdRegionCorrespondence">
+                                                    <ComboBoxFieldSettings Text="RegionName" Value="idRegion" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div class="form-group required">
+                                                <label class="control-label">Адрес за кореспонденция с административния офис на @(this.IsCPO ? "ЦПО" : "ЦИПО"): </label>
+                                                <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderAddressCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-sm-7">
+                                            <div class="form-group required">
+                                                <label class="control-label">Адрес за кореспонденция с административния офис на @(this.IsCPO ? "ЦПО" : "ЦИПО"): </label>
+                                                <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderAddressCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Директор @(this.IsCPO ? "ЦПО" : "ЦИПО") (Име): </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.DirectorFirstName" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Директор @(this.IsCPO ? "ЦПО" : "ЦИПО") (Презиме): </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.DirectorSecondName" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Директор @(this.IsCPO ? "ЦПО" : "ЦИПО") (Фамилия): </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.DirectorFamilyName" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group required">
+                                            <label class="control-label">Лице за контакт: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.PersonNameCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="form-group required">
+                                            <label class="control-label">Потребители за получаване на известия/уведомления: </label>
+                                            <SfMultiSelect Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" TValue="List<PersonVM>" TItem="PersonVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.personsFromCPOSource" AllowFiltering="true" @bind-Value="this.CandidateProviderVM.PersonsForNotifications" AllowCustomValue="false">
+                                                <MultiSelectFieldSettings Text="FullName" Value="IdPerson" />
+                                            </SfMultiSelect>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Телефон: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderPhoneCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>Факс: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderFaxCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group required">
+                                            <label class="control-label">E-mail адрес: </label>
+                                            <SfTextBox @bind-Value="this.CandidateProviderVM.ProviderEmailCorrespondence" Enabled="this.IsUserProfileAdministrator && !this.DisableFieldsWhenUserIsNAPOO && !this.DisableFieldsWhenApplicationStatusIsNotDocPreparation && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableFieldsWhenActiveLicenceChange" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label>Допълнителна информация: представяне на @(this.IsCPO ? "ЦПО" : "ЦИПО") в публичния регистър на сайта на НАПОО</label>
+                                            <p>
+                                                <CustomInputTextArea rows="4" maxlength="512" class="form-control" @bind-Value="this.CandidateProviderVM.AdditionalInfo" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || !this.IsUserProfileAdministrator ||this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation || this.DisableFieldsWhenActiveLicenceChange)"></CustomInputTextArea>
+                                                <div style="float:right"><label>@(this.CandidateProviderVM.AdditionalInfo != null ? this.CandidateProviderVM.AdditionalInfo.Length : 0)/512</label></div>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (this.IsCPO)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="new-task">
+                                                <div class="to-do-list">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input type="checkbox" @bind-value="this.CandidateProviderVM.AccessibilityInfo" checked="@(this.CandidateProviderVM.AccessibilityInfo ? "checked" : null)" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || !this.IsUserProfileAdministrator ||this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation || this.DisableFieldsWhenActiveLicenceChange)">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Достъпност на архитектурна среда за хора с увреждания, жестомимичен превод</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="to-do-list">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input type="checkbox" @bind-value="this.CandidateProviderVM.OnlineTrainingInfo" checked="@(this.CandidateProviderVM.OnlineTrainingInfo ? "checked" : null)" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee || !this.IsUserProfileAdministrator ||this.DisableFieldsWhenUserIsNAPOO || this.DisableFieldsWhenApplicationStatusIsNotDocPreparation || this.DisableFieldsWhenActiveLicenceChange)">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Условия за дистанционна форма на обучение</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </ContentTemplate>
+                        </AccordionItem>
+                    </AccordionItems>
+                </SfAccordion>
+            </p>
+        </div>
+    </div>
+</EditForm>

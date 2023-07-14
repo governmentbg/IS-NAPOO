@@ -1,0 +1,69 @@
+﻿@page "/ArchiveTrainingCourseList"
+
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ShowArchiveTrainingCourseList")]
+
+@{
+    base.CheckUserActionPermission("ShowArchiveTrainingCourseList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Архив на курсове за обучение</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @*<li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>*@
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="coursesSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="coursesGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="CourseVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="7%">
+                                <Template>
+                                    @GetRowNumber(coursesGrid, (context as CourseVM).IdCourse).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="7%" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед на курс" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.ViewCourseBtn(context as CourseVM))"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCourse" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CourseName" HeaderText="Курс" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                            <GridColumn Field="Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="FormEducationName" HeaderText="Форма на обучение" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Field="MandatoryHours" HeaderText="Задължителни уч. часове" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="SelectableHours" HeaderText="Избираеми уч. часове" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                            <GridColumn Field="SubscribeDateAsStr" HeaderText="Крайна дата за записване" TextAlign="TextAlign.Left" Width="40%" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="StartDateAsStr" HeaderText="Дата за започване" TextAlign="TextAlign.Left" Width="40%" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="EndDateAsStr" HeaderText="Дата за завършване" TextAlign="TextAlign.Left" Width="40%" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="ArchiveCourseValue" HeaderText="Вид" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" EntryFromOldArchivedCourses="true" />
+
+

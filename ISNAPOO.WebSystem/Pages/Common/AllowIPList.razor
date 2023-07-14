@@ -1,0 +1,77 @@
+﻿@page "/AllowIPList"
+@using ISNAPOO.Core.ViewModels.Common
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Позволени IP-та</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="openNewAllowIPModal">Ново IP</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <SfGrid DataSource="allowIPVM" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                        AllowTextWrap="true" @ref="allowIPGrid" AllowSelection="false" AllowPaging="true">                
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+
+                    <GridColumns>
+                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                            <Template>
+                                @GetRowNumber(allowIPGrid, (context as AllowIPVM).idAllowIP).Result
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Width="8">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button @onclick="(()=>SelectAllowIP(context as AllowIPVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>                     
+                        <GridColumn Field="IP" HeaderText="IP" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                        <GridColumn Field="Commnet" HeaderText="Commnet" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                        <GridColumn Field="IsAllow" HeaderText="isAllow" TextAlign="TextAlign.Left" Width="15"> 
+                            <Template>
+                                <div class="text-left">
+                                    @{
+                                        var allowIPVM = context as AllowIPVM;
+
+                                        switch (allowIPVM.IsAllow)
+                                        {
+                                            case true:
+                                                <label class="form-label label label-success">@allowIPVM.IsAllow</label>
+                                                break;
+                                            case false:
+                                                <label class="form-label label label-warning">@allowIPVM.IsAllow</label>
+                                                break;                                      
+                                        }
+                                    }
+                                </div>
+                            </Template>
+                        </GridColumn>                      
+                        <GridColumn Field="idAllowIP" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Width="5%">
+                            <Template Context="context">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                    <button class="btn-row" type="button" @onclick="(async () => await this.DeleteRowAllowIP(context as AllowIPVM))"><i class="fa fa-trash-o"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+</div>
+<AllowIPModal @ref="allowIPModal" CallbackAfterSubmit = "LoadAllowIPsDataAsync" ></AllowIPModal>

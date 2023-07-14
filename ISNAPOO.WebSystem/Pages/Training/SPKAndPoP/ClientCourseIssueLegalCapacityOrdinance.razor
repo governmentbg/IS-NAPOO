@@ -1,0 +1,71 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Година:
+                            </label>
+                            <SfNumericTextBox @bind-Value="this.model.FinishedYear" ShowSpinButton="false" Format="0" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <label class="control-label">Вид на издадения документ за правоспособност: </label>
+                            <SfComboBox Enabled="this.IsEditEnabled" ShowClearButton="true" TValue="int?" TItem="TypeOfRequestedDocumentVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="typeOfRequestedDocSource" AllowCustom="false" @bind-Value="this.model.IdLegalCapacityTypeOfRequestedDocument">
+                                <ComboBoxFieldSettings Text="NumberWithName" Value="IdTypeOfRequestedDocument" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Регистрационен номер на документа (документ за правоспособност):
+                            </label>
+                            <SfTextBox @bind-Value="this.model.LegalCapacityDocumentRegNo" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Дата на издаване (документ за правоспособност): </label>
+                            <SfDatePicker Enabled="this.IsEditEnabled" @bind-Value="this.model.LegalCapacityDocumentDate" Format="dd.MM.yyyy" />
+                        </div>
+                    </div>
+                </div>
+
+                @if (this.model.IdLegalCapacityClientCourseDocument != 0)
+                {
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Сканирани страници (документ за правоспособност):
+                                </label>
+                                <SfUploader Enabled="this.IsEditEnabled" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChangeLegalCapacity" OnRemove="OnRemoveClickLegalCapacity"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(this.model.LegalCapacityUploadedFileName))
+                {
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            <button type="button" class="btn-row" @onclick="(() => OnRemoveLegalCapacity(this.model.LegalCapacityFileName))"><i class="fa fa-trash-o"></i></button>
+                            <span class="align-text-bottom"><a @onclick="OnDownloadClickLegalCapacity" href="#" class="link-primary">@this.model.LegalCapacityFileName</a></span>
+                        </div>
+                    </div>
+                }
+            </p>
+        </div>
+    </div>
+</EditForm>

@@ -1,0 +1,103 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="75%" Height="70%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3020" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за протокол <span style="color: #ffffff;">@this.CourseVM.CourseName</span></Header>
+        <Content>
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-block" style="">
+                    <p>
+                        <EditForm EditContext="editContext">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Име: </label>
+                                        <InputText class="form-control" @bind-Value="this.model.FirstName" disabled="@(!IsEditable)" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Презиме: </label>
+                                        <InputText class="form-control" @bind-Value="this.model.SecondName" disabled="@(!IsEditable)" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Фамилия: </label>
+                                        <InputText class="form-control" @bind-Value="this.model.FamilyName" disabled="@(!IsEditable)" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="new-task" style="margin-top: 28px;">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="this.model.IsChairman" checked="@(this.model.IsChairman ? "checked" : null)" disabled="@(!IsEditable)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Председател</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (this.IsEditable)
+                                {
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <p>
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddMemberBtn" disabled="@(!IsEditable)">Добави</button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </EditForm>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="text-gray"><b>Членове на комисии и Квестори:</b></label>
+                                <SfGrid DataSource="membersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                        AllowTextWrap="true" @ref="membersGrid" AllowSelection="false" AllowPaging="true"
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridEvents TValue="CourseCommissionMemberVM" OnToolbarClick="ToolbarClick" />
+                                    <GridColumns>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                            <Template>
+                                                @GetRowNumber(membersGrid, (context as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                        <GridColumn Field="SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                        <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                        <GridColumn Field="IsChairmanAsStr" HeaderText="Председател" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-righ" style="display: inline-flex">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+

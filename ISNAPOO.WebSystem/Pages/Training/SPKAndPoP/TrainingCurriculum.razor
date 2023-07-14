@@ -1,0 +1,255 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        @*<ul class="navbar-nav">
+                        <li class="nav-item d-none d-sm-inline-block">
+                        <SfTooltip Content="Създаване на нова програма за обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewProgramBtn">Нова програма</button>
+                        </SfTooltip>
+                        </li>
+                        <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                        </li>
+                        </ul>*@
+                    </nav>
+                </div>
+                <div class="row" style="padding-left: 18px;">
+                    <div class="col-sm-8">
+                        <p style="color: #01A9AC;">
+                            <div>
+                                <div>
+                                    <span>Минимален брой задължителни учебни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionА == 0 ? "" : this.frameworkProgramVM.SectionА)</span></span>
+                                </div>
+                                <div>
+                                    <span>Брой избираеми учебни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionB == 0 ? "" : this.frameworkProgramVM.SectionB)</span></span>
+                                </div>
+                                <div>
+                                    <span>Входящо минимално образователно равнище: <span class="text-gray">@this.frameworkProgramVM.MinimumLevelEducationName</span></span>
+                                </div>
+                                <div>
+                                    <span>Входящо минимално квалификационно равнище: <span class="text-gray">@this.frameworkProgramVM.MinimumLevelQualification</span></span>
+                                </div>
+                                <div>
+                                    <span>Продължителност на обучението: <span class="text-gray">@this.frameworkProgramVM.TrainingPeriodName</span></span>
+                                </div>
+                                <div style="line-height: 15px; margin-bottom: 3px;">
+                                    <span>Максимален % часове обща професионална подготовка спрямо общия брой задължителни часове: <span class="text-gray">@(this.frameworkProgramVM.SectionА1 == 0 ? "" : this.frameworkProgramVM.SectionА1)</span></span>
+                                </div>
+                                <div style="line-height: 15px;">
+                                    <span>Минимален % на учебните часове за практическо обучение спрямо общия брой часове за отраслова и специфична професионална подготовка: <span class="text-gray">@(this.frameworkProgramVM.Practice == 0 ? "" : this.frameworkProgramVM.Practice)</span></span>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                    <div class="col-sm-4">
+                        <p style="color: #01A9AC;">
+                            <div>
+                                <div>
+                                    <span>Общо <span class="text-gray">@(this.totalHours == 0 ? "" : this.totalHours)</span> @(this.totalHours == 1 ? "час" : "часа"), от тях:</span>
+                                </div>
+                                <div>
+                                    <span>- A Задължителни учебни часове: <span class="text-gray">@(this.compulsoryHours == 0 ? "" : this.compulsoryHours)</span></span>
+                                </div>
+                                <div>
+                                    <span>- Б Избираеми учебни часове: <span class="text-gray">@(this.nonCompulsoryHours == 0 ? "" : this.nonCompulsoryHours)</span></span>
+                                </div>
+                                <div>
+                                    <span>- A1 Обща професионална подготовка: <span class="text-gray">@(this.generalProfessionTrainingHours == 0 ? "" : this.generalProfessionTrainingHours)</span></span>
+                                </div>
+                                <div>
+                                    <span>- A2 Отраслова професионална подготовка: <span class="text-gray">@(this.industryProfessionTrainingHours == 0 ? "" : this.industryProfessionTrainingHours)</span></span>
+                                </div>
+                                <div>
+                                    <span>- A3 Специфична професионална подготовка: <span class="text-gray">@(this.specificProfessionTrainingHours == 0 ? "" : this.specificProfessionTrainingHours)</span></span>
+                                </div>
+                                <div>
+                                    <span>- Б Разширена професионална подготовка: <span class="text-gray">@(this.extendedProfessionTrainingHours == 0 ? "" : this.extendedProfessionTrainingHours)</span></span>
+                                </div>
+                            </div>
+                        </p>
+                        <p style="color: #01A9AC;">
+                            <div>
+                                <div>
+                                    <span>Брой часове по теория: <span class="text-gray">@(this.totalTheoryHours != 0 ? this.totalTheoryHours : "")</span></span>
+                                </div>
+                                <div>
+                                    <span>Брой часове по практика: <span class="text-gray">@(this.totalPracticeHours != 0 ? this.totalPracticeHours : "")</span></span>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+                <div class="row" style="padding-left: 18px;">
+                    <div class="col-sm-12">
+                        <nav class="navbar navbar-expand  ">
+                            <ul class="navbar-nav">
+                                @if (!this.HideBtnsWhenSPK)
+                                {
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Изтегляне на бланка за автоматично зареждане на учебен план и учебни програми" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="CurriculumTemplateDownloadHandler">Шаблон за импорт</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Зареждане на учебен план и учебни програми за избрана специалност от файл" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="OpenImportCurriculumModal">Импорт уч. план</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                }
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Добавяне на нова тема към учебната програма за специалността" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="OpenCandidateCurriculumModal">Нова тема</button>
+                                    </SfTooltip>
+                                </li>
+                                <label>&nbsp</label>
+                                @if (!this.HideBtnsWhenSPK)
+                                {
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Добавяне на съответствие с ДОС и ЕРУ за избран ред от учебната програма" OpensOn="Hover">
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="OpenDOCERUModal">Съответствие с ДОС</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                }
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Проверка на съответствието на учебния план и учебните програми с нормативните изисквания в рамковата програма" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="ValidateCurriculum">Валидирай уч. план</button>
+                                    </SfTooltip>
+                                </li>
+                                <label>&nbsp</label>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Печат на бланка на учебния план и учебните програми за избраната специалност" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="PrintCurriculum">Печат уч. план</button>
+                                    </SfTooltip>
+                                </li>
+                                    <label>&nbsp</label>
+                                @if (!this.HideBtnsWhenSPK)
+                                {
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" CssClass="toolTip-zindex" Content="Изтриване на избрани теми от учебната програма" OpensOn="Hover">
+                                            <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" style="text-transform: none;" @onclick="DeleteSelectedCurriculumsBtn">Изтрий теми</button>
+                                        </SfTooltip>
+                                    </li>
+                                    <label>&nbsp</label>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="this.curriculumsGrid" DataSource="addedCurriculums" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true" AllowPaging="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                        <GridEditSettings AllowDeleting="true" />
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridTemplates>
+                            <EmptyRecordTemplate Context="emptyRecord">
+                                <span>Няма намерени резултати.</span>
+                            </EmptyRecordTemplate>
+                        </GridTemplates>
+                        <GridColumns>
+                            <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="10"></GridColumn>
+                            <GridColumn Field="IdCandidateCurriculum" HeaderText="" TextAlign="TextAlign.Center" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="15" AllowFiltering="false">
+                                <Template Context="idContext">
+                                    @if ((idContext as TrainingCurriculumVM).IdTrainingCurriculum != 0)
+                                    {
+                                        @GetRowNumber(curriculumsGrid, (idContext as TrainingCurriculumVM).IdTrainingCurriculum).Result
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="15" HeaderText=" ">
+                                <Template Context="curriculumContext">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.EditSchedule(curriculumContext as TrainingCurriculumVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="15" HeaderText=" ">
+                                <Template Context="curriculumContext">
+                                    @{
+                                        var trainingCurriculum = curriculumContext as TrainingCurriculumVM;
+                                        if (trainingCurriculum.IdProfessionalTraining == this.kvBType.IdKeyValue || !this.HideBtnsWhenSPK)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(async () => await this.DeleteCurriculum(curriculumContext as TrainingCurriculumVM))"><i class="fa fa-trash-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdTrainingCurriculum" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ProfessionalTraining" HeaderText="Р" TextAlign="TextAlign.Center" Width="15"></GridColumn>
+                            <GridColumn Field="Subject" HeaderText="Предмет" TextAlign="TextAlign.Left" Width="57"></GridColumn>
+                            <GridColumn Field="Topic" HeaderText="Тема" TextAlign="TextAlign.Left" Width="146"></GridColumn>
+                            <GridColumn Field="Theory" HeaderText="Т" TextAlign="TextAlign.Center" Width="30">
+                                <Template>
+                                    @{
+                                        var ctx = context as TrainingCurriculumVM;
+                                        <div class="text-right" style="font-size: 20px !important;">
+                                            @ctx.Theory
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Practice" HeaderText="П" TextAlign="TextAlign.Center" Width="30">
+                                <Template>
+                                    @{
+                                        var ctx = context as TrainingCurriculumVM;
+                                        <div class="text-right" style="font-size: 20px !important;">
+                                            @ctx.Practice
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ERUsJoined" HeaderText="ЕРУ" TextAlign="TextAlign.Center" Width="28">
+                                <Template Context="candidateCurriculumCtx">
+                                    @{
+                                        var candidateCurriculum = candidateCurriculumCtx as TrainingCurriculumVM;
+
+                                        foreach (var eru in candidateCurriculum.SelectedERUs.OrderBy(x => x.ERUIntCodeSplit))
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="@eru.Name" OpensOn="Hover">
+                                                @(eru.Code)
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                    @{
+                                        var ctx = context as TrainingCurriculumVM;
+                                        var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx.IdTrainingCurriculum, "TrainingProgramCurriculum");
+                                        if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                        <GridEvents TValue="TrainingCurriculumVM" OnRecordClick="CurriculumRecordClickHandler"
+                                    RowSelected="CurriculumSelectedHandler" RowDeselected="CurriculumDeselectedHandler"
+                                    RowSelecting="CurriculumSelectingHandler" RowDeselecting="CurriculumDeselectingHandler"
+                                    DataBound="CalculateCurriculumHours" OnToolbarClick="ToolbarClick" QueryCellInfo="CustomizeCellHours" />
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<TrainingCurriculumModal @ref="trainingCurriculumModal" CallbackAfterSubmit="UpdateAfterSubmitTrainingCurriculumModal" />
+<DOCERUModal @ref="docEruModal" CallbackAfterERUSelected="AfterSelectedERUHandler" />
+<ImportCandidateCurriculumModal @ref="importCandidateCurriculumModal" CallbackAfterTrainingCurriculumImport="UpdateAfterExcelImport" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

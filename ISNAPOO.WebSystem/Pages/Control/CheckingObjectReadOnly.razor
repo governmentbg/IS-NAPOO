@@ -1,0 +1,193 @@
+﻿@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.Core.Contracts.Training
+@using System.ComponentModel.DataAnnotations
+@using ISNAPOO.WebSystem.Pages.Registers.Courses
+
+
+@inherits BlazorBaseComponent
+<EditForm EditContext="editContext" id="checkingForm">
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body">
+                        <SfAccordion ExpandMode="ExpandMode.Single">
+                            <AccordionItems>
+                                <AccordionItem Header="Материално-технически бази">
+                                    <ContentTemplate>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <SfGrid ID="mtbSfGrid" DataSource="mtbsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="mtbSfGrid" AllowSelection="true">
+                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                    <GridTemplates>
+                                                        <EmptyRecordTemplate Context="emptyRecord">
+                                                            <span>Няма намерени резултати.</span>
+                                                        </EmptyRecordTemplate>
+                                                    </GridTemplates>
+                                                    <GridColumns>
+                                                        <GridColumn Width="6%">
+                                                            <Template Context="premisesCtx">
+                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                    <button @onclick="(async () => await this.OpenRegisterMTBModalBtn((premisesCtx as CandidateProviderPremisesCheckingVM)))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                                                </SfTooltip>
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CandidateProviderPremises.PremisesName" HeaderText="Материално-техническа база" TextAlign="TextAlign.Left" Width="23%"></GridColumn>
+                                                        <GridColumn Field="CandidateProviderPremises.Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                                                        <GridColumn Context="mtbContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="7%%">
+
+                                                            <Template>
+                                                                <div class="text-center">
+                                                                    @{
+                                                                        var ctx = mtbContext as CandidateProviderPremisesCheckingVM;
+                                                                        if (ctx.CheckDone)
+                                                                        {
+                                                                            <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                        }
+
+                                                                    }
+                                                                </div>
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                        <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="22%"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            </div>
+                                        </div>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Header="@TrainersHeader">
+                                    <ContentTemplate>
+
+                                        <ContentTemplate>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <SfGrid ID="trainerSfGrid" DataSource="trainersSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                            AllowTextWrap="true" @ref="trainerSfGrid" AllowSelection="true">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridTemplates>
+                                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                                <span>Няма намерени резултати.</span>
+                                                            </EmptyRecordTemplate>
+                                                        </GridTemplates>
+                                                        <GridColumns>
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="trainerCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                        <button @onclick="(async () => await this.OpenRegisterTrainerModalBtn((trainerCtx as CandidateProviderTrainerCheckingVM)))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="CandidateProviderTrainer.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                            <GridColumn Field="CandidateProviderTrainer.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                            <GridColumn Field="CandidateProviderTrainer.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                            <GridColumn Context="trainerContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="7%">
+                                                                <Template>
+                                                                    <div class="text-center">
+                                                                        @{
+                                                                            var ctx = trainerContext as CandidateProviderTrainerCheckingVM;
+                                                                            if (ctx.CheckDone)
+                                                                            {
+                                                                                <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                            }
+
+                                                                        }
+                                                                    </div>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="27%"></GridColumn>
+                                                        </GridColumns>
+                                                    </SfGrid>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Header="Курсове на обучение" Visible="IsCPO">
+                                    <ContentTemplate>
+
+                                        <ContentTemplate>
+
+                                            
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <SfGrid ID="courseSfGrid" DataSource="courseSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                            AllowTextWrap="true" @ref="courseSfGrid" AllowSelection="true">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridTemplates>
+                                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                                <span>Няма намерени резултати.</span>
+                                                            </EmptyRecordTemplate>
+                                                        </GridTemplates>
+                                                        <GridColumns>
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="courseCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                        <button @onclick="(async () => await this.OpenRegisterCourseModalBtn((courseCtx as CourseCheckingVM)))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="Course.CourseName" HeaderText="Наименование на курс" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Program.CourseTypeName" HeaderText="Вид на обучение" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Program.Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Program.Speciality.CodeAndName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Context="courseContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="9%">
+
+                                                                <Template>
+                                                                    <div class="text-center">
+                                                                        @{
+                                                                            var ctx = courseContext as CourseCheckingVM;
+                                                                            if (ctx.CheckDone)
+                                                                            {
+                                                                                <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                            }
+
+                                                                        }
+                                                                    </div>
+                                                                </Template>
+
+                                                            </GridColumn>
+                                                            <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                        </GridColumns>
+                                                    </SfGrid>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                            </AccordionItems>
+                        </SfAccordion>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+<ToastMsg @ref="toast"></ToastMsg>
+<MTBInformationModal @ref="mTBInformationModal" />
+<TrainerInformationModal @ref="trainerInformationModal" />
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />
+

@@ -1,0 +1,45 @@
+﻿@page "/PrintingHouseReportList"
+
+@attribute [Authorize(Policy = "ShowPrintingHouseReportList")]
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Справки печатница</h6>
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="documentRequestsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="documentRequestsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="PrintingHouseReportVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(documentRequestsGrid, (context as PrintingHouseReportVM).Id).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="6px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                    <button @onclick="(() => this.OpenRequestDetailsModal(context as PrintingHouseReportVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="District" HeaderText="Област" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="NumberAndDate" HeaderText="№ на обобщена заявка" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NAPOOSummarizeRequestsModal @ref=summarizeRequestsModal />

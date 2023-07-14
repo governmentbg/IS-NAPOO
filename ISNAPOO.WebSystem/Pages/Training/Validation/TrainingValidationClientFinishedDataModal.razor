@@ -1,0 +1,203 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-header">
+            <nav class="navbar navbar-expand  ">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item d-none d-sm-inline-block">
+                        @if (this.model.DocumentDate.HasValue)
+                        {
+                            <button style="margin-right: 5px;" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.Export())">Печат</button>
+                        }
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="card-body" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="form-group required">
+                            <label class="control-label">Статус на завършване: </label>
+                            <SfComboBox Enabled="@(this.IsEditable && !this.model.DocumentDate.HasValue)" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="finishedTypeSource" AllowCustom="false" @bind-Value="this.model.IdFinishedType">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                @if (this.model.IdFinishedType == this.kvFinishedWithDoc.IdKeyValue)
+                {
+                    <div class="row">
+                        @if (!this.model.IdValidationProtocol.HasValue && this.ClientVM.OldId.HasValue)
+                        {
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Протокол:
+                                    </label>
+                                    <SfTextBox Value="@(this.model.DocumentProtocol)" Enabled="false" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-sm-5">
+                                <div class="form-group required">
+                                    <label class="control-label">Протокол: </label>
+                                    <SfComboBox Enabled="@(this.IsEditable)" ShowClearButton="true" TValue="int?" TItem="ValidationProtocolVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="protocolsSource" AllowCustom="false" @bind-Value="this.model.IdValidationProtocol">
+                                        <ComboBoxFieldSettings Text="NameAndDate" Value="IdValidationProtocol" />
+                                        <ComboBoxEvents TValue="int?" TItem="ValidationProtocolVM" ValueChange="OnProtocolSelected" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        }
+                        @*  <div class="col-sm-2">
+                    <div class="form-group required">
+                    <label class="control-label">
+                    Оценка по теория:
+                    </label>
+                    <SfTextBox @bind-Value="this.model.TheoryResult" />
+                    </div>
+                    </div>
+                    <div class="col-sm-2">
+                    <div class="form-group required">
+                    <label class="control-label">
+                    Оценка по практика:
+                    </label>
+                    <SfTextBox @bind-Value="this.model.PracticeResult"/>
+                    </div>
+                    </div>*@
+                        <div class="col-sm-7">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на издадения документ:
+                                </label>
+                                <SfTextBox @bind-Value="this.model.DocumentTypeName" Enabled="false" />
+                            </div>
+                        </div>
+                    </div>
+                    @if (this.model.HasDocumentFabricNumber)
+                    {
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group required">
+                                    <label class="control-label">Фабричен номер на документа: </label>
+                                    <SfComboBox Enabled="@(this.IsEditable)" @ref="docSerialNumbersComboBox" ShowClearButton="true" TValue="int?" TItem="DocumentSerialNumberVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="documentSerialNumbersSource" AllowCustom="true" @bind-Value="this.model.IdDocumentSerialNumber">
+                                        <ComboBoxFieldSettings Text="SerialNumber" Value="IdDocumentSerialNumber" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Регистрационен номер на документа:
+                                    </label>
+                                    <SfTextBox Enabled="@(this.IsEditable)" @bind-Value="this.model.DocumentRegNo" Placeholder="@(this.docRegNoPlaceholder)" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">Дата на издаване: </label>
+                                    <SfDatePicker Enabled="@(this.IsEditable)" @bind-Value="this.model.DocumentDate" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Обща оценка:
+                                    </label>
+                                    <SfTextBox Enabled="@(this.IsEditable)" @bind-Value="this.model.FinalResult" />
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Година:
+                                    </label>
+                                    <SfNumericTextBox Enabled="@(this.IsEditable)" @bind-Value="this.model.FinishedYear" OnChange="OnFinishedYearValueChanged" ShowSpinButton="false" Format="0" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Регистрационен номер на документа:
+                                    </label>
+                                    <SfTextBox Enabled="@(this.IsEditable)" @bind-Value="this.model.DocumentRegNo" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Обща оценка:
+                                    </label>
+                                    <SfTextBox Enabled="@(this.IsEditable)" @bind-Value="this.model.FinalResult" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">Дата на издаване: </label>
+                                    <SfDatePicker Enabled="@(this.IsEditable)" @bind-Value="this.model.DocumentDate" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Година:
+                                    </label>
+                                    <SfNumericTextBox Enabled="@(this.IsEditable)" @bind-Value="this.model.FinishedYear" OnChange="OnFinishedYearValueChanged" ShowSpinButton="false" Format="0" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (this.model.IdValidationClientDocument != 0 && this.IsEditable)
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Сканиран документ:
+                                    </label>
+                                    <SfUploader @ref="sfUploader" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                        <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                    </SfUploader>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @*                  @if (!string.IsNullOrEmpty(this.model.UploadedFileName))
+                {
+                <div class="row e-upload" style="margin-left: 0px">
+                <div class="col-sm-8">
+                <button type="button" hidden="@(!this.IsEditable)" class="btn-row" @onclick="(() => OnRemove(this.model.UploadedFileName))"><i class="fa fa-trash-o"></i></button>
+                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.model.UploadedFileName</a></span>
+                </div>
+                </div>
+                }*@
+                    @if (this.model.DocumentUploadedFiles.Any())
+                    {
+                        @foreach (var doc in this.model.DocumentUploadedFiles)
+                        {
+                            @if (!string.IsNullOrEmpty(doc.UploadedFileName))
+                            {
+                                <div class="row e-upload" style="margin: 2px 0">
+                                    <div class="col-sm-8">
+                                        <button type="button" disabled="@(!this.IsEditable)" class="btn-row" @onclick="(() => OnRemove(doc.FileName, doc.IdValidationDocumentUploadedFile))"><i class="fa fa-trash-o"></i></button>
+                                        <span class="align-text-bottom"><a @onclick="(() => OnDownloadClick(doc.FileName, doc.IdValidationDocumentUploadedFile))" href="#" class="link-primary">@doc.FileName</a></span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                }
+            </p>
+        </div>
+    </div>
+</EditForm>
+<PrintDocumentModalMessage @ref="printDocumentModalMessage" />

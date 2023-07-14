@@ -1,0 +1,72 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="80%" Height="auto" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Програми за обучение към <span style="color: #ffffff">ЦПО @this.providerName към @this.providerOwner</span></Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row" style="margin-bottom: 30px;">
+                                    <div class="col-sm-12">
+                                        <SfGrid @ref="programsGrid" DataSource="programsSource" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true" AllowPaging="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridSelectionSettings CheckboxOnly="true" />
+                                            <GridEvents TValue="ProgramVM" RowSelecting="RowSelectingHandler" />
+                                            <GridColumns>
+                                                <GridColumn Type="ColumnType.CheckBox" Width="10">
+                                                    <HeaderTemplate>
+                                                    </HeaderTemplate>
+                                                </GridColumn>
+                                                <GridColumn Field="IdProgram" HeaderText="" TextAlign="TextAlign.Center" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8" AllowFiltering="false">
+                                                    <Template Context="idContext">
+                                                        @if ((idContext as ProgramVM).IdProgram != 0)
+                                                        {
+                                                            @GetRowNumber(this.programsGrid, (idContext as ProgramVM).IdProgram).Result
+                                                        }
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="IdProgram" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn Field="Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                                <GridColumn Field="Speciality.CodeAndName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                                <GridColumn Field="ProgramNumber" HeaderText="Номер на програмата" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                                <GridColumn Field="ProgramName" HeaderText="Наименование на програмата" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                                <GridColumn Field="FrameworkProgram.Name" HeaderText="Рамкова програма" TextAlign="TextAlign.Left" Width="40" Visible="!this.isOpenedFromLegalCapacity"></GridColumn>
+                                                <GridColumn Field="TotalHours" HeaderText="Общо часове" TextAlign="TextAlign.Left" Width="30" Visible="!this.isOpenedFromLegalCapacity">
+                                                    <Template>
+                                                        @{
+                                                            var ctx = context as ProgramVM;
+                                                            <div class="text-right">
+                                                                @ctx.TotalHours
+                                                            </div>
+                                                        }
+                                                    </Template>
+                                                </GridColumn>
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Добави</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

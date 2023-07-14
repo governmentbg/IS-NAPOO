@@ -1,0 +1,85 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+
+
+
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Филтър</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="searchForm">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                            <div class="col-sm-6">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Служител:
+                                                </label>
+                                                <SfComboBox ShowClearButton="true" TValue="int" TItem="ExpertVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="experts" AllowCustom="false" @bind-Value="this.followUpControlfilter.IdFollowUpControlExpert">
+                                                    <ComboBoxFieldSettings Text="Person.FullName" Value="IdExpert" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Срок за проверката от (Начало): </label>
+                                        <SfDatePicker TValue="DateTime?" @onfocusout="DateValid" ShowClearButton="true" @bind-Value="this.followUpControlfilter.ControlStartDate" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Срок за проверката до (Начало): </label>
+                                        <SfDatePicker TValue="DateTime?" @onfocusout="DateValid" ShowClearButton="true" @bind-Value="this.followUpControlfilter.ControlEndDate" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Срок за проверката от (Край):</label>
+                                        <SfDatePicker TValue="DateTime?" @onfocusout="@(() => {DateValidLimit("LimitStart");})" ShowClearButton="true" @bind-Value="this.followUpControlfilter.ControlStartDateLimit" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Срок за проверката до (Край):</label>
+                                        <SfDatePicker TValue="DateTime?" @onfocusout="@(() => {DateValidLimit("LimitEnd");})" ShowClearButton="true" @bind-Value="this.followUpControlfilter.ControlEndDateLimit" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="searchForm" @onclick="SearchBtn">Търси</button>
+                            <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" @onclick="ClearBtn">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

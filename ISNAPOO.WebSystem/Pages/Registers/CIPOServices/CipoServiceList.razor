@@ -1,0 +1,52 @@
+﻿@page "/CipoServiceList"
+@inherits BlazorBaseComponent
+
+@using ISNAPOO.Core.ViewModels.Training
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Регистър на лицата, които са ползвали услуги по информиране и консултиране в ЦИПО</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="clients" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ClientVM" />
+                        <GridColumns>
+                            <GridColumn Field="IdClient" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn AllowFiltering="false" HeaderText=" " AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="20px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ClientVM).IdClient).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="25px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as ClientVM))" class="btn-row"> <i class="fa fa-search-plus"></i> </button>
+                                </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="80px"></GridColumn>
+                            <GridColumn Field="CandidateProvider.CIPONameOwnerGrid" HeaderText="ЦИПО" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
+                            <GridColumn Field="FullName" HeaderText="Име на лице" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<CipoServiceFilter @ref="filterModal" CallbackAfterSubmit="Filter"></CipoServiceFilter>
+<CipoServiceModal @ref="modal"></CipoServiceModal>

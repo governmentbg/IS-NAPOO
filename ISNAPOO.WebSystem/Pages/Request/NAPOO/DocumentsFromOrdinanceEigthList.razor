@@ -1,0 +1,56 @@
+﻿@page "/DocumentsFromOrdinanceEigthList"
+
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Серия на документи по Наредба №8</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="openNewModal">Нов</button>
+                            </li>
+
+
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="documents" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="25px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as DocumentSeriesVM).IdDocumentSeries).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="40px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button class="btn-row" @onclick="(() => openModal(context as DocumentSeriesVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdDocumentSeries" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="TypeOfRequestedDocument.DocTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Field="Year" HeaderText="Година" TextAlign="TextAlign.Left" ></GridColumn>
+                            <GridColumn Field="SeriesName" HeaderText="Серия" TextAlign="TextAlign.Left"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<DocumentsFromOrdinanceModal @ref="modal" CallbackAfterSubmit="CallbackAfterSubmit"></DocumentsFromOrdinanceModal>

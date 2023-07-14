@@ -1,0 +1,194 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" Width="90%" EnableResize="true" AllowDragging="true" Height="90%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за заявка за документация към НАПОО<span style="color: #ffffff">@(this.providerDocumentRequestVM.RequestNumber.HasValue ? $" №{this.providerDocumentRequestVM.RequestNumber}/" : string.Empty)</span> <span style="color: #ffffff">@(this.providerDocumentRequestVM.RequestDate.HasValue ? $"{this.providerDocumentRequestVM.RequestDate.Value.ToString("dd.MM.yyyy")}г." : string.Empty)</span> <span style="color: #ffffff">@($"{this.providerVM.CPONameOwnerGrid}")</span>@(!string.IsNullOrEmpty(this.providerDocumentRequestVM.RequestStatus) ? " статус" : string.Empty) <span style="color: #ffffff">@this.providerDocumentRequestVM.RequestStatus</span>
+        </Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <div class="form-group">
+                                        <label>Заявка №: </label>
+                                        <InputNumber class="form-control" @bind-Value="providerDocumentRequestVM.RequestNumber" disabled></InputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Дата: </label>
+                                        <SfDatePicker TValue="DateTime?" @bind-Value="providerDocumentRequestVM.RequestDate" Format="dd.MM.yyyy" Enabled="false" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Отговорно лице: </label>
+                                        <InputText class="form-control" @bind-Value="providerDocumentRequestVM.Name" disabled></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Длъжност: </label>
+                                        <InputText class="form-control" @bind-Value="providerDocumentRequestVM.Position" disabled></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Статус: </label>
+                                        <InputText class="form-control" @bind-Value="providerDocumentRequestVM.RequestStatus" disabled></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <div class="form-group required">
+                                        <label class="control-label">Година: </label>
+                                        <InputNumber class="form-control" @bind-Value="providerDocumentRequestVM.CurrentYear" disabled="@(this.providerDocumentRequestVM.RequestNumber != null)"></InputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="form-group required">
+                                        <label class="control-label">Населено място: </label>
+                                        <SfAutoComplete @ref="sfAutoCompleteLocationCorrespondence" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                        @bind-Value="providerDocumentRequestVM.IdLocationCorrespondence"
+                                                        DataSource="locationsSource" AllowFiltering="true" Enabled="@(!this.providerDocumentRequestVM.RequestNumber.HasValue)" CssClass="customPad">
+                                            <AutoCompleteTemplates TItem="LocationVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                            <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocation"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Адрес: </label>
+                                        <InputText class="form-control" @bind-Value="providerDocumentRequestVM.Address" disabled="@(this.providerDocumentRequestVM.RequestNumber != null)"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Телефон: </label>
+                                        <InputText class="form-control" @bind-Value="providerDocumentRequestVM.Telephone" disabled="@(this.providerDocumentRequestVM.RequestNumber != null)"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (this.providerDocumentRequestVM.RequestNumber == null)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-9">
+                                        <div class="form-group">
+                                            <label>Вид на документ: </label>
+                                            <SfComboBox CssClass="form-control" TValue="int" TItem="TypeOfRequestedDocumentVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="typeOfRequestedDocumentSource" AllowFiltering="true" @bind-Value="requestDocumentTypeVM.IdTypeOfRequestedDocument" AllowCustom="false">
+                                                <ComboBoxFieldSettings Text="NumberWithName" Value="IdTypeOfRequestedDocument" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <div class="form-group">
+                                            <label>Количество: </label>
+                                            <InputNumber class="form-control" @bind-Value="requestDocumentTypeVM.DocumentCount">бр.</InputNumber>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <p>
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OnAddDocumentClickHandler">Добави</button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="row">
+                                <div class="col-sm-11">
+                                    <SfGrid ID="addedDocumentsGrid" @ref="addedDocumentsGrid" DataSource="addedDocumentsSource" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                                        <GridTemplates>
+                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                <span>Няма намерени резултати.</span>
+                                            </EmptyRecordTemplate>
+                                        </GridTemplates>
+                                        <GridColumns>
+                                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5px">
+                                                    <Template Context="row_count">
+                                                        @GetRowNumber(addedDocumentsGrid, (row_count as TypeOfRequestedDocumentVM).IdTypeOfRequestedDocument).Result
+                                                    </Template>
+                                                </GridColumn>
+                                            @if (this.providerDocumentRequestVM.RequestNumber == null)
+                                            {
+                                                <GridColumn Width="10">
+                                                    <Template Context="documentCtx">
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+															<button type="button" class="btn-row"  @onclick="(() => DeleteDocument(documentCtx as TypeOfRequestedDocumentVM))"><i class="fa fa-trash-o"></i></button>
+                                                    </SfTooltip>
+                                                            </Template>
+                                                </GridColumn>
+                                            }
+                                                
+                                            <GridColumn Field="IdTypeOfRequestedDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                            <GridColumn Field="NumberWithName" HeaderText="Вид на документ" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+                                            <GridColumn Field="Quantity" HeaderText="Количество (бр.)" TextAlign="TextAlign.Right" Width="20"></GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.providerDocumentRequestVM.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.providerDocumentRequestVM.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.providerDocumentRequestVM.RequestStatus == "Обобщена")
+                            {
+                                <button style="margin-right: 3px;" type="button" class="btn btn-info" @onclick="PrintRequestDocument">Печат</button>
+                            }
+                            @if (!string.IsNullOrEmpty(this.providerDocumentRequestVM.RequestStatus))
+                            {
+                                <button style="margin-right: 3px;" class="btn btn-info" type="button" @onclick="FileInRequest" disabled="@(this.providerDocumentRequestVM.RequestNumber != null)">Подай</button>
+                            }
+                            <button class="btn btn-info" type="submit" form="saveForm" @onclick="(() => Save(true))" disabled="@(this.providerDocumentRequestVM.RequestNumber != null)">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

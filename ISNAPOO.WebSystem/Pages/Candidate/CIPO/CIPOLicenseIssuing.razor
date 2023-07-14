@@ -1,0 +1,43 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="card">
+    <div class="card-block" style="">
+        <p>
+            <nav class="navbar navbar-expand">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav float">
+                    <li class="nav-item d-none d-sm-inline-block float-none">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateLicensingTemplateBtn">Лицензия</button>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block float-none">
+                        <button class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="ApproveLicensingBtn" disabled="@(this.disableCompleteProcedureBtn)">Приключване на процедурата</button>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                </ul>
+            </nav>
+            <div class="row align-items-start">
+                <div class="col-sm-12">
+                    <EditForm EditContext="this.editContext">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на лицензията:
+                                    </label>
+                                    <SfDatePicker @bind-Value="this.CandidateProviderVM.LicenceDate" Format="dd.MM.yyyy" CssClass="form-control" TValue="DateTime?" />
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </p>
+    </div>
+</div>
+
+

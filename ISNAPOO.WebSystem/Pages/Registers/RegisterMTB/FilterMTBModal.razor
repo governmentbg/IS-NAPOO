@@ -1,0 +1,734 @@
+﻿@using ISNAPOO.Core.ViewModels.Register
+@inject IDataSourceService DataSourceService
+@inject ILocationService locationService
+@inject IMunicipalityService municipalityService
+@inject IDistrictService districtService
+@inject IProfessionService ProfessionService
+@inject ISpecialityService SpecialityService
+
+@inherits BlazorBaseComponent
+
+<SfDialog Width="60%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@isVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <EditForm id="sf" Model="FilterPremises" OnSubmit="Submit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Юридическо лице: </label>
+                                    <SfAutoComplete @ref="cpAutoComplete" TValue="int?" @bind-Value="this.FilterPremises.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="this.candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="ProviderOwner"></AutoCompleteFieldSettings>
+                                        <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        № на лицензия:
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="FilterPremises.LicenceNumber" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Статус:
+                                    </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                PopupHeight="230px"
+                                                DataSource="this.kvStatus"
+                                    @bind-Value="FilterPremises.IdKvStatus"
+                                                AllowCustom="false">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Материално-техническа база:
+                                    </label>
+                                    <SfTextBox @bind-Value="FilterPremises.PremisesName"></SfTextBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Форма на собственост:
+                                    </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                PopupHeight="230px"
+                                                DataSource="this.kvOwnership"
+                                    @bind-Value="this.FilterPremises.IdOwnerShip"
+                                                AllowCustom="false">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Населено място:
+                                    </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteLocation" TValue="int" TItem="LocationVM" AllowCustom="false"
+                                    @bind-Value="this.FilterPremises.idLocation"
+                                                    DataSource="locationFiltered" AllowFiltering="true" CssClass="form-control">
+                                        <AutoCompleteTemplates TItem="LocationVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                        <AutoCompleteEvents TValue="int" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence" ValueChange="LocationChanegeHandler"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Област:
+                                    </label>
+                                    <SfComboBox @bind-Value="this.FilterPremises.idDistrict" TItem="DistrictVM" AllowCustom="false" TValue="int" DataSource="@districtSource">
+                                        <ComboBoxEvents TItem="DistrictVM" TValue="int" ValueChange="DistrictChangeHandler"></ComboBoxEvents>
+                                        <ComboBoxFieldSettings Value="idDistrict" Text="DistrictName"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Община:
+                                    </label>
+                                    <SfComboBox @bind-Value="this.FilterPremises.idMunicipality" TItem="MunicipalityVM" AllowCustom="false" TValue="int" DataSource="@municipalityFiltered">
+                                        <ComboBoxEvents TItem="MunicipalityVM" TValue="int" ValueChange="MunicipalityChangeHandler"></ComboBoxEvents>
+                                        <ComboBoxFieldSettings Value="idMunicipality" Text="MunicipalityName"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Професия:
+                                    </label>
+                                    <SfAutoComplete @ref="this.sfAutoCompleteProfession" TValue="int?" TItem="ProfessionVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                    @bind-Value="this.FilterPremises.IdProfession"
+                                                    DataSource="this.professionSource" AllowFiltering="true">
+                                        <AutoCompleteTemplates TItem="ProfessionVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="CodeAndName" Value="IdProfession" />
+                                        <AutoCompleteEvents TValue="int?" TItem="ProfessionVM" Filtering="OnFilterProfession" OnValueSelect="OnProfessionSelect"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Специалност:
+                                    </label>
+                                    <SfMultiSelect @ref="sfAutoCompleteSpeciality" CssClass="form-control" TValue="List<SpecialityVM>" TItem="SpecialityVM" PopupHeight="230px" AllowFiltering="true" ShowClearButton="true" AllowCustomValue="false"
+                                                   DataSource="@this.specialities"
+                                    @bind-Value="this.FilteSspecialities">
+                                        <MultiSelectTemplates TItem="SpecialityVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </MultiSelectTemplates>
+                                        <MultiSelectFieldSettings Text="CodeAndAreaForAutoCompleteSearch" Value="IdSpeciality" />
+                                        <MultiSelectEvents TValue="List<SpecialityVM>" TItem="SpecialityVM" Filtering="OnFilterSpeciality" Focus="OnFocusSpeciality" OnValueSelect="OnSpecialitySelect" />
+                                    </SfMultiSelect>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Вид на провежданото обучение:
+                                    </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                PopupHeight="230px"
+                                                DataSource="this.kvTypeOfEducation"
+                                    @bind-Value="this.FilterPremises.IdTypeOfEducation"
+                                                AllowCustom="false">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на създаване от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" CssClass="form-control customPad" @onfocusout="@(async () => await DateValid("Creation"))" @bind-Value="FilterPremises.CreationDateFrom" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на създаване до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" CssClass="form-control customPad" @onfocusout="@(async() => await DateValid("Creation"))" @bind-Value="FilterPremises.CreationDateTo" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на последна актуализация от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" CssClass="form-control customPad" @onfocusout="@(async () => await DateValid("Modify"))" @bind-Value="FilterPremises.ModifyDateFrom" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на последна актуализация до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" CssClass="form-control customPad" @onfocusout="@(async () => await DateValid("Modify"))" @bind-Value="FilterPremises.ModifyDateTo" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="new-task">
+                                    <div class="to-do-list">
+                                        <div class="checkbox-fade fade-in-primary">
+                                            <label class="form-label">
+                                                <input type="checkbox" @bind-value="this.FilterPremises.IsNAPOOCheck" checked="@(this.FilterPremises.IsNAPOOCheck ? "checked" : null)">
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span> <span>Извършена проверка от експерт на НАПОО</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на проверка от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" CssClass="form-control customPad" @onfocusout="@(async () => await DateValid("Check"))" @bind-Value="FilterPremises.NAPOOCheckDateFrom" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на проверка до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" ShowClearButton="true" CssClass="form-control customPad" @onfocusout="@(async () => await DateValid("Check"))" @bind-Value="FilterPremises.NAPOOCheckDateTo" Format="@GlobalConstants.DATE_FORMAT"></SfDatePicker>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <button type="submit" form="sf" class="btn btn-info">Търси</button>
+            <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="CancelClickedHandler">Отказ</button>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+@code {
+    private SfAutoComplete<int?, CandidateProviderVM> cpAutoComplete = new SfAutoComplete<int?, CandidateProviderVM>();
+
+    [Parameter]
+
+    public EventCallback<List<RegisterMTBVM>> CallbackAfterSave { get; set; }
+
+    [Parameter]
+
+    public List<RegisterMTBVM> DataSource { get; set; }
+
+    [Inject]
+    public ICandidateProviderService CandidateProviderService { get; set; }
+
+    //Model
+    ToastMsg toast;
+    private PremisesFilterVM FilterPremises = new PremisesFilterVM();
+
+    //Source
+    private IEnumerable<KeyValueVM> kvOwnership;
+    private IEnumerable<KeyValueVM> kvStatus;
+    private IEnumerable<KeyValueVM> kvTypeOfEducation;
+    private IEnumerable<KeyValueVM> kvComplianceDOC;
+    private List<LocationVM> locationSource = new List<LocationVM>();
+    private List<DistrictVM> districtSource = new List<DistrictVM>();
+    private List<MunicipalityVM> municipalitySource = new List<MunicipalityVM>();
+    private List<SpecialityVM> specialitiesSource = new List<SpecialityVM>();
+    public List<ProfessionVM> professionSource = new List<ProfessionVM>();
+    private IEnumerable<CandidateProviderVM> candidateProvidersSource = new List<CandidateProviderVM>();
+
+    //Filtered sources
+    private List<SpecialityVM> specialities = new List<SpecialityVM>();
+    private List<MunicipalityVM> municipalityFiltered = new List<MunicipalityVM>();
+    private List<LocationVM> locationFiltered = new List<LocationVM>();
+    private List<SpecialityVM> FilteSspecialities = new List<SpecialityVM>();
+
+    //AutoComplete fields
+    private SfAutoComplete<int, LocationVM> sfAutoCompleteLocation = new SfAutoComplete<int, LocationVM>();
+    private SfMultiSelect<List<SpecialityVM>, SpecialityVM> sfAutoCompleteSpeciality = new SfMultiSelect<List<SpecialityVM>, SpecialityVM>();
+    private SfAutoComplete<int?, ProfessionVM> sfAutoCompleteProfession = new SfAutoComplete<int?, ProfessionVM>();
+
+    //Simple fields
+    private bool IsDateValid = true;
+    private string msg = "";
+    private List<string> msgs = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.kvStatus = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("MaterialTechnicalBaseStatus", false);
+        this.kvOwnership = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("MaterialTechnicalBaseOwnership", false);
+        this.kvTypeOfEducation = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("TrainingType", false);
+        this.kvComplianceDOC = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("ComplianceDOC", false);
+        this.districtSource = (await districtService.GetAllDistrictsAsync()).ToList();
+        this.municipalitySource = (await municipalityService.GetAllMunicipalitiesAsync()).ToList();
+        this.municipalityFiltered = municipalitySource;
+        specialitiesSource = (await SpecialityService.GetAllActiveSpecialitiesAsync()).ToList();
+        specialities = specialitiesSource;
+        this.professionSource = (await this.ProfessionService.GetAllActiveProfessionsAsync()).ToList();
+    }
+
+    public async Task OpenModal()
+    {
+        if (!this.candidateProvidersSource.Any())
+        {
+            this.candidateProvidersSource = (await this.CandidateProviderService.GetAllCandidateProvidersForAutoComplete(string.Empty, true)).ToList();
+        }
+
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+    private async Task ClearFilter()
+    {
+        CallbackAfterSave.InvokeAsync(null);
+        IsDateValid = true;
+        FilteSspecialities = new List<SpecialityVM>();
+        FilterPremises = new PremisesFilterVM();
+    }
+
+    private async Task OnFilterCandidateProviderHandler(FilteringEventArgs args)
+    {
+        args.PreventDefaultAction = true;
+
+        var query = new Query().Where(new WhereFilter() { Field = "ProviderOwner", Operator = "contains", value = args.Text, IgnoreCase = true });
+
+        query = !string.IsNullOrEmpty(args.Text) ? query : new Query();
+
+        await this.cpAutoComplete.FilterAsync(this.candidateProvidersSource, query);
+    }
+
+    private async Task Submit()
+    {
+        if (loading) return;
+
+        try
+        {
+            loading = true;
+            var trainers = new List<RegisterMTBVM>();
+
+            if (FilterPremises.IsEmpty())
+            {
+                await this.ShowErrorAsync("Моля, изберете поне един критерий, по който да филтрирате данни за материално-технически бази!");
+                this.loading = false;
+                this.SpinnerHide();
+                return;
+            }
+
+            trainers = (await this.CandidateProviderService.GetAllMTBsForActiveCandidateProvidersAsync(FilterPremises)).ToList();
+
+            await CallbackAfterSave.InvokeAsync(trainers);
+            this.isVisible = false;
+        }
+        finally
+        {
+            this.loading = false;
+        }
+        //if(IsDateValid)
+        //{
+        //    if(
+        //        !FilterPremises.CreationDateFrom.HasValue
+        //        && !FilterPremises.CreationDateTo.HasValue
+        //        && !FilterPremises.ModifyDateFrom.HasValue
+        //        && !FilterPremises.ModifyDateTo.HasValue
+        //        && !FilterPremises.NAPOOCheckDateFrom.HasValue
+        //        && !FilterPremises.NAPOOCheckDateTo.HasValue
+        //        && FilterPremises.idDistrict == 0
+        //        && FilterPremises.IdKvStatus == null
+        //        && FilterPremises.idLocation == 0
+        //        && FilterPremises.idMunicipality == 0
+        //        && FilterPremises.IdOwnerShip == null
+        //        && FilterPremises.IdProfession == null
+        //        && !this.FilteSspecialities.Any()
+        //        && FilterPremises.IdTypeOfEducation == null
+        //        && string.IsNullOrEmpty(FilterPremises.LicenseNumber)
+        //        && string.IsNullOrEmpty(FilterPremises.Owner)
+        //        && string.IsNullOrEmpty(FilterPremises.PremisesName)
+        //        && !FilterPremises.IsNAPOOCheck
+        //    )
+        //    {
+        //        trainers = null;
+        //    }
+        //    else
+        //    {
+        //        trainers = DataSource.Where(d =>
+        //        ((!string.IsNullOrEmpty(FilterPremises.Owner)) && (!string.IsNullOrEmpty(d.ProviderOwner)) ? (d.ProviderOwner.ToLower() == FilterPremises.Owner.ToLower()) || (d.CandidateProvider.ProviderOwner.ToLower().Contains(FilterPremises.Owner.ToLower())) : true)
+        //        && ((!string.IsNullOrEmpty(FilterPremises.PremisesName)) && (!string.IsNullOrEmpty(d.PremisesName)) ? (d.PremisesName.ToLower() == FilterPremises.PremisesName.ToLower()) || (d.CandidateProviderPremises.PremisesName.ToLower().Contains(FilterPremises.PremisesName.ToLower())) : true)
+        //        ).ToList();
+
+        //        /*№ на лицензия*/
+        //        if(!string.IsNullOrEmpty(FilterPremises.LicenseNumber))
+        //        {
+        //            trainers = trainers.Where(t => (!string.IsNullOrEmpty(FilterPremises.LicenseNumber)) && (!string.IsNullOrEmpty(t.LicenceNumber)) ? (t.CandidateProvider.LicenceNumber.ToLower() == FilterPremises.LicenseNumber.ToLower()) || (t.CandidateProvider.LicenceNumber.ToLower().Contains(FilterPremises.LicenseNumber.ToLower())) : false).ToList();
+        //        }
+
+        //        /*Статус*/
+        //        if(FilterPremises.IdKvStatus != null)
+        //        {
+        //            var statusName = kvStatus.FirstOrDefault(s => s.IdKeyValue == FilterPremises.IdKvStatus).KeyValueIntCode;
+        //            trainers = trainers.Where(t => t.StatusValue == statusName).ToList();
+        //        }
+
+        //        /*Форма на собственост*/
+        //        if(FilterPremises.IdOwnerShip.HasValue)
+        //        {
+        //            trainers = trainers.Where(t => t.IdOwnership == FilterPremises.IdOwnerShip.Value).ToList();
+        //        }
+
+        //        /*Област, Община, Населено място*/
+        //        if(FilterPremises.idDistrict != 0)
+        //        {
+        //            trainers = trainers.Where(t => t.Location.Municipality.idDistrict == FilterPremises.idDistrict).ToList();
+        //        }
+
+        //        /*Професия*/
+        //        if(FilterPremises.IdProfession.HasValue)
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremisesSpecialities.Any(c => c.Speciality.IdProfession == FilterPremises.IdProfession.Value)).ToList();
+        //        }
+
+        //        /*Специалност*/
+        //        if(this.FilteSspecialities.Any())
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremisesSpecialities.Any(c => this.FilteSspecialities.All(s => s.IdSpeciality == c.IdSpeciality))).ToList();
+        //        }
+
+        //        /*Вид на провежданото обучение*/
+        //        if(FilterPremises.IdTypeOfEducation.HasValue)
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.CandidateProviderPremisesSpecialities.Any(c => c.IdUsage == FilterPremises.IdTypeOfEducation)).ToList();
+        //        }
+
+        //        /*Дата на създаване От/До*/
+        //        if(FilterPremises.CreationDateFrom.HasValue && FilterPremises.CreationDateTo.HasValue)
+        //        {
+        //            trainers = trainers.Where(t => (t.CandidateProviderPremises.CreationDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.CreationDateFrom.HasValue ? t.CandidateProviderPremises.CreationDate.Date >= FilterPremises.CreationDateFrom.Value.Date : false) && (t.CandidateProviderPremises.CreationDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.CreationDateTo.HasValue ? t.CandidateProviderPremises.CreationDate.Date <= FilterPremises.CreationDateTo.Value.Date : false)).ToList();
+        //        }
+        //        else if(FilterPremises.CreationDateFrom.HasValue && !FilterPremises.CreationDateTo.HasValue) /*Дата на създаване От*/
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.CreationDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.CreationDateFrom.HasValue ? t.CandidateProviderPremises.CreationDate.Date >= FilterPremises.CreationDateFrom.Value.Date : false).ToList();
+        //        }
+        //        else if(FilterPremises.CreationDateTo.HasValue && !FilterPremises.CreationDateFrom.HasValue)/*Дата на създаване До*/
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.CreationDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.CreationDateTo.HasValue ? t.CandidateProviderPremises.CreationDate.Date <= FilterPremises.CreationDateTo.Value.Date : false).ToList();
+        //        }
+
+        //        /*Дата на последна актуализация От/До*/
+        //        if(FilterPremises.ModifyDateFrom.HasValue && FilterPremises.ModifyDateTo.HasValue)
+        //        {
+        //            trainers = trainers.Where(t => (t.CandidateProviderPremises.ModifyDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.ModifyDateFrom.HasValue ? t.CandidateProviderPremises.ModifyDate.Date >= FilterPremises.ModifyDateFrom.Value.Date : false) && (t.CandidateProviderPremises.ModifyDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.ModifyDateTo.HasValue ? t.CandidateProviderPremises.ModifyDate.Date <= FilterPremises.ModifyDateTo.Value.Date : false)).ToList();
+        //        }
+        //        else if(FilterPremises.ModifyDateFrom.HasValue && !FilterPremises.ModifyDateTo.HasValue)/*Дата на последна актуализация От*/
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.ModifyDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.ModifyDateFrom.HasValue ? t.CandidateProviderPremises.ModifyDate.Date >= FilterPremises.ModifyDateFrom.Value.Date : false).ToList();
+        //        }
+        //        else if(FilterPremises.ModifyDateTo.HasValue && !FilterPremises.ModifyDateFrom.HasValue)/*Дата на последна актуализация До*/
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.ModifyDate.ToString() != "1.1.0001 г. 0:00:00" && FilterPremises.ModifyDateTo.HasValue ? t.CandidateProviderPremises.ModifyDate.Date <= FilterPremises.ModifyDateTo.Value.Date : false).ToList();
+        //        }
+
+        //        /*Извършена проверка от експерт на НАПОО*/
+        //        if(FilterPremises.IsNAPOOCheck)
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Any()).ToList();
+        //        }
+
+        //        /*Дата на проверка От/До*/
+        //        if(FilterPremises.NAPOOCheckDateFrom.HasValue && FilterPremises.NAPOOCheckDateTo.HasValue)
+        //        {
+        //            trainers = trainers.Where( t => t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Count > 0 ? t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Any(c => (c.CheckingDate.HasValue && FilterPremises.NAPOOCheckDateFrom.HasValue ? c.CheckingDate.Value.Date >= FilterPremises.NAPOOCheckDateFrom.Value.Date : false) && (c.CheckingDate.HasValue && FilterPremises.NAPOOCheckDateTo.HasValue ? c.CheckingDate.Value.Date <= FilterPremises.NAPOOCheckDateTo.Value.Date : false)) : false).ToList();
+        //        }
+        //        else if(FilterPremises.ModifyDateFrom.HasValue && !FilterPremises.ModifyDateTo.HasValue)/*Дата на проверка От*/
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Count > 0 ? t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Any(c => c.CheckingDate.HasValue && FilterPremises.NAPOOCheckDateFrom.HasValue ? c.CheckingDate.Value.Date >= FilterPremises.NAPOOCheckDateFrom.Value.Date : false) : false).ToList();
+        //        }
+        //        else if(FilterPremises.ModifyDateTo.HasValue && !FilterPremises.ModifyDateFrom.HasValue)/*Дата на проверка До*/
+        //        {
+        //            trainers = trainers.Where(t => t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Count > 0 ? t.CandidateProviderPremises.CandidateProviderPremisesCheckings.Any(c => c.CheckingDate.HasValue && FilterPremises.NAPOOCheckDateTo.HasValue ? c.CheckingDate.Value.Date <= FilterPremises.NAPOOCheckDateTo.Value.Date : false) : false).ToList();
+        //        }
+        //    }
+        //    CallbackAfterSave.InvokeAsync(trainers);
+        //    this.isVisible = false;
+        //}
+        //else
+        //{
+        //    toast.sfErrorToast.Content = string.Join("<br />    ", msgs);
+        //    await toast.sfErrorToast.ShowAsync();
+        //}
+    }
+    private async Task OnFilterLocationCorrespondence(FilteringEventArgs args)
+    {
+        args.PreventDefaultAction = true;
+
+        if (args.Text.Length > 2)
+        {
+            try
+            {
+                if (this.FilterPremises.idMunicipality != 0)
+                {
+                    this.locationSource = (await this.locationService.GetAllLocationsByMunicipalityIdAsync(this.FilterPremises.idMunicipality)).ToList();
+                    locationSource = locationSource.Where(x => x.kati.ToLower().Contains(args.Text.ToLower())).ToList();
+                }
+                else if (this.FilterPremises.idDistrict != 0)
+                {
+                    this.locationSource = (await this.locationService.GetAllLocationsByDistrictIdAsync(this.FilterPremises.idDistrict)).ToList();
+                    locationSource = locationSource.Where(x => x.kati.ToLower().Contains(args.Text.ToLower())).ToList();
+                }
+                else
+                {
+                    this.locationSource = (await this.locationService.GetAllLocationsByKatiAsync(args.Text)).ToList();
+
+                }
+                this.locationFiltered = locationSource;
+
+                var query = new Query().Where(new WhereFilter() { Field = "kati", Operator = "contains", value = args.Text, IgnoreCase = true });
+
+                query = !string.IsNullOrEmpty(args.Text) ? query : new Query();
+
+                await this.sfAutoCompleteLocation.FilterAsync(this.locationFiltered, query);
+            }
+            catch (Exception ex) { }
+
+
+        }
+    }
+    public async void LocationChanegeHandler(ChangeEventArgs<int, LocationVM> args)
+    {
+        if (args.ItemData != null)
+        {
+            if (args.ItemData.Municipality == null)
+            {
+                args.ItemData.Municipality = await municipalityService.GetMunicipalityByIdAsync((int)args.ItemData.idMunicipality);
+            }
+            FilterPremises.idMunicipality = (int)args.ItemData.idMunicipality;
+            FilterPremises.idDistrict = args.ItemData.Municipality.idDistrict;
+        }
+
+    }
+    public async Task DistrictChangeHandler(ChangeEventArgs<int, DistrictVM> args)
+    {
+        if (args.Value != 0)
+            municipalityFiltered = municipalitySource.Where(x => x.idDistrict == args.Value).ToList();
+        else
+        {
+            municipalityFiltered = municipalitySource;
+
+            FilterPremises.idMunicipality = 0;
+            FilterPremises.idDistrict = 0;
+        }
+    }
+    public async Task MunicipalityChangeHandler(ChangeEventArgs<int, MunicipalityVM> args)
+    {
+        if (args.Value != 0)
+        {
+            FilterPremises.idDistrict = municipalitySource.Where(x => x.idMunicipality == args.Value).First().idDistrict;
+
+            locationFiltered = (await locationService.GetAllLocationsByMunicipalityIdAsync(FilterPremises.idMunicipality)).ToList();
+        }
+        else
+        {
+            locationFiltered = locationSource;
+            this.FilterPremises.idLocation = 0;
+        }
+    }
+    private async Task OnFilterSpeciality(FilteringEventArgs args)
+    {
+        args.PreventDefaultAction = true;
+
+        if (args.Text.Length > 2)
+        {
+            try
+            {
+                if (FilterPremises.IdProfession.HasValue && FilterPremises.IdProfession.Value != 0)
+                {
+                    this.specialities = (List<SpecialityVM>)this.specialitiesSource.Where(x => x.CodeAndAreaForAutoCompleteSearch.Contains(args.Text) && x.IdProfession == FilterPremises.IdProfession).ToList();
+                }
+                else
+                {
+                    this.specialities = (List<SpecialityVM>)this.specialitiesSource.Where(x => x.CodeAndAreaForAutoCompleteSearch.Contains(args.Text)).ToList();
+                }
+            }
+            catch (Exception ex) { }
+
+            var query = new Query().Where(new WhereFilter() { Field = "CodeAndAreaForAutoCompleteSearch", Operator = "contains", value = args.Text, IgnoreCase = true });
+
+            query = !string.IsNullOrEmpty(args.Text) ? query : new Query();
+
+            await this.sfAutoCompleteSpeciality.FilterAsync(this.specialities, query);
+        }
+    }
+    private async Task OnFocusSpeciality()
+    {
+        if (!(FilterPremises.IdProfession == null || FilterPremises.IdProfession == 0))
+        {
+            this.specialities = (List<SpecialityVM>)this.specialities.Where(x => x.IdProfession == FilterPremises.IdProfession).ToList();
+        }
+        else
+        {
+            this.specialities = specialitiesSource;
+        }
+    }
+    private async Task OnFilterProfession(FilteringEventArgs args)
+    {
+        args.PreventDefaultAction = true;
+
+        if (args.Text.Length > 2)
+        {
+            try
+            {
+
+                var filteredProfession = professionSource.Where(x => x.CodeAndName.Contains(args.Text)).ToList();
+
+                var query = new Query().Where(new WhereFilter() { Field = "CodeAndName", Operator = "contains", value = args.Text, IgnoreCase = true });
+
+                query = !string.IsNullOrEmpty(args.Text) ? query : new Query();
+
+                await this.sfAutoCompleteProfession.FilterAsync(filteredProfession, query);
+            }
+            catch (Exception ex) { }
+
+
+        }
+    }
+    private async Task OnProfessionSelect(SelectEventArgs<ProfessionVM> args)
+    {
+        this.FilteSspecialities = this.FilteSspecialities.Where(x => x.IdProfession == args.ItemData.IdProfession).ToList();
+    }
+    private async Task OnSpecialitySelect(SelectEventArgs<SpecialityVM> args)
+    {
+        if (!this.FilterPremises.IdProfession.HasValue)
+        {
+            this.FilterPremises.IdProfession = this.professionSource.FirstOrDefault(x => x.IdProfession == args.ItemData.IdProfession).IdProfession;
+        }
+    }
+    private async Task DateValid(string type)
+    {
+        DateTime startDate = new DateTime();
+        DateTime endDate = new DateTime();
+
+        if (type == "Creation")
+        {
+            if (this.FilterPremises.CreationDateFrom.HasValue)
+            {
+                startDate = this.FilterPremises.CreationDateFrom.Value.Date;
+            }
+            if (this.FilterPremises.CreationDateTo.HasValue)
+            {
+                endDate = this.FilterPremises.CreationDateTo.Value.Date;
+            }
+            this.msg = "'Дата на създаване от' не може да е след 'Дата на създаване до'!";
+        }
+        else if (type == "Modify")
+        {
+            if (this.FilterPremises.ModifyDateFrom.HasValue)
+            {
+                startDate = this.FilterPremises.ModifyDateFrom.Value.Date;
+            }
+            if (this.FilterPremises.ModifyDateTo.HasValue)
+            {
+                endDate = this.FilterPremises.ModifyDateTo.Value.Date;
+            }
+            this.msg = "'Дата на последна актуализация от' не може да е след 'Дата на последна актуализация до'!";
+        }
+        else if (type == "Check")
+        {
+            if (this.FilterPremises.NAPOOCheckDateFrom.HasValue)
+            {
+                startDate = this.FilterPremises.NAPOOCheckDateFrom.Value.Date;
+            }
+            if (this.FilterPremises.NAPOOCheckDateTo.HasValue)
+            {
+                endDate = this.FilterPremises.NAPOOCheckDateTo.Value.Date;
+            }
+            this.msg = "'Дата на проверка от' не може да е след 'Дата на проверка до'!";
+        }
+
+        int result = DateTime.Compare(startDate, endDate);
+
+        if (result > 0 && startDate.ToString() != "1.1.0001 г. 0:00:00" && endDate.ToString() != "1.1.0001 г. 0:00:00")
+        {
+            IsDateValid = false;
+            if (!msgs.Contains(msg))
+            {
+                msgs.Add(msg);
+            }
+        }
+        else
+        {
+            if (msgs.Contains(msg))
+            {
+                msgs.Remove(msg);
+            }
+            if (msgs.Count == 0)
+            {
+                IsDateValid = true;
+            }
+        }
+    }
+}

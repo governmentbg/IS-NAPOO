@@ -1,0 +1,145 @@
+﻿@inherits BlazorBaseComponent
+
+<fieldset disabled="@(this.DisableAllFields || this.DisableFieldsWhenUserIsExternalExpertOrCommittee)">
+    <EditForm EditContext="this.editContext">
+        <div class="card">
+            <div class="card-block" style="">
+                <p>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Управление на центъра:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.Management"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.Management != null ? this.candidateProviderCIPOStructureActivityVM.Management.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Организация на дейността по информиране и професионално ориентиране:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.OrganisationInformationProcess"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.OrganisationInformationProcess != null ? this.candidateProviderCIPOStructureActivityVM.OrganisationInformationProcess.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Вътрешна система за осигуряване на качеството на дейността по информиране и професионално ориентиране:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.InternalQualitySystem"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.InternalQualitySystem != null ? this.candidateProviderCIPOStructureActivityVM.InternalQualitySystem.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Информационно осигуряване и поддържането на архива на центъра:
+                                </label>
+
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.InformationProvisionMaintenance"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.InformationProvisionMaintenance != null ? this.candidateProviderCIPOStructureActivityVM.InformationProvisionMaintenance.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Актуализиране на документацията за информиране и професионално ориентиране:
+                                </label>
+
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.TrainingDocumentation"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.TrainingDocumentation != null ? this.candidateProviderCIPOStructureActivityVM.TrainingDocumentation.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Подбор на лицата, които извършват информиране и професионално ориентиране:
+                                </label>
+
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.ConsultantsSelection"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.ConsultantsSelection != null ? this.candidateProviderCIPOStructureActivityVM.ConsultantsSelection.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Осигуряване на материалната база:
+                                </label>
+
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.MTBDescription"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.MTBDescription != null ? this.candidateProviderCIPOStructureActivityVM.MTBDescription.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Поддържане на актуални данни за центъра и провежданото от него информиране и професионално ориентиране в информационната система на Националната агенция за професионално образование и обучение:
+                                </label>
+
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.candidateProviderCIPOStructureActivityVM.DataMaintenance"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.candidateProviderCIPOStructureActivityVM.DataMaintenance != null ? this.candidateProviderCIPOStructureActivityVM.DataMaintenance.Length : 0)/4000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </p>
+            </div>
+        </div>
+    </EditForm>
+</fieldset>

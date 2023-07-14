@@ -1,0 +1,124 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="98%" Height="98%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Попълване на анкета <span style="color: #ffffff;">@this.surveyResultVM.Survey.Name</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-body">
+                                @{
+                                    var questionCounter = 1;
+                                    foreach (var question in this.surveyResultVM.Survey.Questions)
+                                    {
+                                        var header = $"{questionCounter++}. {question.Text}";
+                                        var type = this.kvQuestionTypeSource.FirstOrDefault(x => x.IdKeyValue == question.IdQuestType)!.Name;
+                                        string icon = string.Empty;
+                                        if (type.Contains("Единствен"))
+                                        {
+                                            icon = "radio";
+                                        }
+                                        else if (type.Contains("Множествен"))
+                                        {
+                                            icon = "checkbox";
+                                        }
+
+                                        <div class="row" style="margin-bottom: 20px;">
+                                            <div class="col-sm-12">
+                                                <SfCard CssClass="@(question.IsRequired ? "custom" : string.Empty)">
+                                                    <CardHeader Title="@header" SubTitle="@type" />
+                                                    <CardContent>
+                                                        @if (question.Answers.Any())
+                                                        {
+                                                            var userAnswerModel = this.userAnswerModels.FirstOrDefault(x => x.IdQuestion == question.IdQuestion);
+                                                            if (question.IdQuestType != this.kvOpenQuestion.IdKeyValue)
+                                                            {
+                                                                var counter = 0;
+                                                                foreach (var answer in question.Answers)
+                                                                {
+                                                                    var symbol = this.GetSymbolByOrder(counter++);
+                                                                    answer.Symbol = symbol;
+                                                                }
+
+                                                                var selectionMode = icon == "checkbox" ? Syncfusion.Blazor.DropDowns.SelectionMode.Multiple : Syncfusion.Blazor.DropDowns.SelectionMode.Single;
+                                                                <SfListBox TValue="List<int>" DataSource="@question.Answers" TItem="AnswerVM" @bind-Value="userAnswerModel.AnswerIds">
+                                                                    <ListBoxFieldSettings Text="SymbolAndText" Value="IdAnswer" />
+                                                                    <ListBoxSelectionSettings ShowCheckbox="true" Mode="selectionMode" />
+                                                                </SfListBox>
+                                                            }
+
+                                                            if (question.IdQuestType == this.kvOpenQuestion.IdKeyValue || question.IdQuestType == this.kvSingleOpenQuestion.IdKeyValue || question.IdQuestType == this.kvMultipleOpenQuestion.IdKeyValue)
+                                                            {
+                                                                string style = question.IdQuestType != this.kvOpenQuestion.IdKeyValue ? "margin-top: 15px;" : string.Empty;
+                                                                <EditForm EditContext="this.editContext">
+                                                                    <div class="row" style="@style">
+                                                                        <div class="col-sm-12">
+                                                                            <div class="form-group">
+                                                                                <CustomInputTextArea class="form-control" @bind-Value="userAnswerModel.OpenAnswerText" rows="3" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </EditForm>
+                                                            }
+                                                        }
+                                                    </CardContent>
+                                                </SfCard>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" @onclick="(async () => await this.SendSurveyBtn())">Изпрати анкета</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .e-card .e-card-header .e-card-header-caption .e-card-sub-title {
+        font-size: 12px !important;
+        font-style: italic;
+    }
+
+    .custom.e-card .e-card-header .e-card-header-caption .e-card-header-title:after {
+        color: #d00;
+        content: " *";
+        position: inherit;
+        margin-left: 0px;
+        top: 15px;
+    }
+</style>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+

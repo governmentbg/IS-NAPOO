@@ -1,0 +1,165 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using ISNAPOO.WebSystem.Pages.ExternalExpertCommission.Modals.ExpertDOC
+
+@inject IJSRuntime JsRuntime
+@inject IExpertService ExpertService
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Въвеждане на информация за Работни групи/Рецензенти на ДОС за експерт" OpensOn="Hover">
+                                    <button type="button" class="btn btn-info" hidden="@(this.IsRegister && !this.IsEditable)" disabled="@Disabled" @onclick="OpenAddNewModal">Нов</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" Width="auto" Height="auto" DataSource="@this.expertDOCs" AllowSorting="true" EnableAltRow="true"
+                            EnableHover="false" AllowSelection="true" AllowFiltering="true" @ref="sfGrid"
+                            AllowPaging="true" AllowReordering="true" AllowTextWrap="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                        <GridTextWrapSettings WrapMode="Syncfusion.Blazor.Grids.WrapMode.Both"></GridTextWrapSettings>
+                        <GridColumns>
+                            <GridColumn Width="25">
+                                <Template>
+                                    @if (!this.IsRegister && this.IsEditable)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button @onclick="(() => SelectedRow(context as ExpertDOCVM))" class="btn-row">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdExpertDOC" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Width="40" Visible="false"></GridColumn>
+                            <GridColumn Field="DOC.Name" HeaderText="Проект на ДОС" TextAlign="TextAlign.Left" Width="105"></GridColumn>
+                            <GridColumn Field="OrderNumber" HeaderText="Номер на заповед" TextAlign="TextAlign.Left" Width="89"></GridColumn>
+                            <GridColumn Field="DateOrder" HeaderText="Дата на утвърждаване" TextAlign="TextAlign.Left" Width="78" Type="ColumnType.Date" Format="@GlobalConstants.DATE_FORMAT">
+                                <Template>
+                                    @{
+                                        var ctx = context as ExpertDOCVM;
+                                        var date = ctx.DateOrder.HasValue ? $"{ctx.DateOrder.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="40px">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var providerStatus = context as ExpertDOCVM;
+                                            if (providerStatus.IdStatus != 0)
+                                            {
+                                                switch (providerStatus.StatusName)
+                                                {
+                                                    case "Активен":
+                                                        <label class="form-label-status label label-success">@providerStatus.StatusName</label>
+                                                        break;
+                                                    case "Неактивен":
+                                                        <label class="form-label-status label label-danger">@providerStatus.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ExpertDOCModal @ref="epxertDOCModal" CallbackAfterSave="UpdateAfterSaveExpertDOC"></ExpertDOCModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+@code {
+
+    [Parameter]
+    public EventCallback<ExpertDOCVM> CallbackAfterSave { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public bool IsRegister { get; set; }
+
+    [Parameter]
+    public bool IsEditable { get; set; } = true;
+
+    ExpertVM expert = new ExpertVM();
+    ExpertDOCModal epxertDOCModal = new ExpertDOCModal();
+    SfGrid<ExpertDOCVM> sfGrid = new SfGrid<ExpertDOCVM>();
+    IEnumerable<ExpertDOCVM> expertDOCs;
+    ExpertDOCVM model = new ExpertDOCVM();
+    private int idExpert = 0;
+    protected override async Task OnInitializedAsync()
+    {
+        this.expertDOCs = new List<ExpertDOCVM>();
+    }
+    public async Task OpenList(IEnumerable<ExpertDOCVM> expertDOCs, int idExpert)
+    {
+        this.SpinnerShow();
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+
+            this.expertDOCs = expertDOCs;
+            this.idExpert = idExpert;
+            if (idExpert != 0)
+            {
+                this.expert = await ExpertService.GetExpertByIdAsync(this.idExpert);
+            }
+            this.StateHasChanged();
+        }
+        finally
+        {
+            this.SpinnerHide();
+            this.loading = false;
+        }
+    }
+    private async Task OpenAddNewModal()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageExpertsData", false);
+        if (!hasPermission) { return; }
+
+        this.epxertDOCModal.Open(new ExpertDOCVM() { IdExpert = this.idExpert });
+    }
+    private async Task SelectedRow(ExpertDOCVM _model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewExpertsData", false);
+        if (!hasPermission) { return; }
+        _model.IdExpert = this.idExpert;
+        this.epxertDOCModal.Open(_model);
+    }
+    private async Task UpdateAfterSaveExpertDOC()
+    {
+        this.expertDOCs = await ExpertService.GetAllExpertExpertDOCsAsync(idExpert);
+        await this.sfGrid.Refresh();
+
+        await CallbackAfterSave.InvokeAsync(this.model);
+    }
+
+}

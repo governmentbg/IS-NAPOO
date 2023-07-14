@@ -1,0 +1,187 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<CandidateProviderVM>
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" Width="98%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @if (this.openFromCIPO || this.isProfileSubmitted)
+            {
+                if (this.licenceNumberAndDate != null)
+                {
+                    <div>Данни за ЦИПО <span style="color: #ffffff;">@this.candidateProviderVM.ProviderName към @this.candidateProviderVM.ProviderOwner</span>, Лицензия <span style="color: #ffffff;">№&nbsp;@this.licenceNumberAndDate</span>, Статус на лицензията: <span style="color: #ffffff;">@this.candidateProviderVM.LicenceStatusName</span></div>
+                }
+                else
+                {
+                    <div>Данни за ЦИПО <span style="color: #ffffff;">@this.candidateProviderVM.ProviderName към @this.candidateProviderVM.ProviderOwner</span></div>
+                }                
+            }
+            else
+            {
+                <div>Заявление за лицензиране <span style="color: #ffffff;">@applicationNumberAndDate</span> <span style="color: #ffffff;">@this.candidateProviderVM.ProviderName</span>, Статус <span style="color: #ffffff;">@this.candidateProviderVM.ApplicationStatus</span></div>
+            }
+        </Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <SfTab EnablePersistence="true" LoadOn="ContentLoad.Init" @bind-SelectedItem="selectedTab">
+                <TabEvents Selecting="Select" Selected="OnTabSelected" />
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Обучаваща институция"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOTrainingInstitution @ref="trainingInstitution" CandidateProviderVM="candidateProviderVM" DisableWhenProcedureIsCompleted="this.hideActionsWhenStatusIsCompleted" DisableAllFields="this.disableFields" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Услуги"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            @*<CIPOConsultings @ref="consultings" CandidateProviderVM="candidateProviderVM" IsApplicationChange="this.isLicenceChange" DisableAllFields="this.disableFields" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" />*@
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Устройство и дейност"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOStructureAndActivities @ref="cipoStructureAndActivities" CandidateProviderVM="candidateProviderVM" DisableAllFields="this.disableFields" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Консултанти"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOTrainers @ref="trainers" CandidateProviderVM="candidateProviderVM" IsApplicationChange="this.isLicenceChange" DisableAllFields="this.disableFields" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="MTБ"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOMaterialTechnicalBase @ref="materialTechnicalBase" CandidateProviderVM="candidateProviderVM" IsApplicationChange="this.isLicenceChange" DisableAllFields="this.disableFields" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.isUserExternalExpertOrExpertCommittee && !this.isInRoleNAPOO">
+                        <ChildContent>
+                            <TabHeader Text="Организация на работата"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOFormApplicationModal @ref="formApplicationModal" DocumentIsGenerated="() => FormApplicationStatus = false" IdCandidateProvider="candidateProviderVM.IdCandidate_Provider" DisableAllFields="this.disableFields" />
+                            <div class="card">
+                                <div class="card-block">
+                                    <button class="btn btn-info" type="submit" @onclick="OpenFormApplicationModal" disabled="@(this.disableFields)">Попълване на формуляр</button>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Приложени документи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOCandidateProviderDocuments @ref="candidateProviderDocuments" CandidateProviderVM="candidateProviderVM" DisableAllFields="this.disableFields" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.hideApplicationStatusTab && !this.isUserExternalExpertOrExpertCommittee && !this.isInRoleNAPOO">
+                        <ChildContent>
+                            <TabHeader Text="Подаване на заявлението"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOApplicationStatus @ref="applicationStatus" CandidateProviderVM="candidateProviderVM" CallbackAfterSubmit="RefreshApplciationList" DisableAllFields="this.disableFields" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.disableFields || this.hideApplicationStatusTab">
+                        <ChildContent>
+                            <TabHeader Text="Лицензиране"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <LicenceChange @ref="licenceChange" CandidateProviderVM="candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @candidateProviderVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @candidateProviderVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        @if (this.percentage != 0)
+                        {
+                            <div class="col text-left">Процент на завършеност: <b>@(percentage)%</b></div>
+                        }
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @candidateProviderVM.CreatePersonName</div>
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @candidateProviderVM.ModifyPersonName</div>
+                        @if (this.percentage != 0)
+                        {
+                            <div class="col text-left">
+                                <div class="faq-progress">
+                                    <div class="progress">
+                                        @if (this.percentage <= 40)
+                                        {
+                                            <div class="faq-bar3" style="width: @(percentage)%;"></div>
+                                        }
+                                        else if (this.percentage > 40 && this.percentage <= 70)
+                                        {
+                                            <div class="faq-bar1" style="width: @(percentage)%;"></div>
+                                        }
+                                        else if (this.percentage > 70 && this.percentage <= 90)
+                                        {
+                                            <div class="faq-bar2" style="width: @(percentage)%;"></div>
+                                        }
+                                        else if (this.percentage > 90 && this.percentage <= 100)
+                                        {
+                                            <div class="faq-bar4" style="width: @(percentage)%;"></div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.disableFields && !this.isUserExternalExpertOrExpertCommittee)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(() => { this.Submit(); })">Запиши</button>
+                            }
+                            @if (!this.hideApplicationStatusTab && !this.isUserExternalExpertOrExpertCommittee)
+                            {
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Отказ</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@if (!this.hideApplicationStatusTab && !this.isUserExternalExpertOrExpertCommittee)
+{
+    <ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+}

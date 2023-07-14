@@ -1,0 +1,200 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<QuestionVM>
+
+<SfDialog @bind-Visible="isVisible" Width="95%" Height="95%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2004" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за въпрос <span style="color: #ffffff;">@this.questionVM.Text</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        @if (this.questionVM.IdQuestion != 0)
+                        {
+                            <div class="row" style="margin-bottom: 10px;">
+                                <div class="col-sm-12 text-center">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="margin-right: 15px;" @onclick="PreviousQuestionBtn" disabled="@(this.disablePreviousBtn)"><i class="fa fa-arrow-circle-left"></i>Предишен въпрос</button>
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextQuestionBtn" disabled="@(this.disableNextBtn)"><i class="fa fa-arrow-circle-right"></i>Следващ въпрос</button>
+                                </div>
+                            </div>
+                        }
+                        <div class="card">
+                            <div class="card-body">
+                                <EditForm EditContext="this.editContext">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group required">
+                                                <label class="control-label">Текст на въпроса: </label>
+                                                <SfTextBox @bind-Value="this.questionVM.Text" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Тип на въпроса: </label>
+                                                <SfComboBox Enabled="@(this.questionVM.IdQuestion == 0)" TValue="int?" TItem="KeyValueVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvQuestionTypeSource" AllowFiltering="true" @bind-Value="this.questionVM.IdQuestType" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                    <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="OnQuestionTypeValueChanged" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Брой отговори: </label>
+                                                <SfNumericTextBox @bind-Value="this.questionVM.AnswersCount" TValue="int?" Format="##.##" ShowSpinButton="false" Enabled="@(this.questionVM.IdQuestType != this.kvOpenQuestion.IdKeyValue && this.questionVM.IdQuestion == 0)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Поредност: </label>
+                                                <SfNumericTextBox @bind-Value="this.questionVM.Order" TValue="int?" Format="##.##" ShowSpinButton="false" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Вид на индикатор: </label>
+                                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvRatingIndicatorType" AllowFiltering="true" @bind-Value="this.questionVM.IdRatingIndicatorType" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="new-task">
+                                                <div class="to-do-list">
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label class="form-label">
+                                                            <input type="checkbox" @bind-value="this.questionVM.IsRequired" checked="@(this.questionVM.IsRequired ? "checked" : null)">
+                                                            <span class="cr">
+                                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                            </span> <span>Въпросът е задължителен</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </EditForm>
+                                @if (this.questionVM.IdQuestion != 0)
+                                {
+                                    <div class="row mb-3">
+                                        &nbsp;
+                                    </div>
+
+                                    var answerHeader = this.questionVM.AnswersCount == 1 ? "Отговор:" : "Отговори:";
+                                    <EditForm EditContext="this.answerEditContext">
+                                        <fieldset>
+                                            <legend class="text-gray"><b>@answerHeader</b></legend>
+                                            @{
+                                                if (this.answers is not null && this.answers.Length > 0)
+                                                {
+
+                                                    if (this.questionVM.IdQuestType != this.kvOpenQuestion.IdKeyValue)
+                                                    {
+                                                        for (int i = 0; i < this.questionVM.AnswersCount; i++)
+                                                        {
+                                                            var symbol = this.GetSymbolByOrder(i);
+                                                            var answer = this.answers[i];
+                                                            answer.Symbol = symbol;
+                                                            <div class="row">
+                                                                <div class="col-sm-6">
+                                                                    <div class="form-group required">
+                                                                        <label class="control-label">Отговор '@symbol': </label>
+                                                                        <SfTextBox @bind-Value="answer.Text" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    }
+
+                                                    @if (this.questionVM.IdQuestType == this.kvOpenQuestion.IdKeyValue || this.questionVM.IdQuestType == this.kvSingleOpenQuestion.IdKeyValue || this.questionVM.IdQuestType == this.kvMultipleOpenQuestion.IdKeyValue)
+                                                    {
+                                                        <div class="row">
+                                                            <div class="col-sm-6">
+                                                                <div class="form-group">
+                                                                    <CustomInputTextArea class="form-control" @bind-Value="openQuestionText" disabled="@(true)" rows="4" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                }
+                                            }
+                                        </fieldset>
+                                    </EditForm>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.questionVM.IdQuestion != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.questionVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.questionVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.questionVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.questionVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.hideBtnsConcurrentModal)
+                            {
+                                <button style="margin-right: 15px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitAndContinueBtn())"><i class="fa fa-save"></i>Запиши и добави нов</button>
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    fieldset {
+        display: block;
+        margin-left: 2px;
+        margin-right: 2px;
+        padding-top: 0.35em;
+        padding-bottom: 0.625em;
+        padding-left: 0.75em;
+        padding-right: 0.75em;
+        border: 2px groove;
+    }
+
+    legend {
+        float: none;
+        width: inherit;
+        padding: 0 10px;
+        border-bottom: none;
+    }
+</style>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

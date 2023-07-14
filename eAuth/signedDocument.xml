@@ -1,0 +1,61 @@
+<saml2p:AuthnRequest Destination="https://eauth-test.egov.bg/SingleSignOnService" ID="id6a1ae6adb7d04c6ea860e90519dae6cb" IssueInstant="2022-06-17T17:22:02.6576025Z" Version="2.0" AssertionConsumerServiceURL="https://eauth.smcon.com/eAuth/Home/AuthenticateCertificate" ForceAuthn="false" IsPassive="false" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol">
+  <saml2:Issuer SPProvidedID="2.16.100.1.1.23" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">https://eauth.smcon.com/eAuth/Home/saml</saml2:Issuer>
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <SignedInfo>
+      <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments" />
+      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+      <Reference URI="">
+        <Transforms>
+          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+          <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+        </Transforms>
+        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+        <DigestValue>PFOvmK2i/K6ysIZrENdAswzzMPtYCTO0ktdttMY/8KI=</DigestValue>
+      </Reference>
+    </SignedInfo>
+    <SignatureValue>UWxk1rd2RmvVwl8JvoAaRYoz2Hr74yOWBDFZEmTz45ugzkvYGrlSQhP1gKu2TejjYBXn0bS5kH8L1ex5EU1mpNFam15YvXALO/9ylnvVTpKLKBa8vmiJq7a3cUE0mMicObDkQAFbzQBsFDi+Os4fNxYtWW6c1+mETkqUBsHj/ZpSlveWD41umx2cEXUe9nDgpGjlO+iv2E+eg7QQ6NE7JpQ017rF/6SwzUPP8sve8z2KVS4Mb69s3K8LE6CuwgGgq4MNx29/MTMw10r9GhHAKuwESSZUkJeLNwYfTX2n+SfWkPrX5QwfwU0jMnANKYD4CgjcrRx8D+O24oYryJDH/Q==</SignatureValue>
+    <KeyInfo>
+      <X509Data>
+        <X509IssuerSerial>
+          <X509IssuerName>CN=Sectigo RSA Domain Validation Secure Server CA, O=Sectigo Limited, L=Salford, S=Greater Manchester, C=GB</X509IssuerName>
+          <X509SerialNumber>337741084173892729847705899099100150800</X509SerialNumber>
+        </X509IssuerSerial>
+        <X509SubjectName>CN=*.smcon.com</X509SubjectName>
+        <X509Certificate>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</X509Certificate>
+      </X509Data>
+    </KeyInfo>
+  </Signature>
+  <saml2p:Extensions>
+    <egovbga:RequestedService xmlns:egovbga="urn:bg:egov:eauth:2.0:saml:ext">
+      <egovbga:Service>2.16.100.1.1.23.1.4.1.1</egovbga:Service>
+      <egovbga:Provider>2.16.100.1.1.23</egovbga:Provider>
+      <egovbga:LevelOfAssurance>SUBSTANTIAL</egovbga:LevelOfAssurance>
+    </egovbga:RequestedService>
+    <egovbga:RequestedAttributes xmlns:egovbga="urn:bg:egov:eauth:2.0:saml:ext">
+      <egovbga:RequestedAttribute FriendlyName="latinName" Name="urn:egov:bg:eauth:2.0:attributes:latinName" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:latinName</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="birthName" Name="urn:egov:bg:eauth:2.0:attributes:birthName" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:birthName</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="email" Name="urn:egov:bg:eauth:2.0:attributes:email" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:email</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="phone" Name="urn:egov:bg:eauth:2.0:attributes:phone" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:phone</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="gender" Name="urn:egov:bg:eauth:2.0:attributes:gender" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:gender</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="dateOfBirth" Name="urn:egov:bg:eauth:2.0:attributes:dateOfBirth" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:dateOfBirth</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="placeOfBirth" Name="urn:egov:bg:eauth:2.0:attributes:placeOfBirth" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:placeOfBirth</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+      <egovbga:RequestedAttribute FriendlyName="canonicalResidenceAddress" Name="urn:egov:bg:eauth:2.0:attributes:canonicalResidenceAddress" NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" isRequired="false">
+        <egovbga:AttributeValue>urn:egov:bg:eauth:2.0:attributes:canonicalResidenceAddress</egovbga:AttributeValue>
+      </egovbga:RequestedAttribute>
+    </egovbga:RequestedAttributes>
+  </saml2p:Extensions>
+</saml2p:AuthnRequest>

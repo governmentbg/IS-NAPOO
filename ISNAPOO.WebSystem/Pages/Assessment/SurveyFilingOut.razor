@@ -1,0 +1,10 @@
+﻿@page "/SurveyFilingOut"
+
+@inherits BlazorBaseComponent
+
+<div>
+    <p>@msg</p>
+</div>
+
+<SurveyFilingOutModal @ref="surveyFilingOutModal" CallbackAfterSubmit="UpdateAfterSurveyModalSubmit" />
+

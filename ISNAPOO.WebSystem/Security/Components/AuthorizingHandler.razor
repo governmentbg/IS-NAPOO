@@ -1,0 +1,42 @@
+﻿@using Blazored.LocalStorage
+@using ISNAPOO.WebSystem.Extensions
+@using static ISNAPOO.WebSystem.Extensions.BlazorCookieLoginMiddleware
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject IDataSourceService DataSourceService
+
+@inject ILocalStorageService localStorage
+
+<section class="section" id="not-authorized-message">
+    <div class="container">
+        <div class="notification is-danger">
+            .................
+        </div>
+    </div>
+</section>
+}
+@code {
+
+ 
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+        try
+        {
+            var LOCAL_LOGIN_KEY = await localStorage.GetItemAsync<string>("LOCAL_LOGIN_KEY");
+
+            if (!string.IsNullOrEmpty(LOCAL_LOGIN_KEY))
+            {
+
+                LoginInfo loginInfo = null;
+                if (BlazorCookieLoginMiddleware.OnlineUsers.TryGetValue(LOCAL_LOGIN_KEY, out loginInfo))
+                {
+                   // loginInfo.Activity = (await DataSourceService.GetPolicyByCode(claimType)).PolicyDescription;
+                    loginInfo.LastActivity = DateTime.Now;
+                }
+            }
+        }
+        catch { }
+    }
+}

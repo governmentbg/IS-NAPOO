@@ -1,0 +1,364 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-block" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Идентификатор:
+                            </label>
+                            <SfComboBox TValue="int?" TItem="KeyValueVM" Enabled="this.ConsultingClientVM.IsArchived == false" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdIndentType" DataSource="kvIndentTypeSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="IdentValueChangedHandler" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                @this.identType:
+                            </label>
+                            <SfTextBox @bind-Value="this.ConsultingClientVM.Indent" Enabled="this.ConsultingClientVM.IsArchived == false" OnChange="IndentChanged" />
+                        </div>
+                    </div>
+                    @if (this.ConsultingClientVM.IdConsultingClient == 0 && this.ConsultingClientVM.IdIndentType.HasValue && !string.IsNullOrEmpty(this.ConsultingClientVM.Indent))
+                    {
+                        <div class="col-sm-1">
+                            <div class="form-group">
+                                <label class="control-label">
+                                </label>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="@this.content" OpensOn="Hover">
+                                    <button type="button" class="btn-row" disabled="@this.ConsultingClientVM.IsArchived == true" @onclick="CheckForExistingClientAsync"><i class="fa fa-search-plus"></i></button>
+                                </SfTooltip>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Име:
+                            </label>
+                            <InputText class="form-control" disabled="@(this.ConsultingClientVM.IsArchived == true)" @bind-Value="this.ConsultingClientVM.FirstName" />
+                        </div>
+                    </div>
+                    @if (this.ConsultingClientVM.IdIndentType == this.kvEGN.IdKeyValue)
+                    {
+                        <div class="col-sm-4">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Презиме:
+                                </label>
+                                <InputText class="form-control" disabled="@(this.ConsultingClientVM.IsArchived == true)"  @bind-Value="this.ConsultingClientVM.SecondName" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Презиме:
+                                </label>
+                                <InputText class="form-control" disabled="@(this.ConsultingClientVM.IsArchived == true)" @bind-Value="this.ConsultingClientVM.SecondName" />
+                            </div>
+                        </div>
+                    }
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Фамилия:
+                            </label>
+                            <InputText class="form-control" disabled="@(this.ConsultingClientVM.IsArchived == true)" @bind-Value="this.ConsultingClientVM.FamilyName" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Дата на раждане:
+                            </label>
+                            <div>
+                                <SfDatePicker TValue="DateTime?" @bind-Value="this.ConsultingClientVM.BirthDate" Enabled="this.ConsultingClientVM.IsArchived == false" Format="dd.MM.yyyy" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Пол:
+                            </label>
+                            <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" Enabled="this.ConsultingClientVM.IsArchived == false" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdSex" DataSource="kvSexSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Гражданство:
+                            </label>
+                            <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" Enabled="this.ConsultingClientVM.IsArchived == false" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdNationality" DataSource="kvNationalitySource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxTemplates TItem="KeyValueVM">
+                                    <ItemTemplate Context="kvCtx">
+                                        @{
+                                            var kv = kvCtx as KeyValueVM;
+                                            if (kv.Name == "България")
+                                            {
+                                                <div style="border-bottom: 1px solid gray; margin-bottom: 10px;">
+                                                    <span>@kv.Name</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                @kv.Name
+                                            }
+                                        }
+                                    </ItemTemplate>
+                                </ComboBoxTemplates>
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Адрес:
+                            </label>
+                            <SfTextBox @bind-Value="this.ConsultingClientVM.Address" Enabled="this.ConsultingClientVM.IsArchived == false" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Телефон:
+                            </label>
+                            <SfTextBox @bind-Value="this.ConsultingClientVM.Phone" Enabled="this.ConsultingClientVM.IsArchived == false" />
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">
+                                E-mail адрес:
+                            </label>
+                            <SfTextBox @bind-Value="this.ConsultingClientVM.EmailAddress" Enabled="this.ConsultingClientVM.IsArchived == false" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Начин на финансиране:
+                            </label>
+                            <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" Enabled="this.ConsultingClientVM.IsArchived == false" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdAssignType" DataSource="kvAssingSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Период на консултиране от:
+                            </label>
+                            <div>
+                                <SfDatePicker TValue="DateTime?" @bind-Value="this.ConsultingClientVM.StartDate" Format="dd.MM.yyyy" Enabled="this.ConsultingClientVM.IsArchived == false" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Период на консултиране до:
+                            </label>
+                            <div>
+                                <SfDatePicker TValue="DateTime?" @bind-Value="this.ConsultingClientVM.EndDate" Format="dd.MM.yyyy" Enabled="this.ConsultingClientVM.IsArchived == false" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group required">
+                            <label class="control-label">
+                                Насочен към услугите на ЦИПО:
+                            </label>
+                            <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" Enabled="this.ConsultingClientVM.IsArchived == false" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdAimAtCIPOServicesType" DataSource="kvAimAtCIPOServicesType" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="new-task">
+                            <div class="to-do-list">
+                            </div>
+                            <div class="to-do-list">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" @bind-value="this.ConsultingClientVM.IsDisabledPerson" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.ConsultingClientVM.IsDisabledPerson ? "checked" : null)">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Лице с увреждания</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="to-do-list" style="margin-bottom: 0px !important;">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" @bind-value="this.ConsultingClientVM.IsDisadvantagedPerson" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.ConsultingClientVM.IsDisadvantagedPerson ? "checked" : null)">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Лице в неравностойно положение</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="color: #d00;">
+                                *
+                            </div>
+                            <div class="checkbox-fade fade-in-primary">
+                                <label class="form-label">
+                                    <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isStudentTrue" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.isStudentTrue ? "checked" : null)" @onchange="OnStudentTrueValueChange">
+                                    <span class="cr">
+                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                    </span> <span>Учащ</span>
+                                </label>
+                            </div>
+                            <div class="to-do-list" style="margin-bottom: 0px !important;">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isStudentFalse" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.isStudentFalse ? "checked" : null)" @onchange="OnStudentFalseValueChange">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Неучащ</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="color: #d00;">
+                                *
+                            </div>
+                            <div class="checkbox-fade fade-in-primary">
+                                <label class="form-label">
+                                    <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isEmployedPersonTrue" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.isEmployedPersonTrue ? "checked" : null)" @onchange="OnIsEmployedPersonTrueValueChange">
+                                    <span class="cr">
+                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                    </span> <span>Заето лице</span>
+                                </label>
+                            </div>
+                            <div class="to-do-list">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" @bind-value:event="oninput" @bind-value="this.isEmployedPersonFalse" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.isEmployedPersonFalse ? "checked" : null)" @onchange="OnIsEmployedPersonFalseValueChange">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Безработно лице</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="to-do-list">
+                                <div class="checkbox-fade fade-in-primary">
+                                    <label class="form-label">
+                                        <input type="checkbox" @bind-value="this.ConsultingClientVM.IsContactAllowed" disabled="@(this.ConsultingClientVM.IsArchived == true)" checked="@(this.ConsultingClientVM.IsContactAllowed ? "checked" : null)">
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span> <span>Съгласие за използване на информацията за контакт от НАПОО</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="to-do-list">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if (this.isEmployedPersonFalse)
+                {
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Регистрация в бюрото по труда:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" Enabled="this.ConsultingClientVM.IsArchived == false" FilterType=" Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.ConsultingClientVM.IdRegistrationAtLabourOfficeType" DataSource="kvRegistrationAtLabourOfficeType" AllowFiltering="true" AllowCustom="false">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Вид на услугата:
+                            </label>
+                            <SfComboBox Enabled="@(this.ConsultingClientVM.IdConsultingClient != 0 && this.ConsultingClientVM.IsArchived != true)" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.consultingVM.IdConsultingType" DataSource="kvConsultingTypeSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Начин на предоставяне:
+                            </label>
+                            <SfComboBox Enabled="@(this.ConsultingClientVM.IdConsultingClient != 0 && this.ConsultingClientVM.IsArchived != true)" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.consultingVM.IdConsultingReceiveType" DataSource="kvConsultingReceiveTypeSource" AllowFiltering="true" AllowCustom="false">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Цена (в лева): </label>
+                            <SfNumericTextBox Enabled="@(this.ConsultingClientVM.IdConsultingClient != 0 && this.ConsultingClientVM.IsArchived != true)" TValue="decimal?" ShowSpinButton="false" @bind-Value="this.consultingVM.Cost" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <p>
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" disabled="@(this.ConsultingClientVM.IdConsultingClient == 0 || this.ConsultingClientVM.IsArchived == true)" @onclick="AddConsultingTypeBtn">Добави</button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label class="text-gray"><b>Видове услуги:</b></label>
+                        <SfGrid DataSource="consultingsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                AllowTextWrap="true" @ref="consultingsGrid" AllowSelection="false" AllowPaging="true">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                            <GridColumns>
+                                <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5" Context="ctx">
+                                    <Template>
+                                        @GetRowNumber(consultingsGrid, (ctx as ConsultingVM).IdConsulting).Result
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="5" Context="ctx">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" disabled="@(this.ConsultingClientVM.IsArchived == true)" @onclick="(async () => await this.DeleteConsultingTypeBtn(ctx as ConsultingVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="IdConsulting" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field="ConsultingTypeValue" HeaderText="Вид на услугата" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                                <GridColumn Field="ConsultingReceiveTypeValue" HeaderText="Начин на предоставяне" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                <GridColumn Field="CostAsStr" HeaderText="Цена" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</EditForm>
+

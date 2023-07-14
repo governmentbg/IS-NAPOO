@@ -1,0 +1,112 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" Width="80%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Документ на МТБ</Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на документа:
+                                </label>
+                                <SfComboBox Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee" TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="candidateProviderPremisesDocumentVM.IdDocumentType" DataSource="kvDocumentTypeSource" AllowFiltering="true" AllowCustom="false">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание на документа:
+                                </label>
+                                <InputTextArea class="form-control" @bind-Value="candidateProviderPremisesDocumentVM.DocumentTitle" disabled="@(this.DisableFieldsWhenUserIsExternalExpertOrCommittee)" />
+                            </div>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (candidateProviderPremisesDocumentVM.HasUploadedFile)
+                            {
+                                var files = this.candidateProviderPremisesDocumentVM.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                foreach (var file in files)
+                                {
+                                    var fileName = file.Split(($"\\{this.candidateProviderPremisesDocumentVM.IdCandidateProviderPremisesDocument}\\"), StringSplitOptions.RemoveEmptyEntries).ToArray().LastOrDefault();
+                                    <span class="align-text-bottom">
+                                        @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                                        {
+                                            <button type="button" class="btn-row" @onclick="(() => OnRemoveClick(fileName))"><i class="fa fa-trash-o"></i></button>
+                                        }
+                                        <a @onclick="(() => OnDownloadClick(fileName))" href="#" class="link-primary">@fileName</a>
+                                    </span>
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    @if (this.candidateProviderPremisesDocumentVM.IdCandidateProviderPremisesDocument != 0)
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                                    {
+                                        @if (this.isDocumentSaved)
+                                        {
+                                            <SfUploader @ref="uploader" AutoUpload="false" AllowMultiple="true" Enabled="true" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                                <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove" FileSelected="FilesSelectedHandler"></UploaderEvents>
+                                            </SfUploader>
+                                        }
+                                        else
+                                        {
+                                            <SfUploader @ref="uploader" AutoUpload="false" AllowMultiple="true" Enabled="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                                <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove" FileSelected="FilesSelectedHandler"></UploaderEvents>
+                                            </SfUploader>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                            {
+                                @if (this.candidateProviderPremisesDocumentVM.HasUploadedFile)
+                                {
+                                    <button style="margin-right: 15px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitAndContinueBtn())"><i class="fa fa-save"></i>Запиши и добави нов</button>
+                                }
+                                <button class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitDocumentHandler())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

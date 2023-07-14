@@ -1,0 +1,56 @@
+﻿@page "/Logout"
+@using Blazored.LocalStorage
+@using ISNAPOO.WebSystem.Extensions
+@using Microsoft.AspNetCore.Mvc
+@using global::Data.Models.Data.ProviderData
+@using Microsoft.AspNetCore.Identity;
+@using static ISNAPOO.WebSystem.Extensions.BlazorCookieLoginMiddleware
+@inject SignInManager<ApplicationUser> signInManager
+@inject UserManager<ApplicationUser> userManager
+@inject ILogger<Logout> Logger
+@inject NavigationManager NavManager
+@inject ILocalStorageService localStorage
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState> authStateCascadingParameter { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var key = await localStorage.GetItemAsync<string>("LOCAL_LOGIN_KEY");
+
+            if (!string.IsNullOrEmpty(key))
+            {
+
+                var logOutUser = BlazorCookieLoginMiddleware.OnlineUsers.FirstOrDefault(c => c.Key == key.Replace("\"", ""));
+                if (logOutUser.Value != null)
+                {
+                    logOutUser.Value.LogoutTime = DateTime.Now;
+                    NavManager.NavigateTo("/exit?key=" + key, true);
+
+                }
+                else
+                {
+                    NavManager.NavigateTo("/exit?key=1111", true);
+                }
+
+            }
+            else
+            {
+                NavManager.NavigateTo("/exit?key=1111", true);
+            }
+        }
+        catch
+        {
+            NavManager.NavigateTo("/exit?key=1111", true);
+        }
+
+
+    }
+
+
+
+
+}

@@ -1,0 +1,52 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Актуализиране на учебните планове и програми</Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid DataSource="this.dataGridSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false" AllowExcelExport="true" AllowPdfExport="true"
+                                        AllowTextWrap="true" @ref="this.dataGrid" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridEvents TValue="AnnualCurriculumsVM" OnToolbarClick="ToolbarClick" />
+                                    <GridColumns>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" Width="5%">
+                                            <Template>
+                                                @this.GetRowNumber(this.dataGrid, (context as AnnualCurriculumsVM).Id).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="CPOName" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                        <GridColumn Field="Profession" HeaderText="Професия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                        <GridColumn Field="Speciality" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                                        <GridColumn Field="UpdateReason" HeaderText="Основна причина за актуализация на учебния план и програма" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                                        <GridColumn Field="Date" HeaderText="Дата" TextAlign="TextAlign.Left" Width="15%" Format="dd.MM.yyyy"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+

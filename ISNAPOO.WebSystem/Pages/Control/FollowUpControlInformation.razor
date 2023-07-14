@@ -1,0 +1,350 @@
+﻿@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+
+@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="card">
+
+                    <div class="card-header">
+                        <nav class="navbar navbar-expand">
+                            <ul class="navbar-nav">
+                                @if (this.IsEditable)
+                                {
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <button type="button" class="btn btn-warning btn-outline-warning" disabled="@isBlankGenerate" hidden="@(this.Model.IdFollowUpControl == 0 ? true : false)" @onclick="GenerateBlank">Печат на заповед</button>
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        &nbsp;
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <button type="button" class="btn btn-warning btn-outline-warning"  hidden="@(this.Model.IdFollowUpControl == 0 ? true : false || !isBlankGenerate)" @onclick="GenerateProtocol">Печат на КП</button>
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        &nbsp;
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <button type="button" class="btn btn-warning btn-outline-warning" disabled="@isLetterGenerate" hidden="@(this.Model.IdFollowUpControl == 0 ? true : false || !isProtocolGenerate)" @onclick="GenerateLetter">Писмо до @this.CPOorCIPO</button>
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        &nbsp;
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        <button type="button" class="btn btn-warning btn-outline-warning" disabled="@isReportGenerate" hidden="@(this.Model.IdFollowUpControl == 0 ? true : false || !isLetterGenerate)" @onclick="GenerateReport">Доклад експерти</button>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-11">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        @CPOorCIPO:
+                                    </label>
+                                    @if (IsCPO)
+                                    {
+                                        <SfAutoComplete TValue="int?" @ref="this.sfAutoComplete" TItem="CandidateProviderVM" PopupHeight="230px" ShowClearButton="true"
+                                                    @bind-Value="this.Model.IdCandidateProvider"
+                                                    DataSource="this.candidateProviders" AllowFiltering="true">
+                                            <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="CPOLicenceNumberNameOwnerGrid" Value="IdCandidate_Provider" />
+                                            <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilter" ValueChange="ValueChangeHandler"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    }
+                                    else
+                                    {
+                                        <SfAutoComplete TValue="int?" @ref="this.sfAutoComplete" TItem="CandidateProviderVM" PopupHeight="230px" ShowClearButton="true"
+                                                    @bind-Value="this.Model.IdCandidateProvider"
+                                                    DataSource="this.candidateProviders" AllowFiltering="true">
+                                            <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="CIPOLicenceNumberNameOwnerGrid" Value="IdCandidate_Provider" />
+                                            <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilter" ValueChange="ValueChangeHandler"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    }
+                                </div>
+                            </div>
+                            @if (this.Model.IdCandidateProvider is not null)
+                            {
+                                <div class="col-sm-1">
+                                    <div class="form-group text-center" style="display: flex; margin-top: 21px;">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори профил" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.OpenProfileBtn())"><i class="fa fa-search-plus"></i></button>
+                                        </SfTooltip>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Вид на последващия контрол:
+                                    </label>
+                                    <SfComboBox TValue="int?" ShowClearButton="true" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.Model.IdFollowUpControlType" AllowCustom="false" DataSource="@kvFollowUpControlTypeSource" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Вид на проверката:
+                                    </label>
+                                    <SfComboBox TValue="int?" ShowClearButton="true" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.Model.IdControlType" AllowCustom="false" DataSource="@kvControlTypeSource" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Статус на проверката:
+                                    </label>
+                                    <SfComboBox TValue="int?" ShowClearButton="true" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.Model.IdStatus" AllowCustom="false" DataSource="@kvControlStatusesSource" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Срок за проверката от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @onfocusout="DateValid" @bind-Value="this.Model.ControlStartDate" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Срок за проверката до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @onfocusout="DateValid" @bind-Value="this.Model.ControlEndDate" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Период от:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @onfocusout="DateValid" @bind-Value="this.Model.PeriodFrom" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Период до:
+                                    </label>
+                                    <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @onfocusout="DateValid" @bind-Value="this.Model.PeriodTo" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <div class="new-task">
+                                    <div class="to-do-list">
+                                        <div class="checkbox-fade fade-in-primary">
+                                            <label class="form-label">
+                                                <input type="checkbox" @bind-value="this.Model.IsFollowUpControlOnline" checked="@(this.Model.IsFollowUpControlOnline ? "checked" : null)">
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span>
+                                                <span>По документи в ИС на НАПОО и въз основа на допълнително изискани документи</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="to-do-list">
+                                        <div class="checkbox-fade fade-in-primary">
+                                            <label class="form-label">
+                                                <input type="checkbox" @bind-value="this.Model.IsFollowUpControlOnsite" checked="@(this.Model.IsFollowUpControlOnsite ? "checked" : null)">
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span> <span>На място</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (this.Model.IsFollowUpControlOnsite)
+                        {
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Дата на проверка от:
+                                        </label>
+                                        <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @bind-Value="this.Model.OnsiteControlDateFrom" Format="@GlobalConstants.DATE_FORMAT" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Дата на проверка до:
+                                        </label>
+                                        <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" @bind-Value="this.Model.OnsiteControlDateTo" Format="@GlobalConstants.DATE_FORMAT" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <span>&nbsp;</span>
+                                </div>
+                                @if (isBlankGenerate)
+                                {
+                                    <div class="col-sm-4">
+                                        <!-- text input -->
+                                <div class="form-group">
+                                            <label class="control-label">
+                                                Срок за отстраняване на констатираните нередовности:
+                                            </label>
+                                            <SfComboBox TValue="int?" ShowClearButton="true" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.Model.IdDeadlinePeriodType" AllowCustom="false" DataSource="@kvDeadlineTypes" AllowFiltering="true">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                        }
+                        else
+                        {
+                            @if (isBlankGenerate)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <span>&nbsp;</span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <!-- text input -->
+                                <div class="form-group">
+                                            <label class="control-label">
+                                                Срок за отстраняване на констатираните нередовности:
+                                            </label>
+                                            <SfComboBox TValue="int?" ShowClearButton="true" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.Model.IdDeadlinePeriodType" AllowCustom="false" DataSource="@kvDeadlineTypes" AllowFiltering="true">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if (this.IsEditable)
+                        {
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <!-- text input -->
+                                <div class="form-group">
+                                        <label class="control-label">
+                                            Длъжностни лица:
+                                        </label>
+                                        <SfComboBox Readonly="@(this.Model.IdFollowUpControl != 0 ? false : true)" ShowClearButton="true" TValue="int" TItem="ExpertVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="experts" AllowCustom="false" @bind-Value="this.idExpert">
+                                            <ComboBoxFieldSettings Text="FullNameAndOccupation" Value="IdExpert" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <p>
+                                            <button disabled="@(this.Model.IdFollowUpControl != 0 ? false : true)" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@AddNewControlExpert">Добави</button>
+                                        </p>
+
+                                    </div>
+                                </div>
+                                @if (isBlankGenerate)
+                                {
+                                    <div class="col-sm-4">
+                                        <!-- text input -->
+                                <div class="form-group">
+                                            <label class="control-label">
+                                                Срок за изпълнение на препоръки:
+                                            </label>
+                                            <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" ShowClearButton="true" @bind-Value="this.Model.TermImplRecommendation" Format="@GlobalConstants.DATE_FORMAT" />
+                                        </div>
+                                    </div>
+                                }
+
+                            </div>
+                        }
+                        else
+                        {
+                            @if (isBlankGenerate)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <!-- text input -->
+                                <div class="form-group">
+                                            <label class="control-label">
+                                                Срок за изпълнение на препоръки:
+                                            </label>
+                                            <SfDatePicker TValue="DateTime?" CssClass="form-control customPad" ShowClearButton="true" @bind-Value="this.Model.TermImplRecommendation" Format="@GlobalConstants.DATE_FORMAT" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid ID="sfGrid" DataSource="followUpControlExperts" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                        @ref="this.sfGrid" AllowTextWrap="true" AllowSelection="false">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Context="ctxNum" HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                            <Template>
+                                                @GetRowNumber(sfGrid, (ctxNum as FollowUpControlExpertVM).IdFollowUpControlExpert).Result
+                                            </Template>
+                                        </GridColumn>
+                                            <GridColumn Visible="this.IsEditable" Width="6%">
+                                                <Template Context="controlExpertCtx">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                        <button type="button" class="btn-row" @onclick="(() => DeleteControlExpert(controlExpertCtx as FollowUpControlExpertVM))">
+                                                            <i class="fa fa-trash-o"></i>
+                                                        </button>
+                                                    </SfTooltip>
+                                                </Template>
+                                            </GridColumn>
+                                        <GridColumn Field="IdFollowUpControlExpert" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Visible=false></GridColumn>
+                                        <GridColumn Field="Expert.Person.Title" HeaderText="Титла" TextAlign="TextAlign.Left" Width="16%"></GridColumn>
+                                        <GridColumn Field="Expert.Person.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                                        <GridColumn Field="Expert.Person.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                                        <GridColumn Field="Expert.Person.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+<ApplicationModal @ref="applicationModal" />
+<CIPOApplicationModal @ref="cipoApplicationModal" />

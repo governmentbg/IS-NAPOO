@@ -1,0 +1,53 @@
+﻿@using Data.Models.Data.SqlView.Archive
+@inherits BlazorBaseComponent
+
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" Width="98%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@AnnualTrainingCourseTitle.HeaderTitle</Header>
+        <Content>
+            <SfGrid ID="sfGrid" DataSource="annualTrainingCourses" EnableAltRow="true" EnableHover="false" AllowTextWrap="true" @ref="sfGrid" AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                <GridEvents TValue="AnnualTrainingCourse" OnToolbarClick="ToolbarClick" />
+                <GridColumns>
+                    <GridColumn Field="IdAnnualTrainingCourse" IsPrimaryKey="true" TextAlign="TextAlign.Center" Visible="true" Width="5%" HeaderText="   " MinWidth="20"></GridColumn>
+                    <GridColumn HeaderText="Професия" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="ProfessionCode" Width="10%" HeaderText="Код по СППОО" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>
+                    <GridColumn HeaderText="Специалност" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="SpecialityCode" Width="10%" HeaderText="Код по СППОО" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>
+
+                    <GridColumn Field="VQSName" Width="8%" HeaderText="Степен на ПК" TextAlign="TextAlign.Center" MinWidth="15"></GridColumn>
+                    <GridColumn Field="DistrictName" Width="10%" HeaderText="Административно териториална област на провеждане на курса" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+
+                    <GridColumn HeaderText="@AnnualTrainingCourseTitle.CountIncludedTitle" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="CountIncludedMan" Width="10%" HeaderText="мъже" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                            <GridColumn Field="CountIncludedWomen" Width="10%" HeaderText="жени" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>
+                    <GridColumn HeaderText="@AnnualTrainingCourseTitle.CountCertificateTitle" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="CountCertificateMan" Width="10%" HeaderText="мъже" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                            <GridColumn Field="CountCertificateWomen" Width="10%" HeaderText="жени" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>
+                    <GridColumn Field="Horarium" Width="130" HeaderText="Хорариум на курса (брой учебни часове)" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    <GridColumn Field="Cost" Width="130" HeaderText="Цена на курса (за един участник) - лева" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    <GridColumn Field="CountTestimony" Width="130" HeaderText="Курсисти, получили свидетелство за правоспособност - брой" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    <GridColumn Field="SourceFunding" Width="130" HeaderText="Основен източник на финансиране на курса" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    <GridColumn Field="CountDisabledPerson" Width="130" HeaderText="Брой обучаеми в неравностойно положение" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    <GridColumn Field="CountDisadvantagedPerson" Width="130" HeaderText="Брой обучаеми от уязвими групи" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

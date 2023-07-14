@@ -1,0 +1,64 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="90%" Height="90%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Промени в лицензията на @((MarkupString)this.title)</Header>
+        <Content>
+            <nav class="navbar navbar-expand  ">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item d-none d-sm-inline-block">
+                           @if (this.isVisibleLicenceChangeButton)
+                            {
+                              <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenNewCandidateProviderLicenceModal">Промяна на лицензията</button>
+                            }
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        &nbsp;
+                    </li>
+                </ul>
+            </nav>
+            <SfGrid ID="sfGrid" @ref="sfGridModal" DataSource="candidateProviderLicenceChangeVM" AllowSorting="true" AllowTextWrap="true" AllowFiltering="true"
+                        AllowPaging="true" AllowSelection="true" Toolbar="@(new List<string>() { "ExcelExport", "CsvExport" ,"PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                    <GridPageSettings PageCount="5" PageSizes="true" />
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"/>
+                    <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CandidateProviderLicenceChangeVM" />
+                    <GridSelectionSettings CheckboxOnly="true"></GridSelectionSettings>
+                    <GridColumns>
+                    <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                        <Template>
+                            @GetRowNumber(sfGridModal, (context as CandidateProviderLicenceChangeVM).IdCandidateProviderLicenceChange).Result
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Width="5%">
+                        <Template>
+                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                <button class="btn-row" @onclick="(() => GetDocument(context as CandidateProviderLicenceChangeVM))"><i class="fa fa-file-o"></i></button>
+                            </SfTooltip>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Width="5%">                      
+                        <Template>                         
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редактиране на лиценз" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(() => OpenProviderLicenceChangeModal(context as CandidateProviderLicenceChangeVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                 </SfTooltip>                            
+                        </Template>                        
+                    </GridColumn>
+                    <GridColumn Field="IdCandidateProviderLicenceChange" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Width="10" Visible=false></GridColumn>
+                    <GridColumn Field="LicenceStatusName" HeaderText="Статус на лицензията" TextAlign="TextAlign.Left" Width="150px"></GridColumn>
+                    <GridColumn Field="NumberCommand" HeaderText="Заповед" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                    <GridColumn Field="ChangeDate" HeaderText="Дата" TextAlign="TextAlign.Left" Format="@GlobalConstants.DATE_FORMAT"  Width="70px"></GridColumn>
+                    <GridColumn Field="LicenceStatusDetailName" HeaderText="Вид на промяната" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                    <GridColumn Field="Notes" HeaderText="Бележки" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                    <GridColumn Field="Archive" HeaderText="Съхранение на архива" TextAlign="TextAlign.Left" Width="70px"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+           </Content>
+    </DialogTemplates>
+</SfDialog>
+
+
+<ProviderLicenceChangeModal @ref="providerLicenceChangeModal" CallbackAfterSubmit="LoadCandidateProviderLicensesList"></ProviderLicenceChangeModal>

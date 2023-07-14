@@ -1,0 +1,330 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <p></p>
+            <div class="card">
+                <div class="card-header">
+                    <nav>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <nav class="navbar navbar-expand" style="justify-content: right;padding-top:0;">
+                                    <ul class="navbar-nav">
+                                         @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                                        {
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewMTBClickHandler" disabled="@(this.DisableAllFields)">Нова МТБ</button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-5">
+                                <nav class="navbar navbar-expand" style="@(!this.DisableFieldsWhenUserIsExternalExpertOrCommittee ? "text-align: left; !important" : string.Empty) justify-content: left;padding-top:0; ">
+                                    <ul class="navbar-nav">                                    
+                                        @if (this.mtbsSource.Count > 1 && this.candidateProviderPremisesVM is not null && this.candidateProviderPremisesVM.IdCandidateProviderPremises != 0)
+                                        {
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PreviousMTBBtn" disabled="@(this.disablePreviousBtn)"><i class="fa fa-arrow-circle-left" style="margin-right: 3px !important;"></i>Предишна МТБ</button>
+                                            </li>
+                                            <label>&nbsp</label>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextMTBBtn" disabled="@(this.disableNextBtn)"><i class="fa fa-arrow-circle-right" style="margin-right: 3px !important;"></i>Следваща МТБ</button>
+                                            </li>
+                                            <label>&nbsp</label>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <div class="row mainBGColor">
+                        <div class="col-sm-5">
+                            <SfGrid ID="sfGrid" DataSource="candidateProviderPremisesListForGrid"
+                                    AllowPaging="true" EnableAltRow="true" EnableHover="false"
+                                    AllowTextWrap="true" @ref="mtbsGrid" AllowSelection="true" Height="100%" SelectedRowIndex="selectedRowIdx">
+                                <GridTemplates>
+                                    <EmptyRecordTemplate Context="emptyRecord">
+                                        <span>Няма намерени резултати.</span>
+                                    </EmptyRecordTemplate>
+                                </GridTemplates>
+                                <GridColumns>
+                                    <GridColumn Field="IdCandidateProviderPremises" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn TextAlign="TextAlign.Left" Width="10" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" HeaderText=" ">
+                                        <Template>
+                                            @GetRowNumber(mtbsGrid, (context as CandidateProviderPremisesVM).IdCandidateProviderPremises).Result
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="PremisesName" HeaderText="Материално-технически бази" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                                    <GridColumn HeaderText="Статус" TextAlign="TextAlign.Left" Width="55">
+                                        <Template>
+                                            @{
+                                                var premises = context as CandidateProviderPremisesVM;
+                                                @(this.kvMTBStatusSource.First(x => x.IdKeyValue == premises.IdStatus).Name)
+
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn TextAlign="TextAlign.Left" Width="20">
+                                        <Template>
+                                            @{
+                                                var premises = context as CandidateProviderPremisesVM;
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на промените" OpensOn="Hover">
+                                                    <button type="button" class="btn-row" @onclick="() => {mTBStatusModal.OpenModal(premises);}"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                                <GridEvents TValue="CandidateProviderPremisesVM" RowSelected="MTBSelectedHandler" QueryCellInfo="QueryCellInfo"
+                                            RowSelecting="MTBSelectingHandler" OnRecordClick="PremisesRecordClickHandler" />
+                            </SfGrid>
+                        </div>
+                        <div class="col-sm-7">
+                            <SfAccordion ExpandMode="ExpandMode.Single">
+                                <AccordionItems>
+                                    <AccordionItem Expanded="true">
+                                        <HeaderTemplate>
+                                            Данни за материално-техническа база <span style="color: #01a9ac !important;">@this.premisesNameInformation</span>
+                                        </HeaderTemplate>
+                                        <ContentTemplate>
+                                            <fieldset disabled="@(this.DisableAllFields || this.DisableFieldsWhenUserIsExternalExpertOrCommittee)">
+                                                <EditForm EditContext="editContext">
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Материално-техническа база:
+                                                                </label>
+                                                                <InputText class="form-control" @bind-Value="candidateProviderPremisesVM.PremisesName" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">
+                                                                    Кратко описание:
+                                                                </label>
+                                                                <InputTextArea class="form-control" @bind-Value="candidateProviderPremisesVM.PremisesNote" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">Населено място: </label>
+                                                                <SfAutoComplete Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee" @ref="sfAutoCompleteLocation" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                                @bind-Value="candidateProviderPremisesVM.IdLocation"
+                                                                                DataSource="locationSource" AllowFiltering="true" CssClass="form-control customPad">
+                                                                    <AutoCompleteTemplates TItem="LocationVM">
+                                                                        <NoRecordsTemplate>
+                                                                            Няма намерени резултати.
+                                                                        </NoRecordsTemplate>
+                                                                    </AutoCompleteTemplates>
+                                                                    <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                                                    <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocation" ValueChange="SetZIPCode"></AutoCompleteEvents>
+                                                                </SfAutoComplete>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-10">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Адрес:
+                                                                </label>
+                                                                <InputText class="form-control" @bind-Value="candidateProviderPremisesVM.ProviderAddress" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Пощ. код:
+                                                                </label>
+                                                                <InputText class="form-control" @bind-Value="candidateProviderPremisesVM.ZipCode" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label class="control-label">
+                                                                    Телефон:
+                                                                </label>
+                                                                <InputText class="form-control" @bind-Value="candidateProviderPremisesVM.Phone" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Форма на собственост:
+                                                                </label>
+                                                                <SfComboBox Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee" TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="candidateProviderPremisesVM.IdOwnership" DataSource="kvMTBOwnershipSource" AllowFiltering="true" AllowCustom="false">
+                                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                                </SfComboBox>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group required">
+                                                                <label class="control-label">
+                                                                    Статус:
+                                                                </label>
+                                                                <SfComboBox Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee" TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="candidateProviderPremisesVM.IdStatus" DataSource="kvMTBStatusSource" AllowFiltering="true" AllowCustom="false">
+                                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                                </SfComboBox>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </EditForm>
+                                            </fieldset>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                    <AccordionItem Header="Данни за помещения">
+                                        <ContentTemplate>
+                                            <div class="content-wrapper">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <nav class="navbar navbar-expand">
+                                                            <!-- Left navbar links -->
+                                                            <ul class="navbar-nav float">
+                                                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                                                                {
+                                                                    <li class="nav-item d-none d-sm-inline-block float-none">
+                                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewRoomClickHandler" disabled="@(this.candidateProviderPremisesVM.IdCandidateProviderPremises == 0)">Добави помещение</button>
+                                                                    </li>
+                                                                    <li class="nav-item d-none d-sm-inline-block">
+                                                                        &nbsp;
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        </nav>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-sm-12">
+                                                                <SfGrid ID="premisesRoomsGrid" DataSource="premisesRoomsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                                        AllowTextWrap="true" @ref="premisesRoomsGrid" AllowSelection="false">
+                                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                                    <GridColumns>
+                                                                        <GridColumn Width="10%">
+                                                                            <Template>
+                                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                                                                    <button type="button" class="btn-row" @onclick="(() => EditRoom(context as CandidateProviderPremisesRoomVM))">
+                                                                                        <i class="fa fa-pencil-square-o"></i>
+                                                                                    </button>
+                                                                                </SfTooltip>
+                                                                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                                                                                {
+                                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                                                        <button type="button" class="btn-row" @onclick="(() => DeleteRoom(context as CandidateProviderPremisesRoomVM))">
+                                                                                            <i class="fa fa-trash-o"></i>
+                                                                                        </button>
+                                                                                    </SfTooltip>
+                                                                                }
+                                                                            </Template>
+                                                                        </GridColumn>
+                                                                        <GridColumn Field="PremisesRoomName" HeaderText="Помещение" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                                                                        <GridColumn Field="PremisesTypeName" HeaderText="Вид на помещението" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                                                                    </GridColumns>
+                                                                </SfGrid>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                    <AccordionItem Header="Документи">
+                                        <ContentTemplate>
+                                            <div class="content-wrapper">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <nav class="navbar navbar-expand">
+                                                            <!-- Left navbar links -->
+                                                            <ul class="navbar-nav float">
+                                                                @if (!this.DisableFieldsWhenUserIsExternalExpertOrCommittee)
+                                                                {
+                                                                    <li class="nav-item d-none d-sm-inline-block float-none">
+                                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewDocumentClickHandler" disabled="@(this.DisableAllFields)">Добави документ</button>
+                                                                    </li>
+                                                                    <li class="nav-item d-none d-sm-inline-block">
+                                                                        &nbsp;
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        </nav>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-sm-12">
+                                                                <SfGrid ID="mtbDocumentsGrid" DataSource="mtbDocumentsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                                        AllowTextWrap="true" @ref="mtbDocumentsGrid" AllowSelection="false">
+                                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                                    <GridColumns>
+                                                                        <GridColumn Width="5%" Visible="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee">
+                                                                            <Template>
+                                                                                <button type="button" class="btn-row" @onclick="(() => DeleteDocument(context as CandidateProviderPremisesDocumentVM))">
+                                                                                    <i class="fa fa-trash-o"></i>
+                                                                                </button>
+                                                                            </Template>
+                                                                        </GridColumn>
+                                                                        <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="19%"></GridColumn>
+                                                                        <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="19%"></GridColumn>
+                                                                        <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="19%">
+                                                                            <Template Context="docContext">
+                                                                                @{
+                                                                                    var entry = (docContext as CandidateProviderPremisesDocumentVM);
+
+                                                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                                                    {
+                                                                                        var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                                                                        foreach (var item in files)
+                                                                                        {
+                                                                                            <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                                                                            <br />
+                                                                                        }
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        @entry.FileName
+                                                                                    }
+                                                                                }
+                                                                            </Template>
+                                                                        </GridColumn>
+                                                                        <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="19%" Format="dd.MM.yyyy"></GridColumn>
+                                                                        <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="19%"></GridColumn>
+                                                                    </GridColumns>
+                                                                </SfGrid>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                </AccordionItems>
+                            </SfAccordion>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .color-elements {
+        color: red !important;
+    }
+</style>
+
+<CandidateProviderPremisesCheckingModal @ref="candidateProviderPremisesCheckingModal" CallbackAfterModalSubmit="OnCheckingModalSubmit" />
+<CIPOCandidateProviderPremisesRoomModal @ref="candidateProviderPremisesRoomModal" CallbackAfterModalSubmit="OnRoomModalSubmit" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.DisableFieldsWhenUserIsExternalExpertOrCommittee" />
+<CIPOCandidateProviderPremisesDocumentModal @ref="candidateProviderPremisesDocumentModal" CallbackAfterModalSubmit="OnDocumentModalSubmit" />
+<MTBStatusModal @ref="mTBStatusModal" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

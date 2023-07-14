@@ -1,0 +1,59 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="cpoConsecutiveNumbersModal" @bind-Visible="isVisible" Width="40%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Добавяне на поредни номера за получен документ по Наредба №8</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="saveForm">
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Начален номер: </label>
+                                        <SfTextBox @bind-Value="consecutiveNumbersVM.StartNumber" OnChange="OnStartNumberValueChanged"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Краен номер: </label>
+                                        <SfTextBox @bind-Value="consecutiveNumbersVM.EndNumber" OnChange="OnEndNumberValueChanged"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group required">
+                                        <label class="control-label">Брой поредни: </label>
+                                        <InputNumber class="form-control" ParsingErrorMessage="Полето 'Брой поредни' е задължително!" @bind-Value="consecutiveNumbersVM.CountConsecutiveNumbers"></InputNumber>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="saveForm" @onclick="AddClickHandler">Добави</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

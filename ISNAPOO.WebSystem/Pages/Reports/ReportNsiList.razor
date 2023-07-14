@@ -1,0 +1,99 @@
+﻿@page "/ReportNsiList"
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ManageReportNsiList")]
+
+@{
+    base.CheckUserActionPermission("ManageReportNsiList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Годишна информация НСИ</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTextBox @bind-value="year" Multiline="false" />
+                            </li>
+                            &nbsp;
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="zipReport">Изтегли отчет</button>
+                            </li>
+                            &nbsp;
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="submitReport">Подай отчет</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="reports" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true">
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+
+                        <GridColumns>
+                            <GridColumn Field="IdAnnualReportNSI" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn AllowFiltering="false" HeaderText=" " AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="45">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as AnnualReportNSIVM).IdAnnualReportNSI).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Year" HeaderText="Година" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Field="Status.Name" HeaderText="Статус" TextAlign="TextAlign.Left">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as AnnualReportNSIVM;
+                                            if (ctx.Status != null)
+                                            {
+                                                switch (ctx.Status.Name.ToLower())
+                                                {
+                                                    case "създаден":
+                                                        <label class="form-label label label-warning">@ctx.Status.Name</label>
+                                                        break;
+                                                    case "подаден":
+                                                        <label class="form-label label label-success">@ctx.Status.Name</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="SubmissionDate" HeaderText="Дата на подаване" TextAlign="TextAlign.Left" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as AnnualReportNSIVM;
+                                            if (ctx.SubmissionDate != DateTime.MinValue)
+                                            {
+                                                <label>@ctx.SubmissionDate</label>
+
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Name" HeaderText="Служител" TextAlign="TextAlign.Left"></GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтегли справка" OpensOn="Hover" Width="100px">
+                                        <button @onclick="(() => SelectedRow(context as AnnualReportNSIVM))" class="btn-row"><i class="fa fa-file-text-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

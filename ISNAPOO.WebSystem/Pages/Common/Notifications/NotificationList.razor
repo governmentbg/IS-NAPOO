@@ -1,0 +1,76 @@
+﻿@page "/NotificationList"
+@attribute [Authorize(Policy = "ShowNotificationList")]
+
+@inherits BlazorBaseComponent
+
+@using ISNAPOO.Core.Contracts.DOC
+@using ISNAPOO.Core.ViewModels.DOC
+@using Syncfusion.PdfExport
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Уведомления/Известия</h6>
+            <div class="card">
+                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" hidden="true" @onclick="CreateNotification">Създай тестово известие</button>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@dataSource" AllowSorting="true"
+                            EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true" AllowTextWrap="true" @ref="currentGrid"
+                            AllowPaging=true Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="NotificationVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" QueryCellInfo="CellInfoHandler" OnRecordDoubleClick="NotificationDoubleClickHandler"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(currentGrid, (context as NotificationVM).IdNotification).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                    <button @onclick="(() => SelectedRow(context as NotificationVM))" class="btn-row"> <i class="fa fa-search-plus"></i> </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdNotification" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="About" HeaderText="Относно" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="NotificationText" HeaderText="Коментар" Width="30%"></GridColumn>
+                            <GridColumn Field="SendDateAsStr" HeaderText="Дата на изпращане" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="ReviewDateAsStr" HeaderText="Дата на прочитане" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="PersonFrom.FullName" HeaderText="Изпратено от" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="PersonTo.FullName" HeaderText="Изпратено до" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="StatusNotificationName" HeaderText="Статус" TextAlign="TextAlign.Center" Width="10%">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as NotificationVM;
+                                            if (ctx.IdStatusNotification != 0)
+                                            {
+                                                switch (ctx.StatusNotificationName)
+                                                {
+                                                    case "Прочетено":
+                                                        <label class="form-label-status label label-success">@ctx.StatusNotificationName</label>
+                                                        break;
+                                                    case "Непрочетено":
+                                                        <label class="form-label-status label label-warning">@ctx.StatusNotificationName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NotificationModal @ref="editModal"></NotificationModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

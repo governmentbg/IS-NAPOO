@@ -1,0 +1,26 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @bind-Visible="this.isVisible" Width="60%" EnableResize="true" AllowDragging="true" Height="20%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за @(TypeOfTrainer): <span style="font-size: 18px;color: white !important;">@this.candidateProviderTrainerVM.FullName</span>
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @candidateProviderTrainerVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @candidateProviderTrainerVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @candidateProviderTrainerVM.CreatePersonName</div>
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @candidateProviderTrainerVM.ModifyPersonName</div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

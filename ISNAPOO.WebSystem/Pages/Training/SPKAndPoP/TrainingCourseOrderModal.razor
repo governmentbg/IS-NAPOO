@@ -1,0 +1,336 @@
+﻿@using Data.Models.Data.Training
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.Contracts.Training
+
+@inject ITrainingService TrainingService
+@inject IApplicationUserService ApplicationUserService
+@inject IJSRuntime JsRuntime
+@inject IUploadFileService UploadFileService
+@inject ILocService LocService
+@inject IDataSourceService DataSourceService
+
+@inherits BlazorBaseComponent
+<SfDialog Target="#target" Width="65%" Height="75%" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible" ZIndex="3012">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за заповед
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="courseOrderForm">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Номер на заповедта:
+                                </label>
+                                <div>
+                                    <InputText Enabled="IsEditable" class="form-control" @bind-Value="model.OrderNumber" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Дата на заповедта:
+                                </label>
+                                <div>
+                                    <SfDatePicker Enabled="IsEditable" CssClass="form-control customPad" TValue="DateTime?" @bind-Value="model.OrderDate" Format="@GlobalConstants.DATE_FORMAT" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание на заповедта:
+                                </label>
+                                <CustomInputTextArea disabled="@(!IsEditable)" style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="2"
+                                @bind-Value="this.model.Description"
+                                                     maxlength="1000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.model.Description != null ? this.model.Description.Length : 0)/1000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (IsEditable)
+                    {
+                        <label>
+                            Прикачен файл:
+                        </label>
+                        <div class="row e-upload" style="margin-left: 0px">
+                            <div class="col-sm-8">
+                                @if (model.HasUploadedFile)
+                                {
+                                    var files = this.model.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                    foreach (var file in files)
+                                    {
+                                        var fileName = file.Split(($"\\{this.model.IdCourseOrder}\\"), StringSplitOptions.RemoveEmptyEntries).ToArray().LastOrDefault();
+                                        <span class="align-text-bottom">
+                                            <button type="button" class="btn-row" @onclick="(() => OnRemoveClick(fileName))"><i class="fa fa-trash-o"></i></button>
+                                            <a @onclick="(() => OnDownloadClick(fileName))" href="#" class="link-primary">@fileName</a>
+                                        </span>
+                                        <br />
+                                    }
+                                }
+                                else
+                                {
+                                    <label>
+                                        Няма прикачен файл
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <SfUploader AutoUpload="false" AllowMultiple="true" Enabled="this.model.IdCourseOrder != 0" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                        <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove"></UploaderEvents>
+                                    </SfUploader>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @model.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (IsEditable)
+                            {
+                                <button type="submit" class="btn btn-info" form="courseOrderForm">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+@code {
+    [Parameter]
+    public EventCallback CallbackAfterSubmit { get; set; }
+
+    [Parameter]
+    public bool IsEditable { get; set; }
+
+    ToastMsg toast = new ToastMsg();
+    private CourseOrderVM model = new CourseOrderVM();
+    private string CreationDateStr = string.Empty;
+    private string ModifyDateStr = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.editContext = new EditContext(this.model);
+    }
+
+    public async Task OpenModal(CourseOrderVM _model)
+    {
+        if (_model.IdCourseOrder != 0)
+        {
+            this.model = _model;
+        }
+        else
+        {
+            this.model = _model;
+            this.CreationDateStr = string.Empty;
+            this.ModifyDateStr = string.Empty;
+            this.model.CreatePersonName = string.Empty;
+            this.model.ModifyPersonName = string.Empty;
+        }
+
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        this.SpinnerShow();
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+            this.editContext = new EditContext(this.model);
+            this.editContext.EnableDataAnnotationsValidation();
+
+            bool isValid = this.editContext.Validate();
+            if (isValid)
+            {
+                ResultContext<CourseOrderVM> result = new ResultContext<CourseOrderVM>();
+                result.ResultContextObject = this.model;
+                if (result.ResultContextObject.IdCourseOrder == 0)
+                {
+                    result = await this.TrainingService.CreateCourseOrderAsync(result);
+                }
+                else
+                {
+                    result = await this.TrainingService.UpdateCourseOrderAsync(result);
+                }
+                this.model = await this.TrainingService.GetCourseOrderByIdAsync(result.ResultContextObject.IdCourseOrder);
+
+                this.CreationDateStr = this.model.ModifyDate.ToString("dd.MM.yyyy");
+                this.ModifyDateStr = this.model.CreationDate.ToString("dd.MM.yyyy");
+                this.model.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdModifyUser);
+                this.model.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.model.IdCreateUser);
+
+                if (result.HasErrorMessages)
+                {
+                    await this.ShowErrorAsync(string.Join("", result.ListErrorMessages));
+                }
+                else
+                {
+                    await this.ShowSuccessAsync(string.Join("", result.ListMessages));
+                }
+                await this.SetFileNameAsync();
+                await CallbackAfterSubmit.InvokeAsync();
+            }
+            this.StateHasChanged();
+        }
+        finally
+        {
+            this.loading = false;
+        }
+
+        this.SpinnerHide();
+    }
+    private async Task OnRemoveClick(string fileName)
+    {
+        if (this.model.IdCourseOrder > 0)
+        {
+            bool isConfirmed = await this.ShowConfirmDialogAsync("Сигурни ли си сте, че искате да изтриете прикачения файл?");
+            if (isConfirmed)
+            {
+                var result = await this.UploadFileService.RemoveFileByIdAsync<CourseOrder>(this.model.IdCourseOrder);
+
+                if (result == 1)
+                {
+                    this.model = await this.TrainingService.GetCourseOrderByIdAsync(this.model.IdCourseOrder);
+                    await this.SetFileNameAsync();
+
+                    this.StateHasChanged();
+
+                    await CallbackAfterSubmit.InvokeAsync();
+                }
+            }
+        }
+    }
+    private async Task OnDownloadClick(string fileName)
+    {
+        this.SpinnerShow();
+
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+
+            var hasFile = await this.UploadFileService.CheckIfExistUploadedFileAsync<CourseOrder>(this.model.IdCourseOrder, fileName);
+            if (hasFile)
+            {
+                var documentStream = await this.UploadFileService.GetUploadedFileAsync<CourseOrder>(this.model.IdCourseOrder, fileName);
+
+                if (!string.IsNullOrEmpty(documentStream.FileNameFromOldIS))
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, documentStream.FileNameFromOldIS, documentStream.MS!.ToArray());
+                }
+                else
+                {
+                    await FileUtils.SaveAs(this.JsRuntime, fileName, documentStream.MS!.ToArray());
+                }
+            }
+            else
+            {
+                var msg = this.LocService.GetLocalizedHtmlString("NotExistingFileForDownload").Value;
+
+                await this.ShowErrorAsync(msg);
+            }
+        }
+        finally
+        {
+            this.loading = false;
+        }
+
+        this.SpinnerHide();
+    }
+    private async Task OnChange(UploadChangeEventArgs args)
+    {
+        if (args.Files.Count >= 1)
+        {
+            var fileNames = args.Files.Select(x => $"{x.FileInfo.Name} ");
+            var fileName = string.Join(Environment.NewLine, fileNames).Trim();
+            var fileStreams = args.Files.Select(x => x.Stream).ToArray();
+
+            var result = await this.UploadFileService.UploadFileAsync<CourseOrder>(fileStreams.FirstOrDefault(), fileName, "CourseOrderDocument", this.model.IdCourseOrder);
+
+            this.model = await this.TrainingService.GetCourseOrderByIdAsync(this.model.IdCourseOrder);
+
+            await this.SetFileNameAsync();
+
+            this.StateHasChanged();
+
+            this.editContext = new EditContext(this.model);
+        }
+    }
+    private async Task OnRemove(RemovingEventArgs args)
+    {
+        if (args.FilesData.Count == 1)
+        {
+            if (this.model.IdCourseOrder > 0)
+            {
+                bool isConfirmed = true;
+
+                if (isConfirmed)
+                {
+                    var result = await this.UploadFileService.RemoveFileByIdAsync<CourseOrder>(this.model.IdCourseOrder);
+
+                    if (result == 1)
+                    {
+                        this.model = await this.TrainingService.GetCourseOrderByIdAsync(this.model.IdCourseOrder);
+
+                        this.StateHasChanged();
+                    }
+                }
+            }
+        }
+    }
+    private async Task SetFileNameAsync()
+    {
+        var settingResource = (await this.DataSourceService.GetSettingByIntCodeAsync("ResourcesFolderName")).SettingValue;
+        var fileFullName = settingResource + "\\" + this.model.UploadedFileName;
+        if (Directory.Exists(fileFullName))
+        {
+            var files = Directory.GetFiles(fileFullName);
+            this.model.FileName = string.Join(Environment.NewLine, files);
+        }
+    }
+}

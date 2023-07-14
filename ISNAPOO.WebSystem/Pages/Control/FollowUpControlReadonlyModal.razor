@@ -1,0 +1,78 @@
+﻿@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+
+@inherits BlazorBaseComponent
+
+<SfDialog Width="75%" Height="85%" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="this.isVisible" ZIndex="1999">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>
+            Данни за Последващ контрол - <span style="font-size: 18px;color: white !important;">@CPOorCIPONameAndOwner</span>
+        </Header>
+        <Content>
+            <SfTab EnablePersistence="true" LoadOn="ContentLoad.Dynamic" @bind-SelectedItem="selectedTab">
+                <TabEvents Selecting="Select"></TabEvents>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Данни за последващ контрол"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <FollowUpControlInformation @ref="this.followUpControlInformation" IsEditable="this.IsEditable" IsCPO="IsCPO" Model="this.model"></FollowUpControlInformation>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Обект на проверката"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CheckingObjectReadOnly IsCPO="IsCPO" @ref="checkingObjectReadOnly" Model="this.model"></CheckingObjectReadOnly>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Документи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <FollowUpControlDocumentsList @ref="followUpControlDocumentsList" IsEditable="this.IsEditable" Model="this.model"></FollowUpControlDocumentsList>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.model.CreatePersonName </div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.model.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CloseModal">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .btn-outline-warning.disabled, .btn-outline-warning:disabled {
+        color: #fd7e14;
+    }
+
+    .btn-warning.disabled, .btn-warning:disabled {
+        border-color: #fd7e14;
+    }
+</style>

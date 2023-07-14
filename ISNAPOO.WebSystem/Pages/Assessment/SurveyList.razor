@@ -1,0 +1,169 @@
+﻿@inherits BlazorBaseComponent
+
+@page "/SurveyList"
+
+@attribute [AuthorizeAttribute(Policy = "ShowSurveyList")]
+
+@{
+    base.CheckUserActionPermission("ShowSurveyList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@this.title</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @if (this.isNAPOOEntry)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSurveyBtn">Добави анкета</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+                            <li class="nav-item d-none d-sm-inline-block" style="margin-left: @(this.isNAPOOEntry ? "40" : "0")px;">
+                                <SfDropDownButton Content="Справка резултати" style="color: #fff; background-color: #2DCEE3; border-color: #2DCEE3; border-radius: 2px; padding-top: 5px; padding-bottom: 6px;">
+                                    <DropDownMenuItems>
+                                        <DropDownMenuItem Text="Обобщена справка за получените резулатати" id="summarized-report"></DropDownMenuItem>
+                                        <DropDownMenuItem Text="Детайлна справка за получените резултати" id="detailed-report"></DropDownMenuItem>
+                                    </DropDownMenuItems>
+                                    <DropDownButtonEvents ItemSelected="OnReportBtnSelectHandler" />
+                                </SfDropDownButton>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            @if (this.isNAPOOEntry)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateExcelTemplateBtn">Шаблон за импорт</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenImportSurveyModalBtn">Импорт на шаблон</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+               <SfGrid DataSource="surveySource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="surveyGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="SurveyVM" OnToolbarClick="ToolbarClick" RowSelecting="RowSelectingHandler" />
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="5%">
+                                <HeaderTemplate>
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(surveyGrid, (context as SurveyVM).IdSurvey).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%" HeaderText=" ">
+                                <Template>
+                                    @if (this.isNAPOOEntry)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditSurveyBtn(context as SurveyVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    }
+                                    else
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditSurveyBtn(context as SurveyVM))"><i class="fa fa-search-plus"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="@(this.isNAPOOEntry ? "5%" : "0%")" HeaderText=" ">
+                                <Template>
+                                    @if (this.isNAPOOEntry)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => this.DeleteSurveyBtn(context as SurveyVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdSurvey" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Наименование" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="TrainingPeriodFromAsStr" HeaderText="Период на обучение от" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="TrainingPeriodToAsStr" HeaderText="Период на обучение до" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="TrainingCourseTypeValue" HeaderText="Вид на курса" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="StartDateAsStr" HeaderText="Дата на активност от" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="EndDateAsStr" HeaderText="Дата на активност до" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="SurveysSentCount" HeaderText="Изпратени" TextAlign="TextAlign.Left" Width="8%">
+                                <Template>
+                                    <div class="text-right">
+                                        @((context as SurveyVM).SurveysSentCount)
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="FiledOutCount" HeaderText="Отговорили" TextAlign="TextAlign.Left" Width="8%">
+                                <Template>
+                                    <div class="text-right">
+                                        @((context as SurveyVM).FiledOutCount)
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="SurveyExpirationValue" HeaderText="Статус" TextAlign="TextAlign.Center" Width="10%">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var survey = context as SurveyVM;
+                                            switch (survey?.SurveyExpirationValue)
+                                            {
+                                                case "Активна":
+                                                    <label class="form-label-status label label-success">@survey.SurveyExpirationValue</label>
+                                                    break;
+                                                case "Неактивна":
+                                                    <label class="form-label-status label label-danger">@survey.SurveyExpirationValue</label>
+                                                    break;
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="@(this.isNAPOOEntry ? "5%" : "0")">
+                                <Template>
+                                    @{
+                                        if (this.isNAPOOEntry)
+                                        {
+                                            var ctx = context as SurveyVM;
+                                            var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx!.IdSurvey, "Survey");
+                                            if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                            {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                    <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<SurveyModal @ref="surveyModal" CallbackAfterSubmit="UpdateAfterSurveyModalSubmitAsync" />
+<ImportSurveyModal @ref="importSurveyModal" CallbackAfterImport="UpdateAfterSurveyModalSubmitAsync" />

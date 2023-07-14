@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ActualStateResponse xmlns="http://egov.bg/RegiX/AV/TR/ActualStateResponse">
+	<Status>Нова партида</Status>
+	<UIC>201593301</UIC>
+	<Company>ТехноЛогика</Company>
+	<LegalForm>
+		<LegalFormAbbr xmlns="http://egov.bg/RegiX/AV/TR">ЕАД</LegalFormAbbr>
+		<LegalFormName xmlns="http://egov.bg/RegiX/AV/TR">Еднолично акционерно дружество</LegalFormName>
+	</LegalForm>
+	<Transliteration>TechnoLogica ЕAD</Transliteration>
+	<Seat>
+		<Address xmlns="http://egov.bg/RegiX/AV/TR">
+			<CountryCode>BGR</CountryCode>
+			<Country>БЪЛГАРИЯ</Country>
+			<IsForeign>false</IsForeign>
+			<DistrictEkatte>SOF</DistrictEkatte>
+			<District>София (столица)</District>
+			<MunicipalityEkatte>SOF46</MunicipalityEkatte>
+			<Municipality>Столична</Municipality>
+			<SettlementEKATTE>68134</SettlementEKATTE>
+			<Settlement>гр. София</Settlement>
+			<Area>р-н Изгрев</Area>
+			<AreaEkatte>68134-08</AreaEkatte>
+			<PostCode>1113</PostCode>
+			<HousingEstate>Изток</HousingEstate>
+			<Block>4</Block>
+			<Entrance>А</Entrance>
+			<Floor>1</Floor>
+			<Apartment>2</Apartment>
+		</Address>
+		<Contacts xmlns="http://egov.bg/RegiX/AV/TR">
+			<Phone>+ 359 2 91 912</Phone>
+			<Fax>+ 359 2 963 16 10</Fax>
+			<EMail>office@technologica.com</EMail>
+			<URL>www.technologica.com</URL>
+		</Contacts>
+	</Seat>
+	<SeatForCorrespondence>
+		<CountryCode xmlns="http://egov.bg/RegiX/AV/TR">BGR</CountryCode>
+		<Country xmlns="http://egov.bg/RegiX/AV/TR">БЪЛГАРИЯ</Country>
+		<IsForeign xmlns="http://egov.bg/RegiX/AV/TR">false</IsForeign>
+		<DistrictEkatte xmlns="http://egov.bg/RegiX/AV/TR">SOF</DistrictEkatte>
+		<District xmlns="http://egov.bg/RegiX/AV/TR">София (столица)</District>
+		<MunicipalityEkatte xmlns="http://egov.bg/RegiX/AV/TR">SOF46</MunicipalityEkatte>
+		<Municipality xmlns="http://egov.bg/RegiX/AV/TR">Столична</Municipality>
+		<SettlementEKATTE xmlns="http://egov.bg/RegiX/AV/TR">68134</SettlementEKATTE>
+		<Settlement xmlns="http://egov.bg/RegiX/AV/TR">гр. София</Settlement>
+		<Area xmlns="http://egov.bg/RegiX/AV/TR">р-н Лозенец</Area>
+		<AreaEkatte xmlns="http://egov.bg/RegiX/AV/TR">68134-09</AreaEkatte>
+		<PostCode xmlns="http://egov.bg/RegiX/AV/TR">1421</PostCode>
+		<Street xmlns="http://egov.bg/RegiX/AV/TR">"Червена стена"</Street>
+		<StreetNumber xmlns="http://egov.bg/RegiX/AV/TR">46</StreetNumber>
+	</SeatForCorrespondence>
+	<SubjectOfActivity>
+		<Subject xmlns="http://egov.bg/RegiX/AV/TR">Разработка на софтуер; създаване, развитие, продажба и внедряване на програмни продукти; консултантска дейност, обучение и трансфер на ноу-хау в областта на информационните технологии; финансиране на дъщерни дружества; търговско представителство и посредничество, маркетингова и рекламна дейност; производствена дейност, както и всякаква друга дейност в страната и в чужбина, която не е забранена от закона.</Subject>
+		<IsBank xmlns="http://egov.bg/RegiX/AV/TR">false</IsBank>
+		<IsInsurer xmlns="http://egov.bg/RegiX/AV/TR">false</IsInsurer>
+	</SubjectOfActivity>
+	<SubjectOfActivityNKID>
+		<NKIDcode xmlns="http://egov.bg/RegiX/AV/TR">62.01</NKIDcode>
+		<NKIDname xmlns="http://egov.bg/RegiX/AV/TR">Компютърно програмиране</NKIDname>
+	</SubjectOfActivityNKID>
+	<WayOfRepresentation>Изпълнителният директор Огнян Георгиев Траянов самостоятелно. Всеки двама члена на Съвета на директорите само заедно (чл. 29 от Устава)</WayOfRepresentation>
+	<AddemptionOfTraderSeatChange>
+		<Address xmlns="http://egov.bg/RegiX/AV/TR" />
+		<Contacts xmlns="http://egov.bg/RegiX/AV/TR" />
+	</AddemptionOfTraderSeatChange>
+	<Funds>
+		<Value xmlns="http://egov.bg/RegiX/AV/TR">1000000</Value>
+	</Funds>
+	<Shares>
+		<Share xmlns="http://egov.bg/RegiX/AV/TR">
+			<Type>обикновени, налични, поименни с право на глас</Type>
+			<Count>100000</Count>
+			<NominalValue>10</NominalValue>
+		</Share>
+	</Shares>
+	<MinimumAmount />
+	<DepositedFunds>
+		<Value xmlns="http://egov.bg/RegiX/AV/TR">1000000</Value>
+	</DepositedFunds>
+	<NonMonetaryDeposits>
+		<NonMonetaryDeposit xmlns="http://egov.bg/RegiX/AV/TR">
+			<Description>МАРКА HERMES И СИСТЕМА ЗА УПРАВЛЕНИЕ НА ЧОВЕШКИ РЕСУРСИ HERMES </Description>
+			<Value>916193</Value>
+		</NonMonetaryDeposit>
+	</NonMonetaryDeposits>
+	<BoardOfDirectorsMandate>
+		<MandateValue xmlns="http://egov.bg/RegiX/AV/TR">02.12.2013</MandateValue>
+	</BoardOfDirectorsMandate>
+	<AdministrativeBoardMandate />
+	<BoardOfManagersMandate />
+	<BoardOfManagers2Mandate />
+	<LeadingBoardMandate />
+	<SupervisingBoardMandate />
+	<SupervisingBoard2Mandate />
+	<ControllingBoardMandate />
+	<Details>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Представители</FieldName>
+			<FieldCode>10</FieldCode>
+			<FieldOrder>00100</FieldOrder>
+			<Subject>
+				<Indent>74081771234</Indent>
+				<Name>Йонко Петков Терзиев</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Представители</FieldName>
+			<FieldCode>10</FieldCode>
+			<FieldOrder>00100</FieldOrder>
+			<Subject>
+				<Indent>1111111110</Indent>
+				<Name>Марио Божидаров Манджуков</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Едноличен собственик на капитала</FieldName>
+			<FieldCode>23</FieldCode>
+			<FieldOrder>00230</FieldOrder>
+			<Subject>
+				<Indent>1212124563</Indent>
+				<Name>Огнян Георгиев Траянов</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Съвет на директорите</FieldName>
+			<FieldCode>12</FieldCode>
+			<FieldOrder>00120</FieldOrder>
+			<Subject>
+				<Indent>1212124563</Indent>
+				<Name>Огнян Георгиев Траянов</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Съвет на директорите</FieldName>
+			<FieldCode>12</FieldCode>
+			<FieldOrder>00120</FieldOrder>
+			<Subject>
+				<Indent>1111111110</Indent>
+				<Name>Марио Божидаров Манджуков</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Представители</FieldName>
+			<FieldCode>10</FieldCode>
+			<FieldOrder>00100</FieldOrder>
+			<Subject>
+				<Indent>1212124563</Indent>
+				<Name>Огнян Георгиев Траянов</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+		<Detail xmlns="http://egov.bg/RegiX/AV/TR">
+			<FieldName>Съвет на директорите</FieldName>
+			<FieldCode>12</FieldCode>
+			<FieldOrder>00120</FieldOrder>
+			<Subject>
+				<Indent>74081771234</Indent>
+				<Name>Йонко Петков Терзиев</Name>
+				<IndentType>EGN</IndentType>
+			</Subject>
+		</Detail>
+	</Details>
+</ActualStateResponse>

@@ -1,0 +1,250 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="95%" Height="95%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3020" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за протокол <span style="color: #ffffff;">@this.courseProtocolVM.CourseProtocolTypeName</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-block" style="">
+                    <p>
+                        <EditForm EditContext="editContext">
+                            @if (!this.isOpenedFromStateExam || this.courseProtocolVM.IdCourseProtocol != 0)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Курс: </label>
+                                            <SfTextBox @bind-Value="this.courseName" Enabled="false" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group required">
+                                            <label class="control-label">Курс: </label>
+                                            <SfComboBox Enabled="IsEditable" ShowClearButton="true" TValue="int" TItem="CourseVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.coursesSource" AllowCustom="false" @bind-Value="this.courseProtocolVM.IdCourse">
+                                                <ComboBoxFieldSettings Text="CourseNameAndPeriod" Value="IdCourse" />
+                                                <ComboBoxEvents TValue="int" TItem="CourseVM" ValueChange="OnCourseSelected" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид на протокола: </label>
+                                        <SfComboBox Enabled="@(this.courseProtocolVM.IdCourseProtocol == 0 && IsEditable)" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.courseProtocolTypeSource" AllowCustom="false" @bind-Value="this.courseProtocolVM.IdCourseProtocolType">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" ValueChange="OnProtocolSelected" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Номер на протокола: </label>
+                                        <SfTextBox Enabled="IsEditable" @bind-Value="this.courseProtocolVM.CourseProtocolNumber" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Дата на протокола: </label>
+                                        <SfDatePicker Enabled="IsEditable" @bind-Value="this.courseProtocolVM.CourseProtocolDate" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            @if (this.courseProtocolVM.IdCourseProtocolType == this.kvProtocol381.IdKeyValue)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group required">
+                                            <label class="control-label">Председател на изпитна комисия: </label>
+                                            <SfComboBox ShowClearButton="true" TValue="int?" TItem="CourseCommissionMemberVM" Enabled="IsEditable" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.courseCommissionMemberSource" AllowCustom="false" @bind-Value="this.courseProtocolVM.IdCourseCommissionMember">
+                                                <ComboBoxFieldSettings Text="WholeName" Value="IdCourseCommissionMember" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </EditForm>
+                        @if (this.courseProtocolVM.IdCourseProtocol != 0)
+                        {
+                            @if (this.IsEditable)
+                            {
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    <ul class="navbar-nav">
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Enabled="IsEditable" Content="Добавяне на всички курсисти от курса за обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddAllCourseClientsBtn">Добави всички</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Enabled="IsEditable" Content="Добавяне на курсист от курса за обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddClientCourseBtn">Добави курсист</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            <SfTooltip Enabled="IsEditable" Content="Комися" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddCommissionBtn">Комисия</button>
+                                            </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                            &nbsp;
+                                        </li>
+                                    </ul>
+                                </nav>
+                            }
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label class="text-gray"><b>Курсисти:</b></label>
+                                    <SfGrid DataSource="clientSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="clientsGrid" AllowSelection="false" AllowPaging="true"
+                                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                        <GridEvents TValue="CourseProtocolGradeVM" OnToolbarClick="ToolbarClick" />
+                                        <GridEditSettings AllowEditing="true" AllowEditOnDblClick="false" ShowConfirmDialog="false" Mode="Syncfusion.Blazor.Grids.EditMode.Batch"></GridEditSettings>
+                                        <GridColumns>
+                                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                                <Template Context="clientCtx">
+                                                    @GetRowNumber(clientsGrid, (clientCtx as CourseProtocolGradeVM).IdCourseProtocolGrade).Result
+                                                </Template>
+                                            </GridColumn>
+                                            @if (this.IsEditable)
+                                            {
+                                                <GridColumn Width="5%" HeaderText=" ">
+                                                    <Template>
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteClientBtn(context as CourseProtocolGradeVM))"><i class="fa fa-trash-o"></i></button>
+                                                        </SfTooltip>
+                                                    </Template>
+                                                </GridColumn>
+                                            }
+                                            <GridColumn Field="IdCourseProtocolGrade" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                            <GridColumn Field="ClientCourse.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="26%"></GridColumn>
+                                            <GridColumn Field="ClientCourse.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="26%"></GridColumn>
+                                            <GridColumn Field="ClientCourse.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="26%"></GridColumn>
+                                            <GridColumn Field="Grade" HeaderText="Оценка" TextAlign="TextAlign.Left" Width="12%" Format="f2" Visible="this.courseProtocolVM.IdCourseProtocolType == this.kvProtocol381.IdKeyValue">
+                                                <Template Context="clientCourseCtx">
+                                                    @{
+                                                        var con = clientCourseCtx as CourseProtocolGradeVM;
+                                                        <div @onclick:stopPropagation="true" @onkeydown:stopPropagation="true">
+                                                            <SfTextBox Enabled="IsEditable" @bind-Value="con.GradeAsStr" ValueChange="(async () => await this.SaveGradeAsync(con))" OnInput="OnGradeInput"></SfTextBox>
+                                                        </div>
+                                                    }
+                                                </Template>
+                                            </GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </div>
+                        }
+                        @if (this.IsEditable)
+                        {
+                            @if (this.courseProtocolVM.IdCourseProtocol != 0)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Прикачване на сканиран протокол:
+                                            </label>
+                                            <SfUploader @ref="uploader" Enabled="IsEditable" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                                <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                            </SfUploader>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <label style="margin-top: 10px;">Прикачен файл:</label>
+                        <div class="row e-upload" style="margin-left: 0px">
+                            <div class="col-sm-6">
+                                @if (!string.IsNullOrEmpty(this.courseProtocolVM.UploadedFileName))
+                                {
+                                    @if (this.IsEditable)
+                                    {
+                                        <button type="button" class="btn-row" @onclick="(() => OnRemove(this.courseProtocolVM.FileName))"><i class="fa fa-trash-o"></i></button>
+                                    }
+                                    <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.courseProtocolVM.FileName</a></span>
+                                }
+                                else
+                                {
+                                    <label>
+                                        Няма прикачен файл
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.courseProtocolVM.IdCourseProtocol != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.courseProtocolVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.courseProtocolVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.courseProtocolVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.courseProtocolVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-righ" style="display: inline-flex">
+                            @if (this.IsEditable)
+                            {
+                                @if (this.courseProtocolVM.IdCourseProtocol != 0)
+                                {
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Протокол" OpensOn="Hover">
+                                        <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="async () => await this.testProtocols.OpenModal(this.courseProtocolVM.IdCourseProtocolType, this.courseProtocolVM.IdCourse, (DateTime)(this.courseProtocolVM.CourseProtocolDate == null ? DateTime.Now : this.courseProtocolVM.CourseProtocolDate), this.courseProtocolVM.CourseProtocolNumber, this.clientSource, this.courseProtocolVM.IdCourseCommissionMember)">Създай протокол</button>
+                                    </SfTooltip>
+                                }
+                                @if (!this.hideBtnsConcurrentModal)
+                                {
+                                    <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn(true))">Запиши</button>
+                                }
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+<AddSingleClientCourseModal @ref="addSingleClientCourseModal" CallbackAfterSubmit="UpdateAfterSingleClientAddedAsync" />
+<CurrentCourseExamModal @ref="currentCourseExam" IsEditable="@this.IsEditable" />
+<TestProtocols @ref="testProtocols"></TestProtocols>

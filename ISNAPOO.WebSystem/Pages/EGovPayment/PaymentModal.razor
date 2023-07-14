@@ -1,0 +1,155 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="90%" Height="90%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Заявка за плащане</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>          
+            <EditForm EditContext="editContext" id="saveForm">          
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">ЦПО: </label>
+                                        <SfAutoComplete Enabled="paymentVM.IdPayment == 0" TValue="int" @ref="sfAutoCompleteCPO" @bind-Value="paymentVM.IdCandidate_Provider" TItem="CandidateProviderVM"
+                                                        DataSource="@candidateProviders" AllowCustom="false">
+                                            <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="ProviderName"></AutoCompleteFieldSettings>
+                                            <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteEvents TValue="int" TItem="CandidateProviderVM" Filtering="OnAutoCompleteCPO" ValueChange="OnFormCandProviderCompleteData"></AutoCompleteEvents>                                          
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>                                                    
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Задължено лице: </label>
+                                        <InputText class="form-control" @bind-Value="paymentVM.ApplicantName"></InputText>
+                                    </div>
+                                </div>
+                            </div>                         
+                            <div class="row">
+                                    <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Тип на идентификатора: </label>
+                                        <SfComboBox TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    DataSource="applicantUinType" AllowFiltering="true" @bind-Value="paymentVM.ApplicantUinTypeId">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue"/>                                         
+                                        </SfComboBox>
+                                       </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                    <div class="form-group required">
+                                        <label class="control-label">Идентификатор на задължено лице: </label>
+                                            <InputText class="form-control" @bind-Value="paymentVM.ApplicantUin"></InputText>
+                                        </div>
+                                    </div>    
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Процедура за плащане: </label>
+                                        <SfComboBox TValue="int" TItem="ProcedurePriceVM" AllowCustom="false"  PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    DataSource="procedurePrices" AllowFiltering="true" @bind-Value="paymentVM.IdProcedurePrice">
+                                            <ComboBoxFieldSettings Text="Concated" Value="IdProcedurePrice" />
+                                            <ComboBoxEvents TValue="int" TItem="ProcedurePriceVM" ValueChange="OnFormProcedurePriceValueChanged" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>                             
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Сума на задължението: </label>
+                                        <SfNumericTextBox  @bind-Value="paymentVM.PaymentAmount" Format="0.00" ShowSpinButton="false"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Валута: </label>   
+                                        <InputText class="form-control" @bind-Value="paymentVM.Currency" disabled></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Дата на изтичане на заявката: </label>
+                                        <SfDatePicker Enabled=false TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.paymentVM.ExpirationDate"></SfDatePicker>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Основание за плащане: </label>
+                                        <InputTextArea rows="2" class="form-control" @bind-Value="paymentVM.PaymentReason"></InputTextArea>
+                                    </div>
+                                </div>                                                                                                                                            
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Допълнителна информация: </label>
+                                        <InputTextArea rows="2" class="form-control" @bind-Value="paymentVM.AdditionalInformation"></InputTextArea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Статус: </label>
+                                        <SfComboBox Enabled="paymentVM.IdPayment != 0 && paymentVM.IdPaymentStatus == this.kvPending" TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    DataSource="paymentStatuses" AllowFiltering="true" @bind-Value="paymentVM.IdPaymentStatus">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>    
+                                     </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.paymentVM.CreationDate.ToString("dd.MM.yyyy")</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.paymentVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.paymentVM.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.paymentVM.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                             <SfButton Disabled="paymentVM.IdPayment == 0" CssClass="e-warning" @onclick="UpdatePaymentStatusEgov">Актуализирай статус</SfButton>
+                            <button type="button" class="btn btn-info btn-primary" @onclick="Submit">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

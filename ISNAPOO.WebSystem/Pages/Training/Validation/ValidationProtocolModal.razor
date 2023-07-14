@@ -1,0 +1,149 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="95%" Height="95%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2010" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за протокол <span style="color: #ffffff;">@this.validationProtocol.ValidationProtocolTypeName</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-block" style="">
+                    <p>
+                        <EditForm EditContext="editContext">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Име на курсист: </label>
+                                        <SfTextBox @bind-Value="this.courseName" Enabled="false" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид на протокола: </label>
+                                        <SfComboBox Enabled="@(this.validationProtocol.IdValidationProtocol == 0)" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.validationProtocolTypeSource" AllowCustom="false" @bind-Value="this.validationProtocol.IdValidationProtocolType">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            <ComboBoxEvents TValue="int" TItem="KeyValueVM" ValueChange="OnProtocolSelected" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Номер на протокола: </label>
+                                        <SfTextBox @bind-Value="this.validationProtocol.ValidationProtocolNumber" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Дата на протокола: </label>
+                                        <SfDatePicker @bind-Value="this.validationProtocol.ValidationProtocolDate" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            @if (this.validationProtocol.IdValidationProtocol != 0)
+                            {
+                                @if (this.validationProtocol.IdValidationProtocolType == this.kvProtocol381.IdKeyValue)
+                                {
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Обща оценка: </label>
+                                            <SfTextBox @bind-Value="this.protocolGrade.GradeAsStr" />
+                                        </div>
+                                    </div>
+
+                                }
+                            }
+                            @if (this.validationProtocol.IdValidationProtocolType == this.kvProtocol381.IdKeyValue)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group required">
+                                            <label class="control-label">Председател на изпитна комисия: </label>
+                                            <SfComboBox ShowClearButton="true" TValue="int?" TItem="ValidationCommissionMemberVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.validationCommissionMemberSource" AllowCustom="false" @bind-Value="this.validationProtocol.IdValidationCommissionMember">
+                                                <ComboBoxFieldSettings Text="WholeName" Value="IdValidationCommissionMember" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </EditForm>
+                        @if (this.validationProtocol.IdValidationProtocol != 0)
+                        {
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Прикачване на сканиран протокол:
+                                        </label>
+                                        <SfUploader @ref="uploader" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                            <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                        </SfUploader>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="row e-upload" style="margin-left:0px">
+                            <div class="col-sm-6">
+                                @if (!string.IsNullOrEmpty(this.validationProtocol.UploadedFileName))
+                                {
+                                    <button type="button" class="btn-row" @onclick="(() => OnRemove(this.validationProtocol.FileName))"><i class="fa fa-trash-o"></i></button>
+                                    <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.validationProtocol.FileName</a></span>
+                                }
+                                else
+                                {
+                                    <label>
+                                        Няма прикачен файл
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.validationProtocol.IdValidationProtocol != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.validationProtocol.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.validationProtocol.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.validationProtocol.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.validationProtocol.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-righ" style="display:inline-flex">
+                            @if (this.validationProtocol.IdValidationProtocol != 0)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" @onclick="(async () => await this.validationTestProtocols.OpenModal(this.validationProtocol, this.validationProtocol.IdValidationCommissionMember))">Печат</button>
+                            }
+                            <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn(true))">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback"></ConfirmDialog>
+<ValidationTestProtocols @ref="validationTestProtocols"></ValidationTestProtocols>

@@ -1,0 +1,47 @@
+﻿@using ISNAPOO.Core.Contracts.Control
+@using ISNAPOO.Core.Contracts.Training
+@using ISNAPOO.Core.ViewModels.Training
+@using ISNAPOO.WebSystem.Pages.Control
+
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2200" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Валидирано лице:  <span style="font-size: 18px;color: white !important;"></span></Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid DataSource="this.validationCheckings" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false" 
+                                        AllowTextWrap="true" @ref="this.sfGrid" AllowPaging="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridColumns>
+                                        <GridColumn Field="IdValidationClientChecking" IsPrimaryKey="true" Visible="false" ></GridColumn>
+                                        <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                            <Template>
+                                                @GetRowNumber(sfGrid, (context as ValidationClientCheckingVM).IdValidationClientChecking).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="15%" Type="ColumnType.Date" Format="dd.MM.yyyy" />
+                                        <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="15%" />
+                                        <GridColumn Field="CreationDate" HeaderText="Дата на създаване" TextAlign="TextAlign.Left" Width="15%" Type="ColumnType.Date" Format="dd.MM.yyyy"/>
+                                        <GridColumn Field="" HeaderText="Създадено от" TextAlign="TextAlign.Left" Width="15%" >
+                                            <Template>
+                                                @GetPersonName((context as ValidationClientCheckingVM).IdCreateUser).Result
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+

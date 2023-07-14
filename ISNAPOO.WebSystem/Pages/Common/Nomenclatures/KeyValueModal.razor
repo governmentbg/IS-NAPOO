@@ -1,0 +1,221 @@
+﻿@using ISNAPOO.Common.Framework
+@inject IJSRuntime JsRuntime
+@inject IKeyValueService KeyValueService
+@inject IDataSourceService DataSourceService
+@inherits BlazorBaseComponent
+
+<SfDialog Width="55%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="IsVisible">
+    <DialogTemplates>
+        <Header>
+            @(intputContext.ResultContextObject.IdKeyValue == GlobalConstants.INVALID_ID_ZERO ? "Създаване на нова стойност" : $"Данни за стойност на номенклатура - {intputContext.ResultContextObject.Name}")
+        </Header>
+        <Content>
+            <EditForm Model="intputContext.ResultContextObject" OnValidSubmit="SubmitHandler" id="sF">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование: </label>
+                                        <InputText class="form-control" @bind-Value="intputContext.ResultContextObject.Name"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Код: </label>
+                                        <InputText class="form-control" @bind-Value="intputContext.ResultContextObject.KeyValueIntCode"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Описание: </label>
+                                        <InputTextArea class="form-control" @bind-Value="intputContext.ResultContextObject.Description"></InputTextArea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group required">
+                                        <label class="control-label">Поредност: </label>
+                                        <InputNumber class="form-control" @bind-Value="intputContext.ResultContextObject.Order"></InputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Стойност по подразбиране 1: </label>
+                                        <InputText class="form-control" @bind-Value="intputContext.ResultContextObject.DefaultValue1"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group required">
+                                        <label>Стойност по подразбиране 2: </label>
+                                        <InputText class="form-control" @bind-Value="intputContext.ResultContextObject.DefaultValue2"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Стойност по подразбиране 3: </label>
+                                        <InputText class="form-control" @bind-Value="intputContext.ResultContextObject.DefaultValue3"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Стойност по подразбиране 4: </label>
+                                        <InputText class="form-control" @bind-Value="intputContext.ResultContextObject.DefaultValue4"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <span>Активен</span>
+                                                    <input type="checkbox" @bind-value="this.intputContext.ResultContextObject.IsActive" checked="@(this.intputContext.ResultContextObject.IsActive ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.intputContext.ResultContextObject.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.intputContext.ResultContextObject.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="sF">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="Cancel">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+
+    ResultContext<KeyValueVM> intputContext = new ResultContext<KeyValueVM>();
+
+    ToastMsg toast;
+
+
+
+    bool IsVisible = false;
+
+    [Inject]
+    IApplicationUserService ApplicationUserService { get; set; }
+
+    [Inject]
+    IDataSourceService dataSourceService { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmitHandler { get; set; }
+
+    public async Task Open(KeyValueVM model)
+    {
+        this.intputContext.ResultContextObject = model;
+        await UpdateModifiableInfo();
+
+        this.IsVisible = true;
+        this.StateHasChanged();
+    }
+
+    public async Task UpdateModifiableInfo()
+    {
+        if (this.intputContext.ResultContextObject.IdKeyValue == 0)
+        {
+            this.intputContext.ResultContextObject.IsActive = true;
+            ModifyDateStr = "";
+            CreationDateStr = "";
+            this.intputContext.ResultContextObject.CreatePersonName = "";
+            this.intputContext.ResultContextObject.ModifyPersonName = "";
+        }
+        else
+        {
+            this.intputContext.ResultContextObject = await this.dataSourceService.GetKeyValueByIdAsync(this.intputContext.ResultContextObject.IdKeyValue);
+            CreationDateStr = this.intputContext.ResultContextObject.CreationDate.ToString("dd.MM.yyyy");
+            ModifyDateStr = this.intputContext.ResultContextObject.ModifyDate.ToString("dd.MM.yyyy");
+            this.intputContext.ResultContextObject.ModifyPersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.intputContext.ResultContextObject.IdModifyUser);
+            this.intputContext.ResultContextObject.CreatePersonName = await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(this.intputContext.ResultContextObject.IdCreateUser);
+        }
+    }
+
+    public string CreationDateStr { get; set; }
+
+    public string ModifyDateStr { get; set; }
+
+    private void Cancel()
+    {
+        this.IsVisible = false;
+    }
+
+    private async Task SubmitHandler()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+        this.SpinnerShow();
+        ResultContext<KeyValueVM> resultContext = new ResultContext<KeyValueVM>();
+
+        if (this.intputContext.ResultContextObject.IdKeyValue == GlobalConstants.INVALID_ID_ZERO)
+        {
+            resultContext = await this.KeyValueService.CreateKeyValueAsync(this.intputContext);
+        }
+        else
+        {
+            resultContext = await this.KeyValueService.UpdateKeyValueAsync(this.intputContext);
+        }
+
+        if (resultContext.HasMessages)
+        {
+            this.intputContext = resultContext;
+            await this.DataSourceService.ReloadKeyValue();
+            this.ShowSuccessAsync(resultContext.ListMessages.FirstOrDefault());
+        }
+        else
+        {
+            this.ShowErrorAsync(resultContext.ListErrorMessages.FirstOrDefault());
+        }
+        this.intputContext.ListErrorMessages.Clear();
+        this.intputContext.ListMessages.Clear();
+        await UpdateModifiableInfo();
+        this.StateHasChanged();
+        await this.OnSubmitHandler.InvokeAsync();
+    }
+}

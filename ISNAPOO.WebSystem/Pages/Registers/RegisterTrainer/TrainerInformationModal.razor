@@ -1,0 +1,330 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" Width="85%" EnableResize="true" AllowDragging="true" Height="85%" IsModal="true" ZIndex="3000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @((MarkupString)this.title)
+        </Header>
+        <Content>
+            <SfAccordion>
+                <AccordionItems>
+                    <AccordionEvents></AccordionEvents>
+                    <AccordionItem Expanded="true">
+                        <HeaderTemplate>
+                            @(this.isCPO ? "Данни за преподавател" : "Данни за консултант")
+                        </HeaderTemplate>
+                        <ContentTemplate>
+                            <EditForm EditContext="this.editContext">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Име:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.FirstName" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Презиме:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.SecondName" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <!-- text input -->
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Фамилия:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.FamilyName" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Пол:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.SexValue" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Идентификатор:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.IndentTypeValue" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                ЕГН/ЛНЧ/ИДН:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.Indent" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Гражданство:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.NationalityValue" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Дата на раждане:
+                                            </label>
+                                            <div>
+                                                <SfDateTimePicker Enabled="false" TValue="DateTime?" @bind-Value="this.candidateProviderTrainerVM.BirthDate" Format="dd.MM.yyyy" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Образователно равнище:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.EducationValue" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Специалност по диплома:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.EducationSpecialityNotes" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Свидетелство за правоспособност:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.EducationCertificateNotes" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Специална научна подготовка:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.EducationAcademicNotes" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Вид на договора:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.ContractTypeValue" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Дата на договора:
+                                            </label>
+                                            <div>
+                                                <SfDateTimePicker Enabled="false" TValue="DateTime?" @bind-Value="this.candidateProviderTrainerVM.ContractDate" Format="dd.MM.yyyy" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="checkbox-fade fade-in-primary">
+                                            <label class="form-label">
+                                                <input type="checkbox" disabled checked="@(this.candidateProviderTrainerVM.IsAndragog ? "checked" : null)">
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span> <span>Андрагогическа квалификация</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                E-mail адрес:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.Email" />
+                                        </div>
+                                    </div>                                
+                                <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Статус:
+                                            </label>
+                                            <SfTextBox Enabled="false" @bind-Value="this.candidateProviderTrainerVM.StatusName" />
+                                        </div>       
+                                </div>
+                                </div>
+                            </EditForm>
+                        </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Преподавателска дейност" Visible="this.isCPO" Expanded="true">
+                        <ContentTemplate>
+                            <div class="content-wrapper">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <SfGrid DataSource="this.profilesSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="this.profilesGrid" AllowSelection="false">
+                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                    <GridTemplates>
+                                                        <EmptyRecordTemplate Context="emptyRecord">
+                                                            <span>Няма намерени резултати.</span>
+                                                        </EmptyRecordTemplate>
+                                                    </GridTemplates>
+                                                    <GridColumns>
+                                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                                            <Template>
+                                                                @GetRowNumber(this.profilesGrid, (context as CandidateProviderTrainerProfileVM).IdCandidateProviderTrainerProfile).Result
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="IdCandidateProviderTrainerProfile" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                        <GridColumn Field="ProfessionalDirection.DisplayNameAndCode" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="IsProfessionalDirectionQualified" HeaderText="Отговарящ на изискванията" TextAlign="TextAlign.Left" Width="50%" DisplayAsCheckBox="true"></GridColumn>
+                                                        <GridColumn Field="IsTheory" HeaderText="Преподава по теория" TextAlign="TextAlign.Left" Width="50%" DisplayAsCheckBox="true"></GridColumn>
+                                                        <GridColumn Field="IsPractice" HeaderText="Преподава по практика" TextAlign="TextAlign.Left" Width="50%" DisplayAsCheckBox="true"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Квалификация" Visible="this.isCPO" Expanded="true">
+                        <ContentTemplate>
+                            <div class="content-wrapper">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <SfGrid DataSource="this.qualificationsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="this.qualificationsGrid" AllowSelection="false">
+                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                    <GridColumns>
+                                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                                            <Template>
+                                                                @GetRowNumber(this.qualificationsGrid, (context as CandidateProviderTrainerQualificationVM).IdCandidateProviderTrainerQualification).Result
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="IdCandidateProviderTrainerQualification" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                        <GridColumn Field="QualificationName" HeaderText="Курс" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="QualificationDuration" HeaderText="Продължителност" TextAlign="TextAlign.Left" Width="50%">
+                                                            <Template>
+                                                                @{
+                                                                    var trainerQualification = context as CandidateProviderTrainerQualificationVM;
+
+                                                                    if (trainerQualification.QualificationDuration.HasValue)
+                                                                    {
+                                                                        @(trainerQualification.QualificationDuration + " " + (trainerQualification.QualificationDuration == 1 ? "час" : "часа"))
+                                                                    }
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="TrainingFromAsStr" HeaderText="Дата от" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="TrainingToAsStr" HeaderText="Дата до" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Документи" Expanded="true">
+                        <ContentTemplate>
+                            <div class="content-wrapper">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <SfGrid DataSource="this.documentsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="this.documentsGrid" AllowSelection="false">
+                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                    <GridColumns>
+                                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                                            <Template>
+                                                                @GetRowNumber(this.documentsGrid, (context as CandidateProviderTrainerDocumentVM).IdCandidateProviderTrainerDocument).Result
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="IdCandidateProviderTrainerDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                        <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                                                            <Template Context="docContext">
+                                                                @{
+                                                                    var entry = (docContext as CandidateProviderTrainerDocumentVM);
+
+                                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                                    {
+                                                                        var files = entry.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                                                        foreach (var item in files)
+                                                                        {
+                                                                            <a href="#" @onclick="(() => OnDownloadClick(item, entry))">@item</a>
+                                                                            <br />
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @entry.FileName
+                                                                    }
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CreationDateAsStr" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                        <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </AccordionItem>
+                </AccordionItems>
+            </SfAccordion>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

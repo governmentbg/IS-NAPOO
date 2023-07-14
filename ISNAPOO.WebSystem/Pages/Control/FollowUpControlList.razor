@@ -1,0 +1,135 @@
+﻿@page "/FollowUpControlList"
+@attribute [Authorize(Policy = "ShowFollowUpControlList")]
+
+@using ISNAPOO.Core.Contracts.Control
+@using ISNAPOO.Core.ViewModels.Control
+
+@inject IControlService controlService
+
+@inherits BlazorBaseComponent
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@Header</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <ul class="navbar-nav">
+                            @if(IsShowFilter)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterBtn">Филтър</button>
+                                </li>
+                            
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenNewModal">Нов</button>
+                            </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@controlsSource" AllowSorting="true" EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true"
+                            @ref="sfGrid" AllowPaging=true AllowReordering=true AllowTextWrap="true"
+                            AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport"})">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents TValue="FollowUpControlVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                         <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="ControlStartDate" Direction="SortDirection.Descending" />
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as FollowUpControlVM).IdFollowUpControl).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as FollowUpControlVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdFollowUpControl" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Visible=false></GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            @if(CPOorCIPO == "ЦПО")
+                            {
+                                <GridColumn Field="CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            }
+                            else
+                            {
+                                <GridColumn Field="CandidateProvider.CIPONameOwnerGrid" HeaderText="ЦИПО" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            }
+                            <GridColumn Field="FollowUpControlTypeName" HeaderText="Вид на последващия контрол" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ControlTypeName" HeaderText="Вид на проверката" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="ControlStartDate" HeaderText="Срок за проверката от" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        var date = ctx.ControlStartDate.HasValue ? $"{ctx.ControlStartDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ControlEndDate" HeaderText="Срок за проверката до" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        var date = ctx.ControlEndDate.HasValue ? $"{ctx.ControlEndDate.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="TermImplRecommendation" HeaderText="Срок за изпълнение на препоръки" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy">
+                                <Template>
+                                    @{
+                                        var ctx = context as FollowUpControlVM;
+                                        var date = ctx.TermImplRecommendation.HasValue ? $"{ctx.TermImplRecommendation.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="8%">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as FollowUpControlVM;
+                                            if (ctx.IdStatus != 0)
+                                            {
+                                                switch (ctx.StatusName)
+                                                {
+                                                    case "Текуща":
+                                                        <label class="form-label-status label label-success">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Предстояща":
+                                                        <label class="form-label-status label label-warning">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Приключила":
+                                                        <label class="form-label-status label label-danger">@ctx.StatusName</label>
+                                                        break;
+                                                    case "Анулирана":
+                                                        <label class="form-label-status label label-danger">@ctx.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<FollowUpControlModal @ref="followUpControlModal" LicenseType="@this.LicensingType" CallbackAfterSave="UpdateAfterSave"></FollowUpControlModal>
+<FollowUpControlListFilterModal @ref="followUpControlListFilterModal"  CallbackAfterSubmit="OnFilterModalSubmit" ></FollowUpControlListFilterModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

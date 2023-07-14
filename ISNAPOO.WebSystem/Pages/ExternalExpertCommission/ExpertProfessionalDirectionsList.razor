@@ -1,0 +1,112 @@
+﻿@*@page "/ExternalExpertCommissionsList"*@
+@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using ISNAPOO.WebSystem.Pages.ExternalExpertCommission.Modals.ExpertProfessionalDirection
+@using Syncfusion.PdfExport
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Въвеждане на информация за професионално направление за експерт" OpensOn="Hover">
+                                    <button type="button" class="btn btn-info" hidden="@(this.IsRegister && !this.IsEditable)" disabled="@Disabled" @onclick="OpenAddNewModal">Нов</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="expertProfessionalDirectionsGrid" DataSource="@expertProfessionalDirections" AllowSorting="true" EnableAltRow="true"
+                            EnableHover="false" AllowSelection="true"
+                            AllowFiltering="true" @ref="expertProfessionalDirectionsGrid" AllowPaging="true" AllowReordering="true"
+                            AllowExcelExport="false" AllowPdfExport="false" AllowTextWrap="true">
+                        <GridSelectionSettings CheckboxOnly="false" Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents OnToolbarClick="ToolbarClick" TValue="ExpertProfessionalDirectionVM" RowSelected="RowSelected" RowDeselected="RowDeselected"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                        <GridTextWrapSettings WrapMode="Syncfusion.Blazor.Grids.WrapMode.Both"></GridTextWrapSettings>
+                        <GridColumns>
+                            <GridColumn Width="15">
+                                <Template>
+                                    @if (!this.IsRegister && this.IsEditable)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button @onclick="(() => SelectedRow(context as ExpertProfessionalDirectionVM))" class="btn-row">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="15">
+                                <Template>
+                                    @if (!this.IsRegister && this.IsEditable)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => DeleteSelected(context as ExpertProfessionalDirectionVM))">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdExpertProfessionalDirection" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Width="40" Visible="false"></GridColumn>
+                            <GridColumn Field="ProfessionalDirectionName" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="105"></GridColumn>
+                            <GridColumn Field="OrderNumber" HeaderText="Номер на заповед" TextAlign="TextAlign.Left" Width="89"></GridColumn>
+                            <GridColumn Field="DateApprovalExternalExpert" HeaderText="Дата на утвърждаване" TextAlign="TextAlign.Left" Width="78" Format="@GlobalConstants.DATE_FORMAT">
+                                <Template>
+                                    @{
+                                        var ctx = context as ExpertProfessionalDirectionVM;
+                                        var date = ctx.DateApprovalExternalExpert.HasValue ? $"{ctx.DateApprovalExternalExpert.Value.ToString("dd.MM.yyyy")} г." : string.Empty;
+                                        @date
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="40">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var providerStatus = context as ExpertProfessionalDirectionVM;
+                                            if (providerStatus.IdStatus != 0)
+                                            {
+                                                switch (providerStatus.StatusName)
+                                                {
+                                                    case "Активен":
+                                                        <label class="form-label-status label label-success">@providerStatus.StatusName</label>
+                                                        break;
+                                                    case "Неактивен":
+                                                        <label class="form-label-status label label-danger">@providerStatus.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ExpertProfessionalDirectionModal @ref="expertProfessionalDirectionModal" CallbackAfterSave_ExpProfDirection="UpdateAfterSaveExpertProfessionalDirection"></ExpertProfessionalDirectionModal>
+
+<ToastMsg @ref="toast"></ToastMsg>
+

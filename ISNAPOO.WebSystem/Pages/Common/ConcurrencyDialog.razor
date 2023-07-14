@@ -1,0 +1,35 @@
+﻿<SfDialog @bind-Visible="this.showConcurrencyDialog" Width="30%" EnableResize="true"
+          AllowDragging="true" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Внимание!</Header>
+        <Content>
+            Данните в момента се редактират от @this.PersonFullName! Записът е заключен за редакция!
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="(() => this.showConcurrencyDialog = false)">Затвори</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog> 
+
+@code {
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+
+    public bool showConcurrencyDialog = false;
+
+    public string PersonFullName { get; set; }
+
+    public void Refresh() 
+    {
+        this.StateHasChanged();
+    }
+}

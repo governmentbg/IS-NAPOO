@@ -1,0 +1,200 @@
+﻿@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="card" style="margin-bottom: 0px;">
+        <div class="card-header">
+            <nav class="navbar navbar-expand  ">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item d-none d-sm-inline-block">
+                        @if (this.duplicateFinishedModel.DocumentDate.HasValue)
+                        {
+                            <button style="margin-right: 5px;" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.Export())">Печат на дубликат</button>
+                        }
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="card-body" style="">
+            <p>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="form-group required">
+                            <label class="control-label">Статус на завършване: </label>
+                            <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="finishedTypeSource" AllowCustom="false" @bind-Value="this.duplicateFinishedModel.IdFinishedType" Enabled="@(!(this.duplicateFinishedModel.IdFinishedType == finishedTypeSource.Where(x => x.Name == "Издаване на дубликат").FirstOrDefault().IdKeyValue) && this.IsEditEnabled)">
+                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                            </SfComboBox>
+                        </div>
+                    </div>
+                    @if (this.EntryFromCourseGraduatesList && this.duplicateFinishedModel.IdFinishedType == this.kvFinishedWithDoc.IdKeyValue && this.CourseVM.IdTrainingCourseType == this.kvSPK.IdKeyValue)
+                    {
+                        <div class="col-sm-2">
+                            <div class="form-group text-center" style="display: flex; margin-top: 25px;">
+                                @if (this.duplicateFinishedModel.IdDocumentStatus == this.kvDocumentStatusNotSubmitted.IdKeyValue || this.duplicateFinishedModel.IdDocumentStatus == this.kvDocumentStatusReturned.IdKeyValue)
+                                {
+                                    <SfTooltip style="margin-right: 10px;" Position="TooltipPosition.BottomCenter" Content="Подаване на документ за ПК за проверка към НАПОО" OpensOn="Hover">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="(() => FileInForVerificationBtn())">Подай за проверка</button>
+                                    </SfTooltip>
+                                }
+
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на статуса" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(() => OpenStatusHistoryBtn())"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                </SfTooltip>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (this.duplicateFinishedModel.IdFinishedType == this.kvIssueOfDuplicate.IdKeyValue)
+                {
+                    <div class="row">
+                        @if (!this.duplicateFinishedModel.IdCourseProtocol.HasValue && this.CourseVM.OldId.HasValue)
+                        {
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Протокол:
+                                    </label>
+                                    <SfTextBox Value="@(this.duplicateFinishedModel.DocumentProtocol)" Enabled="false" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Протокол: </label>
+                                    <SfComboBox Enabled="this.IsEditEnabled" ShowClearButton="true" TValue="int?" TItem="CourseProtocolVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="protocolsSource" AllowCustom="false" @bind-Value="this.duplicateFinishedModel.IdCourseProtocol">
+                                        <ComboBoxFieldSettings Text="NameAndDate" Value="IdCourseProtocol" />
+                                        <ComboBoxEvents TValue="int?" TItem="CourseProtocolVM" ValueChange="OnProtocolSelected" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(this.duplicateFinishedModel.TheoryResult))
+                        {
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Оценка теория:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.duplicateFinishedModel.TheoryResult" Enabled="false" />
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(this.duplicateFinishedModel.PracticeResult))
+                        {
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Оценка практика:
+                                    </label>
+                                    <SfTextBox @bind-Value="this.duplicateFinishedModel.PracticeResult" Enabled="false" />
+                                </div>
+                            </div>
+                        }
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Обща оценка:
+                                </label>
+                                <SfTextBox @bind-Value="this.duplicateFinishedModel.FinalResult" Enabled="false" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид на издадения документ:
+                                </label>
+                                <SfTextBox @bind-Value="this.duplicateFinishedModel.DocumentTypeName" Enabled="false" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Година:
+                                </label>
+                                <SfNumericTextBox Enabled="this.IsEditEnabled" @bind-Value="this.duplicateFinishedModel.FinishedYear" OnChange="OnFinishedYearValueChanged" ShowSpinButton="false" Format="0" />
+                            </div>
+                        </div>
+                    </div>
+                    @if (this.duplicateFinishedModel.HasDocumentFabricNumber)
+                    {
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group required">
+                                    <label class="control-label">Фабричен номер на документа: </label>
+                                    <SfComboBox Enabled="this.IsEditEnabled" @ref="docSerialNumbersComboBox" ShowClearButton="true" TValue="int?" TItem="DocumentSerialNumberVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="documentSerialNumbersSource" AllowCustom="true" @bind-Value="this.duplicateFinishedModel.IdDocumentSerialNumber">
+                                        <ComboBoxFieldSettings Text="SerialNumber" Value="IdDocumentSerialNumber" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Регистрационен номер на документа:
+                                    </label>
+                                    <SfTextBox Enabled="this.IsEditEnabled" @bind-Value="this.duplicateFinishedModel.DocumentRegNo" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">Дата на издаване: </label>
+                                    <SfDatePicker Enabled="this.IsEditEnabled" @bind-Value="this.duplicateFinishedModel.DocumentDate" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Регистрационен номер на документа:
+                                    </label>
+                                    <SfTextBox Enabled="this.IsEditEnabled" @bind-Value="this.duplicateFinishedModel.DocumentRegNo" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group required">
+                                    <label class="control-label">Дата на издаване: </label>
+                                    <SfDatePicker Enabled="this.IsEditEnabled" @bind-Value="this.duplicateFinishedModel.DocumentDate" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (this.duplicateFinishedModel.IdClientCourseDocument != 0)
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Сканиран документ:
+                                    </label>
+                                    <SfUploader Enabled="this.IsEditEnabled" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                        <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                    </SfUploader>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(this.duplicateFinishedModel.FileName))
+                    {
+                        <div class="row e-upload" style="margin-left: 0px">
+                            <div class="col-sm-8">
+                                <button type="button" class="btn-row" disabled="@(!this.IsEditEnabled)" @onclick="(() => OnRemove(this.duplicateFinishedModel.FileName))"><i class="fa fa-trash-o"></i></button>
+                                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.duplicateFinishedModel.FileName</a></span>
+                            </div>
+                        </div>
+                    }
+                }
+            </p>
+        </div>
+    </div>
+</EditForm>
+
+<SubmissionCommentModal @ref="submissionCommentModal" CallbackAfterSubmit="LoadModelDataAsync" />
+<DocumentStatusModal @ref="documentStatusModal" />
+<PrintDocumentModalMessage @ref="printDocumentModalMessage" />

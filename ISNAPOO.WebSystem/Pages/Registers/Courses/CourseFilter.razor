@@ -1,0 +1,213 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="90%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+        <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+                    <EditForm EditContext="editContext" OnSubmit="Filter" id="mainForm">
+                        @*1st row*@
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Юридическо лице: </label>
+                                    <SfAutoComplete TValue="int" @ref="sfAutoCompleteCPO" @bind-Value="model.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="@candidateProviders" AllowCustom="false">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="CPONameOwnerGrid"></AutoCompleteFieldSettings>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteEvents TValue="int" TItem="CandidateProviderVM" Filtering="OnFilterCPO"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>№ на лицензия:</label>
+                                    <InputText class="form-control" @bind-Value="this.model.LicenceNumber"></InputText>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Област: </label>
+                                    @*@bind-Value="this.model.ClientCourse.Course.Location.Municipality.District.idDistrict"*@
+                                    <SfComboBox @bind-Value="this.model.IdDistrict" TItem="DistrictVM" AllowCustom="false" TValue="int" DataSource="@districtSource">
+                                        <ComboBoxEvents TItem="DistrictVM" TValue="int" ValueChange="DistrictChangeHandler"></ComboBoxEvents>
+                                        <ComboBoxFieldSettings Value="idDistrict" Text="DistrictName"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Община: </label>
+                                    <SfComboBox @bind-Value="this.model.IdMunicipality" TItem="MunicipalityVM" AllowCustom="false" TValue="int" DataSource="@municipalityFiltered">
+                                        <ComboBoxEvents TItem="MunicipalityVM" TValue="int" ValueChange="MunicipalityChangeHandler"></ComboBoxEvents>
+                                        <ComboBoxFieldSettings Value="idMunicipality" Text="MunicipalityName"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                    @*@bind-Value="this.model.ClientCourse.Course.Location.Municipality.idMunicipality"*@
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Населено място: </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteLocation" TValue="int" TItem="LocationVM" AllowCustom="false"
+                                                    @bind-Value="this.model.IdLocation"
+                                                    DataSource="locationFiltered" AllowFiltering="true" CssClass="form-control">
+                                        <AutoCompleteTemplates TItem="LocationVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                        <AutoCompleteEvents TValue="int" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence" ValueChange="LocationChanegeHandler"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Име на курс: </label>
+                                    <InputText class="form-control" @bind-Value="this.model.CourseName"></InputText>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Вид на курс: </label>
+                                    <SfComboBox @bind-Value="this.model.IdCourseType" TItem="KeyValueVM" AllowCustom="false"
+                                                TValue="int?" DataSource="courseType">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Статус: </label>
+                                    <SfComboBox @bind-Value="this.model.IdStatus" TItem="KeyValueVM"  AllowCustom="false"
+                                                TValue="int?" DataSource="Status">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Основен източник на финансиране: </label>
+                                    <SfComboBox @bind-Value="this.model.IdAssignType" TItem="KeyValueVM" AllowCustom="false"
+                                                TValue="int?" DataSource="assignType">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Професия: </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteProfession" TValue="int" TItem="ProfessionVM" AllowCustom="false"
+                                                    @bind-Value="this.model.IdProfession"
+                                                    DataSource="professionSource" AllowFiltering="true" CssClass="form-control">
+                                        <AutoCompleteTemplates TItem="ProfessionVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="CodeAndName" Value="IdProfession" />
+                                        <AutoCompleteEvents TValue="int" TItem="ProfessionVM" Filtering="OnFilterProfession" ValueChange="OnSelectedProfession"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Специалност: </label>
+                                    <SfAutoComplete @ref="sfAutoCompleteSpeciality" TValue="int" TItem="SpecialityVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                    @bind-Value="this.model.IdSpeciality" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                    DataSource="specialitySource" AllowFiltering="true">
+                                        <AutoCompleteTemplates TItem="SpecialityVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                        <AutoCompleteFieldSettings Text="CodeAndName" Value="IdSpeciality" />
+                                        <AutoCompleteEvents TValue="int" TItem="SpecialityVM" Filtering="OnFilterSpeciality" ValueChange="OnSelectedSpeciality"></AutoCompleteEvents>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Начална дата на провеждане от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.StartFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Начална дата на провеждане до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.StartTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Крайна дата на провеждане от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.EndFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Крайна дата на провеждане до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.EndTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="new-task">
+                                    <div class="to-do-list">
+                                    </div>
+                                    <div class="to-do-list">
+                                        <div class="checkbox-fade fade-in-primary">
+                                            <label class="form-label">
+                                                <input type="checkbox" @bind-value="this.model.IsArchived" checked="@(this.model.IsArchived ? "checked" : null)">
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span> <span>Архивиран</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="submit" class="btn btn-info" form="mainForm">Търси</button>
+                        <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+
+</SfDialog>

@@ -1,0 +1,114 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="96%" Height="96%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="this.isVisible" ZIndex="2001">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @((MarkupString)this.title)
+        </Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card" style="margin-bottom: 0px;">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    @*<ul class="navbar-nav">
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Създаване на нова програма за обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewProgramBtn">Нова програма</button>
+                                    </SfTooltip>
+                                    </li>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                    </li>
+                                    </ul>*@
+                                </nav>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid ID="modificationsGrid" @ref="this.modificationsGrid" DataSource="this.modificationsSource" AllowSelection="false" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true"
+                                        Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true" AllowPaging="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                    <GridEditSettings AllowDeleting="true" />
+                                    <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CandidateCurriculumModificationVM"></GridEvents>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Field="IdCandidateCurriculum" HeaderText="" TextAlign="TextAlign.Center" Width="7" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" AllowFiltering="false">
+                                            <Template Context="idContext">
+                                                @if ((idContext as CandidateCurriculumModificationVM).IdCandidateCurriculumModification != 0)
+                                                {
+                                                    @GetRowNumber(modificationsGrid, (idContext as CandidateCurriculumModificationVM).IdCandidateCurriculumModification).Result
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Width="7" HeaderText=" ">
+                                            <Template Context="curriculumContext">
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед на учебния план и учебните програми" OpensOn="Hover">
+                                                    <button type="button" class="btn-row" @onclick="(async () => await this.OpenCandidateCurriculumModalBtn(curriculumContext as CandidateCurriculumModificationVM))"><i class="fa fa-search-plus"></i></button>
+                                                </SfTooltip>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdCandidateCurriculumModification" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="ModificationReasonValue" HeaderText="Причина за промяна" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                                        <GridColumn Field="ValidFromDateAsStr" HeaderText="В сила от" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                        <GridColumn Field="ModificationStatusValue" HeaderText="Статус" TextAlign="TextAlign.Center" Width="30">
+                                            <Template>
+                                                <div class="text-center">
+                                                    @{
+                                                        var mod = context as CandidateCurriculumModificationVM;
+                                                        switch (mod.ModificationStatusValue)
+                                                        {
+                                                            case "Работен":
+                                                                <label class="form-label-status label label-warning">@mod.ModificationStatusValue</label>
+                                                                break;
+                                                            case "Отказани промени":
+                                                                <label class="form-label-status label label-danger">@mod.ModificationStatusValue</label>
+                                                                break;
+                                                            case "Окончателен":
+                                                                <label class="form-label-status label label-success">@mod.ModificationStatusValue</label>
+                                                                break;
+                                                        }
+                                                    }
+                                                </div>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="5">
+                                            <Template Context="modificationCtx">
+                                                @if (!string.IsNullOrEmpty((modificationCtx as CandidateCurriculumModificationVM).UploadedFileName))
+                                                {
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с прикачен учебен план" OpensOn="Hover">
+                                                        <button type="button" class="btn-row" @onclick="(async () => await this.DownloadCurriculumModificationFileBtn(modificationCtx as CandidateCurriculumModificationVM))"><i class="fa fa-file-text"></i></button>
+                                                    </SfTooltip>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+<CurriculumModificationModal @ref="curriculumModificationModal" HideAllActions="this.hideAllActionsInCurriculumModal" />

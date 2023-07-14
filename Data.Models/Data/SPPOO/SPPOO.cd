@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="Data.Models.Data.SPPOO.Area">
+    <Position X="3.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAABAAAAAEAACAggAQgAAAAAAAAAAAIAAAAAAA=</HashCode>
+      <FileName>Data\SPPOO\Area.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Data.Models.Data.SPPOO.Profession">
+    <Position X="11.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QQAAAAAAAAAQABAAACAggAQgAAAAAACAEAAIAAAAAAA=</HashCode>
+      <FileName>Data\SPPOO\Profession.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Data.Models.SPPOOOrder">
+    <Position X="5.25" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>SAAAAAIAAAAAAAAAAAAAgAAgAAAAAAAAAAAICAAAAAA=</HashCode>
+      <FileName>Data\SPPOO\SPPOOOrder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

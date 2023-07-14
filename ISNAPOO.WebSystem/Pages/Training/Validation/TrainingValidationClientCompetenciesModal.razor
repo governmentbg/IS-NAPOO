@@ -1,0 +1,66 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    @if (this.IsEditable)
+                    {
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на нов протокол" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddCompetencyBtn">Добави компетентност</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="text-transform: none;" @onclick="RemoveCompetency">Премахни компетентност</button>
+                                </li>
+
+                            </ul>
+                        </nav>
+                    }
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="ClientVM.ValidationCompetencies" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="Grid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ValidationCompetencyVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="5%"></GridColumn>
+
+                            <GridColumn AllowFiltering="false" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" AllowSorting="false" TextAlign="TextAlign.Left" Width="4%">
+                                <Template>
+                                    @GetRowNumber(Grid, (context as ValidationCompetencyVM).IdValidationCompetency).Result
+                                </Template>
+                                </GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="3%" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditCompetencyBtn(context as ValidationCompetencyVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdValidationCompetency" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CompetencyNumber" HeaderText="№ на компетентност" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                            <GridColumn Field="Competency" HeaderText="Компетентност" TextAlign="TextAlign.Left" Width="70%"></GridColumn>
+                            <GridColumn Field="IsCompetencyRecognizedStr" HeaderText="Признава се" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ValidationClientCompetenciesModal CallbackAfterSubmit="updateClient" @ref="modal"></ValidationClientCompetenciesModal>

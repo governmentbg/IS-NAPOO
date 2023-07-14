@@ -1,0 +1,62 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" EnableResize="true" AllowDragging="true" Width="55%" Height="55%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Смяна на номер и дата на заявлението за лицензиране</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm EditContext="this.editContext">
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">№ на заявление: </label>
+                                        <SfTextBox @bind-Value="this.candidateProvider.ApplicationNumber" />
+                                    </div>
+                                </div>                
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Дата: </label>
+                                        <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.candidateProvider.ApplicationDate"></SfDatePicker>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">                   
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">                           
+                            <button type="button" class="btn btn-info btn-primary" @onclick="Submit">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

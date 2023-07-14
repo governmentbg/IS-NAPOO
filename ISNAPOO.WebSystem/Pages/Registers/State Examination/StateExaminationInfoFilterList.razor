@@ -1,0 +1,87 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="70%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block">
+                    <EditForm EditContext="editContext">      
+                        <p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>ЦПО: </label>
+                                    <SfAutoComplete @ref="cpAutoComplete" TValue="int?" @bind-Value="this.model.IdCandidateProvider" TItem="CandidateProviderVM" DataSource="@candidateProvidersSource" AllowCustom="false" AllowFiltering="true">
+                                        <AutoCompleteFieldSettings Value="IdCandidate_Provider" Text="ProviderName"></AutoCompleteFieldSettings>
+                                        <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterCandidateProviderHandler"></AutoCompleteEvents>
+                                        <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </AutoCompleteTemplates>
+                                    </SfAutoComplete>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>№ на лицензия:</label>
+                                    <InputText class="form-control" @bind-Value="this.model.LicenceNumber"></InputText>
+                                </div>
+                            </div>
+                        </div>                       
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Име на курс: </label>
+                                    <InputText class="form-control" @bind-Value="this.model.CourseName"></InputText>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                        <label class="control-label">Вид на обучението: </label>
+                                        <SfComboBox @bind-Value="this.model.TrainingTypeIntCode" TItem="KeyValueVM" AllowCustom="false" ShowClearButton="true"
+                                                    TValue="string" DataSource="kvTrainingScheduleType">
+                                        <ComboBoxFieldSettings Value="KeyValueIntCode" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Дата на изпита от: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.ExamDateFrom" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Дата на изпита до: </label>
+                                    <SfDatePicker CssClass="form-control" TValue="DateTime?" @bind-Value="this.model.ExamDateTo" Format="dd.MM.yyyy" />
+                                </div>
+                            </div>
+                        </div>
+                        </p>
+                    </EditForm>
+                </div>
+            </div>
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="submit" class="btn btn-info" @onclick="(async () => await this.Save())">Търси</button>
+                        <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+
+</SfDialog>

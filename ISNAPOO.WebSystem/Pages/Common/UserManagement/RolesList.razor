@@ -1,0 +1,70 @@
+﻿@page "/RolesList"
+@attribute [Authorize(Policy = "ShowRolesList")]
+
+@using Data.Models.Data.ProviderData
+@using ISNAPOO.Core.ViewModels.Identity
+@inherits BlazorBaseComponent
+@inject IApplicationUserService ApplicationUserService
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Роли</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterBtn">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                            <label>&nbsp</label>                            
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="roleGrid"DataSource="@roles" AllowSorting="true" EnableAltRow="true" EnableHover="false" AllowSelection="true"
+                            AllowFiltering="true" @ref="refGrid"
+                            AllowPaging="true" AllowReordering="true" AllowResizing="true" 
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ApplicationRoleVM"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="true"></GridPageSettings>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="RoleName" Direction="SortDirection.Ascending"></GridSortColumn>
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridColumns>
+                            
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" TextAlign="TextAlign.Left" Width="10px">
+                                <Template>
+                                    @GetRowNumber((context as ApplicationRoleVM).Id).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button  @onclick="(() => SelectedRow(context as ApplicationRoleVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                </SfTooltip>
+                                                   </Template>
+                            </GridColumn>
+                            <GridColumn Field="Id" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Width="40" Visible=false></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Код" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                            <GridColumn Field="RoleName" HeaderText="Роля на потребител" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<RolesListFilterModal @ref="rolesListFilterModal" CallbackAfterSubmit="OnFilterModalSubmit" />
+<RoleModal  @ref="roleModal"  CallbackAfterSubmit="OnApplicationSubmit" />
+<ToastMsg @ref="toast" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

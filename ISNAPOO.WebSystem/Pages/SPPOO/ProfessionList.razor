@@ -1,0 +1,252 @@
+﻿@page "/ProfessionsList"
+@attribute [Authorize(Policy = "ShowSPPOOList")]
+@using ISNAPOO.Common.HelperClasses
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.CPOSpeciality
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.Profession
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.ProfessionalDirection
+@using System.Text
+@inherits BlazorBaseComponent
+
+@using global::Data.Models
+@using global::Data.Models.Data.SPPOO
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">СППОО - Списък на професиите за професионално образование и обучение</h6>
+            <p></p>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav float">
+                            <li class="nav-item d-none d-sm-inline-block float-none">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterModal">Филтър</button>
+                            </li>
+                            &nbsp;
+                            <li class="nav-item d-none d-sm-inline-block float-none">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateExportAsync">Експорт СППОО</button>
+                            </li>
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                            @if (this.SPPOODataList.Count > 0)
+                            {
+                                <li class="checkbox-fade fade-in-primary nav-item d-none d-sm-inline-block float-none">
+                                    <label class="form-label form-label-250px">
+                                        <input @onclick="ShowAllResultsHandler" type="checkbox" />
+                                        <span class="cr">
+                                            <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                        </span><span>Покажи промените в СППОО</span>
+                                    </label>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfTreeGrid AllowTextWrap="true" @ref="sfTreeGrid" DataSource="SPPOODataList" EnableCollapseAll="expandFilterResults" EnablePersistence="true"
+                                IdMapping="Id" ParentIdMapping="ParentId" TreeColumnIndex="1" ContextMenuItems="contextMenuItemModels" AllowExcelExport="true" AllowPdfExport="true" EnableAltRow="false" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                        <TreeGridEvents TValue="SPPOOTreeGridData" ContextMenuItemClicked="ContextMenuClickHandler"
+                                        ContextMenuOpen="ContextMenuOpenHandler" RowSelected="RowSelectedHandler" RowDeselected="RowDeselectedHandler"
+                                        DataBound="DataboundHandler"
+                                        RowDataBound="RowDataBoundHandler"
+                                        QueryCellInfo="CellInfoHandler"
+                                        OnToolbarClick="ToolbarClick" Expanded="ExpandedHandler" Collapsed="CollapsedHandler"></TreeGridEvents>
+                        <TreeGridColumns>
+                            <TreeGridColumn Field="Id" HeaderText="Id" Width="1%" TextAlign="TextAlign.Left" IsPrimaryKey="true" Visible=false></TreeGridColumn>
+                            <TreeGridColumn Field="Code" HeaderText="Код" Width="15%" TextAlign="TextAlign.Left">
+                                <HeaderTemplate>
+                                    &nbsp;&nbsp;&nbsp;<i class="fa fa-sitemap"></i> Код
+                                </HeaderTemplate>
+                            </TreeGridColumn>
+                            <TreeGridColumn Field="Name" HeaderText="Наименование" Width="40%" TextAlign="TextAlign.Left">
+                                <HeaderTemplate>
+                                    &nbsp;&nbsp;&nbsp;<i class="fa fa-group"></i> Наименование
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        var entry = (context as SPPOOTreeGridData);
+
+                                        StringBuilder sb = new StringBuilder();
+                                        sb.Append(entry.Name);
+
+                                        if (entry.EntityType == SPPOOTypes.Speciality)
+                                        {
+                                            KeyValueVM entryVQS = this.spkValue.FirstOrDefault(x => x.IdKeyValue == entry.IdVQS);
+
+                                            if (entryVQS != null)
+                                            {
+                                                sb.Append($" - {entryVQS.Name}");
+                                            }
+                                        }
+
+                                        @sb.ToString().Trim()
+                                    }
+                                </Template>
+                            </TreeGridColumn>
+                            <TreeGridColumn Field="AddOrder" HeaderText="Вписване" Width="22%" TextAlign="TextAlign.Left">
+                                <HeaderTemplate>
+                                    &nbsp;&nbsp;&nbsp;<i class="fa fa-calendar-plus-o"></i> Вписване
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        var entry = (context as SPPOOTreeGridData);
+
+                                        if (!string.IsNullOrEmpty(entry.AddOrder))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry.AddOrderName))">Заповед № @entry.AddOrder</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.AddOrder
+                                        }
+                                    }
+                                </Template>
+                            </TreeGridColumn>
+                            <TreeGridColumn Field="ChangeOrder" HeaderText="Промяна" Width="22%" TextAlign="TextAlign.Left">
+                                <HeaderTemplate>
+                                    &nbsp;&nbsp;&nbsp;<i class="fa fa-calendar-check-o"></i> Промяна
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        var entry = (context as SPPOOTreeGridData);
+
+                                        if (!string.IsNullOrEmpty(entry.ChangeOrder))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry.ChangeOrderName))">Заповед № @entry.ChangeOrder</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.ChangeOrder
+                                        }
+                                    }
+                                </Template>
+                            </TreeGridColumn>
+                            <TreeGridColumn Field="RemoveOrder" HeaderText="Отпадане" Width="22%" TextAlign="TextAlign.Left">
+                                <HeaderTemplate>
+                                    &nbsp;&nbsp;&nbsp;<i class="fa fa-calendar-minus-o"></i> Отпадане
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        var entry = (context as SPPOOTreeGridData);
+
+                                        if (!string.IsNullOrEmpty(entry.RemoveOrder))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry.RemoveOrderName))">Заповед № @entry.RemoveOrder</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.RemoveOrder
+                                        }
+                                    }
+                                </Template>
+                            </TreeGridColumn>
+                        </TreeGridColumns>
+                    </SfTreeGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<AreaModal @ref="areaModal" OnSubmit="OnModalSubmit"></AreaModal>
+
+<ProfessionalDirectionModal @ref="proffessionalDirectionModal" OnSubmit="OnModalSubmit"></ProfessionalDirectionModal>
+
+<ProfessionModal @ref="professionModal" OnSubmit="OnModalSubmit"></ProfessionModal>
+
+<SpecialityModal @ref="specialityModal" OnSubmit="OnModalSubmit"></SpecialityModal>
+
+<CPOSpecialityModal @ref="cpoSpecialityModal" OnSubmit="OnModalSubmit"></CPOSpecialityModal>
+
+<FilterSPPOOModal @ref="openFilterProfessionModal" OnFilterSubmit="FilterHandler" OnFilterSubmitForNames="FilterHandlerForNames" RefreshGridAfterClearFilter="RefreshGrid"></FilterSPPOOModal>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+<style>
+    .bold-elements {
+        font-weight: bold;
+    }
+
+    .bg-elements {
+        background-color: #ECECEC;
+    }
+
+    .color-elements {
+        color: red !important;
+    }
+
+    .e-grid .e-headercelldiv {
+        font-weight: normal !important;
+    }
+
+    @@font-face {
+        font-family: 'Toast_icons';
+        src: url(data:application/x-font-ttf;charset=utf-8;base64,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) format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    #toast_types button {
+        margin: 5px;
+        min-width: 160px;
+        max-width: 160px;
+    }
+
+    .toast-icons {
+        font-family: 'Toast_icons' !important;
+        speak: none;
+        font-size: 55px;
+        font-style: normal;
+        font-weight: normal;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    #toast_type .e-toast-icon.e-icons {
+        height: auto;
+        font-size: 30px;
+    }
+
+    .bootstrap5 #toast_type .e-toast-icon.e-icons,
+    .bootstrap5-dark #toast_type .e-toast-icon.e-icons {
+        height: 25px;
+    }
+
+    .toast-icons.e-success::before {
+        content: "\e701";
+    }
+
+    .toast-icons.e-error::before {
+        content: "\e700";
+    }
+
+    #toast_types {
+        text-align: center;
+    }
+</style>
+

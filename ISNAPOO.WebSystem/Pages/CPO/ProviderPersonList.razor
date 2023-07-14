@@ -1,0 +1,85 @@
+﻿@page "/ProviderPersonList"
+@attribute [Authorize(Policy = "ShowProviderPersonList")]
+
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Управление на достъпа на потребители за @(candidateProvider.IdCandidate_Provider != 0 ? @header : string.Empty)</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+
+
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="providerPersonSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGridProviderPerson" AllowSelection="false" AllowPaging="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(sfGridProviderPerson, (context as CandidateProviderPersonVM).IdCandidateProviderPerson).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(async () => await SelectedRow(context as CandidateProviderPersonVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidateProviderPerson" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Username" HeaderText="Потребителско име" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Person.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            @*<GridColumn Field="Person.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="50px"></GridColumn>*@
+                            <GridColumn Field="Person.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            @*<GridColumn Field="Person.IndentTypeName" HeaderText="Вид на идентификатора" TextAlign="TextAlign.Left" Width="50px"></GridColumn>*@
+                            @*<GridColumn Field="Person.Indent" HeaderText="ЕГН/ЛНЧ/ИДН:" TextAlign="TextAlign.Left" Width="50px"></GridColumn>*@
+                            <GridColumn Field="Person.Phone" HeaderText="Телефон" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Person.Email" HeaderText="E-mail" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="CandidateProvider.ProviderOwner" HeaderText="Юридическо лице" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Status.Name" HeaderText="Статус" TextAlign="TextAlign.Center" Width="40px">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var providerStatus = context as CandidateProviderPersonVM;
+                                            if (providerStatus.Status != null)
+                                            {
+                                                switch (providerStatus.Status.Name)
+                                                {
+                                                    case "Активен":
+                                                        <label class="form-label-status label label-success">@providerStatus.Status.Name</label>
+                                                        break;
+                                                    case "Неактивен":
+                                                        <label class="form-label-status label label-danger">@providerStatus.Status.Name</label>
+                                                        break;
+                                                }       
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ProviderPersonModal @ref="providerPersonModal" CallbackAfterSubmit="OnApplicationSubmit" />
+<ToastMsg @ref="toast" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

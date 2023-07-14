@@ -1,0 +1,179 @@
+﻿@inherits BlazorBaseComponent
+<SfDialog @bind-Visible="this.isVisible" EnableResize="true" Width="70%" AllowDragging="true" Height="auto" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>Данни за професионално направление <span style="font-size: 18px;color: white !important;">@this.professionalDirectionVM.DisplayNameAndCode</span></Header>
+        <Content>
+            <EditForm id="submitFormProfessionalDirection" EditContext="editContext" OnSubmit="SubmitHandler">
+                <ValidationSummary />
+
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group required">
+                                        <label class="control-label">Област на образование: </label>
+                                        <InputText class="form-control" @bind-Value="professionalDirectionVM.CodeAndArea" disabled="@(isDisabled)"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label class="control-label">Статус на валидност: </label>
+                                        <InputText class="form-control" @bind-Value="status.Name" disabled />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Код: </label>
+                                        <InputText class="form-control" @bind-Value="professionalDirectionVM.Code"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование на професионалното направление: </label>
+                                        <InputText class="form-control" @bind-Value="professionalDirectionVM.Name"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование на професионалното направление: (англ.): </label>
+                                        <InputText class="form-control" @bind-Value="professionalDirectionVM.NameEN"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Заповед на министъра на образованието: </label>
+                                        <SfComboBox TValue="int" TItem="OrderVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="orders" AllowFiltering="true" @bind-Value="idOrder" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="OrderNumberWithOrderDate" Value="IdOrder" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Вид на промяната: </label>
+                                        <SfComboBox Enabled="this.professionalDirectionVM.IdProfessionalDirection != 0" AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="orderChangeValues" AllowFiltering="true" @bind-Value="professionalDirectionVM.IdTypeChange">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <p>
+                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OnAddOrderClickHandler">Добави</button>
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <SfGrid ID="defaultGrid" @ref="ordersGrid" DataSource="addedOrders" AllowTextWrap="true" AllowSorting="false" AllowFiltering="false" AllowPaging=false>
+                                        <GridTemplates>
+                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                <span>Няма намерени резултати.</span>
+                                            </EmptyRecordTemplate>
+                                        </GridTemplates>
+                                        <GridColumns>
+
+                                            <GridColumn Width="10">
+                                                <Template Context="orderContext">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                        <button type="button" class="btn-row" @onclick="(() => DeleteRowOrder(orderContext as OrderVM))"><i class="fa fa-trash-o"></i></button>
+                                                    </SfTooltip>
+                                                </Template>
+                                            </GridColumn>
+                                            <GridColumn Field="OrderNumber" HeaderText="Номер на заповед" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                            <GridColumn Field="OrderDate" HeaderText="Дата на заповед" TextAlign="TextAlign.Left" Width="60" Format="dd.MM.yyyy">
+                                                <Template Context="orderContext">
+                                                    @{
+                                                        var order = orderContext as OrderVM;
+
+                                                        @($"{order.OrderDate?.ToString("dd.MM.yyyy")} г.")
+                                                    }
+                                                </Template>
+                                            </GridColumn>
+                                            <GridColumn Field="OrderType" HeaderText="Вид" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                            <GridColumn Width="10">
+                                                <Template Context="orderContext">
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл със заповедта" OpensOn="Hover">
+                                                        <button type="button" class="btn-row" @onclick="(() => OnDownloadClick(orderContext as OrderVM))"><i class="fa fa-file-o"></i></button>
+                                                    </SfTooltip>
+                                                </Template>
+                                            </GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                &nbsp;
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="professionalDirectionVM.UpdateAllOrders" checked="@(professionalDirectionVM.UpdateAllOrders ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Добави последната заповед за всички професии/специалности в професионалното направление</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                &nbsp;
+                            </div>
+
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDateStr</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDateStr</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @professionalDirectionVM.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @professionalDirectionVM.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.professionalDirectionVM.IdProfessionalDirection != 0)
+                            {
+                                <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" style="margin-right: 30px;" @onclick="SendNotificationAsync">Изпрати известие</button>
+                            }
+                            <button class="btn btn-info" type="submit" form="submitFormProfessionalDirection">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

@@ -1,0 +1,110 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Филтър</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="searchForm">
+                <div id="validation-errors">
+                    <ValidationSummary />
+                </div>
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label class="control-label">Серия: </label>
+                                        <InputText class="form-control" @bind-Value="this.napooDocumentSerialNumberFilterVM.SeriesName"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label class="control-label">Фабричен номер: </label>
+                                        <InputText class="form-control" @bind-Value="this.napooDocumentSerialNumberFilterVM.SerialNumber"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label class="control-label">Година: </label>
+                                        <InputNumber class="form-control" @bind-Value="this.napooDocumentSerialNumberFilterVM.DocumentYear"></InputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Дата: </label>
+                                        <SfDatePicker TValue="DateTime?" @bind-Value="this.napooDocumentSerialNumberFilterVM.DocumentDate" Format="dd.MM.yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-11">
+                                    <div class="form-group">
+                                        <label>Вид на документ: </label>
+                                        <SfComboBox CssClass="form-control" TValue="int" TItem="TypeOfRequestedDocumentVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.typeOfRequestedDocumentSource" AllowFiltering="true" @bind-Value="this.napooDocumentSerialNumberFilterVM.IdTypeOfRequestedDocument" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="NumberWithName" Value="IdTypeOfRequestedDocument" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                @if (!this.isCPO)
+                                {
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label>ЦПО/Юридическо лице: </label>
+                                            <SfAutoComplete @ref="this.providersAutoComplete" TValue="int" TItem="CandidateProviderVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                        @bind-Value="this.napooDocumentSerialNumberFilterVM.IdCandidateProvider"
+                                                        DataSource="this.providersSource" AllowFiltering="true" CssClass="form-control">
+                                                <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                                    <NoRecordsTemplate>
+                                                        Няма намерени резултати.
+                                                    </NoRecordsTemplate>
+                                                    <ItemTemplate Context="providerCtx">
+                                                        @{
+                                                            var provider = providerCtx as CandidateProviderVM;
+
+                                                            @($"ЦПО {provider.ProviderName} към {provider.ProviderOwner}")
+                                                        }
+                                                    </ItemTemplate>
+                                                </AutoCompleteTemplates>
+                                                <AutoCompleteFieldSettings Text="CPONameAndOwnerName" Value="IdCandidate_Provider" />
+                                                <AutoCompleteEvents TValue="int" TItem="CandidateProviderVM" Filtering="OnFilterProvider"></AutoCompleteEvents>
+                                            </SfAutoComplete>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Операция: </label>
+                                        <SfComboBox CssClass="form-control" TValue="int" TItem="KeyValueVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvDocumentOperationsSource" AllowFiltering="true" @bind-Value="this.napooDocumentSerialNumberFilterVM.IdDocumentOperation" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="searchForm" @onclick="SearchBtn">Търси</button>
+                            <button class="btn btn-info" type="button" @onclick="ClearBtn">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

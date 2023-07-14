@@ -1,0 +1,265 @@
+﻿@inherits BlazorBaseComponent
+
+<fieldset disabled="@(this.DisableAllFields || this.DisableFieldsWhenUserIsExternalExpertOrCommittee)">
+    <EditForm EditContext="editContext">
+        <div class="card">
+            <div class="card-block" style="">
+                <p>
+                    <SfAccordion>
+                        <AccordionItems>
+                            <AccordionItem Header="Данни за юридическото лице" Expanded="true">
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Юридическо лице: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderOwner" disabled></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>ЕИК/Булстат: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.PoviderBulstat" disabled></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                @if (CandidateProviderVM.AttorneyName == null)
+                                                {
+                                                    <label>Регистрирано от (представляващ): </label>
+                                                    <InputText class="form-control" @bind-Value="CandidateProviderVM.ManagerName" disabled></InputText>
+                                                }
+                                                else
+                                                {
+                                                    <label>Регистрирано от (упълномощено лице): </label>
+                                                    <InputText class="form-control" @bind-Value="CandidateProviderVM.AttorneyName" disabled></InputText>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group required">
+                                                <label class="control-label">Регистрирано в: </label>
+                                                <SfComboBox Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableWhenProcedureIsCompleted" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="providerRegisteredAtValues" AllowCustom="false" @bind-Value="CandidateProviderVM.IdProviderRegistration">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Форма на собственост: </label>
+                                                <SfComboBox Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableWhenProcedureIsCompleted" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="providerOwnershipValues" AllowCustom="false" @bind-Value="CandidateProviderVM.IdProviderOwnership">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Населено място: </label>
+                                                <InputText class="form-control" @bind-Value="locationVM.DisplayJoinedNames" disabled></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <div class="form-group">
+                                                <label>Пощ. код: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ZipCode" disabled></InputText>
+                                            </div>
+                                        </div>
+                                        @if (this.CandidateProviderVM.IdRegionAdmin is not null)
+                                        {
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>Район: </label>
+                                                    <InputText class="form-control" @bind-Value="CandidateProviderVM.RegionAdmin.RegionName" disabled></InputText>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-5">
+                                                <div class="form-group">
+                                                    <label>Адрес по регистрация: </label>
+                                                    <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderAddress" disabled></InputText>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-sm-7">
+                                                <div class="form-group">
+                                                    <label>Адрес по регистрация: </label>
+                                                    <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderAddress" disabled></InputText>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Телефон: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderPhone"></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>Факс: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderFax"></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group required">
+                                                <label class="control-label">E-mail адрес: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderEmail"></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Интернет страница: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderWeb"></InputText>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem Header="Данни за центъра за информация и професионално ориентиране (ЦИПО)" Expanded="true">
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Име на ЦИПО: </label>
+                                                <SfTextBox @bind-Value="CandidateProviderVM.ProviderName" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableWhenProcedureIsCompleted"></SfTextBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group required">
+                                                <label class="control-label">Вид на обучаващата институция: </label>
+                                                <SfComboBox Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee && !this.DisableWhenProcedureIsCompleted" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="providerStatusValues" AllowCustom="false" @bind-Value="CandidateProviderVM.IdProviderStatus">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group required">
+                                                <label class="control-label">Населено място на административния офис на ЦИПО: </label>
+                                                <SfAutoComplete Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee" @ref="sfAutoCompleteLocationCorrespondence" TValue="int?" TItem="LocationVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                                @bind-Value="CandidateProviderVM.IdLocationCorrespondence"
+                                                                DataSource="locationCorrespondenceSource" AllowFiltering="true">
+                                                    <AutoCompleteTemplates TItem="LocationVM">
+                                                        <NoRecordsTemplate>
+                                                            Няма намерени резултати.
+                                                        </NoRecordsTemplate>
+                                                    </AutoCompleteTemplates>
+                                                    <AutoCompleteFieldSettings Text="DisplayJoinedNames" Value="idLocation" />
+                                                    <AutoCompleteEvents TValue="int?" TItem="LocationVM" Filtering="OnFilterLocationCorrespondence" ValueChange="SetZIPCodeAndRegionDataAsync"></AutoCompleteEvents>
+                                                </SfAutoComplete>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <div class="form-group required">
+                                                <label class="control-label">Пощ. код: </label>
+                                                <SfTextBox @bind-Value="CandidateProviderVM.ZipCodeCorrespondence" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee"></SfTextBox>
+                                            </div>
+                                        </div>
+                                        @if (this.municipalitiIds.Any(x => x == this.selectedLocation.idMunicipality))
+                                        {
+                                            <div class="col-sm-2">
+                                                <div class="form-group required">
+                                                    <label class="control-label">Район: </label>
+                                                    <SfComboBox Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee" ShowClearButton="true" TValue="int?" TItem="RegionVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="regionSource" AllowCustom="false" @bind-Value="this.CandidateProviderVM.IdRegionCorrespondence">
+                                                        <ComboBoxFieldSettings Text="RegionName" Value="idRegion" />
+                                                    </SfComboBox>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-5">
+                                                <div class="form-group required">
+                                                    <label class="control-label">Адрес за кореспонденция с административния офис на ЦИПО: </label>
+                                                    <SfTextBox @bind-Value="CandidateProviderVM.ProviderAddressCorrespondence" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee"></SfTextBox>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-sm-7">
+                                                <div class="form-group required">
+                                                    <label class="control-label">Адрес за кореспонденция с административния офис на ЦИПО: </label>
+                                                    <SfTextBox @bind-Value="CandidateProviderVM.ProviderAddressCorrespondence" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee"></SfTextBox>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Директор ЦИПО (Име): </label>
+                                                <SfTextBox @bind-Value="CandidateProviderVM.DirectorFirstName" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee"></SfTextBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Директор ЦИПО (Презиме): </label>
+                                                <SfTextBox @bind-Value="CandidateProviderVM.DirectorSecondName" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee"></SfTextBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Директор ЦИПО (Фамилия): </label>
+                                                <SfTextBox @bind-Value="CandidateProviderVM.DirectorFamilyName" Enabled="!this.DisableFieldsWhenUserIsExternalExpertOrCommittee"></SfTextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group required">
+                                                <label class="control-label">Лице за контакт: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.PersonNameCorrespondence"></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <div class="form-group required">
+                                                <label class="control-label">Потребители за получаване на известия/уведомления: </label>
+                                                <SfMultiSelect Enabled="!this.DisableAllFields && !this.DisableFieldsWhenUserIsExternalExpertOrCommittee" CssClass="form-control" TValue="List<PersonVM>" TItem="PersonVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.personsFromCPOSource" AllowFiltering="true" @bind-Value="this.CandidateProviderVM.PersonsForNotifications" AllowCustomValue="false">
+                                                    <MultiSelectFieldSettings Text="FullName" Value="IdPerson" />
+                                                </SfMultiSelect>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Телефон: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderPhoneCorrespondence"></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>Факс: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderFaxCorrespondence"></InputText>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group required">
+                                                <label class="control-label">E-mail адрес: </label>
+                                                <InputText class="form-control" @bind-Value="CandidateProviderVM.ProviderEmailCorrespondence"></InputText>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Допълнителна информация: </label>
+                                                <CustomInputTextArea rows="4" maxlength="512" class="form-control" @bind-Value="CandidateProviderVM.AdditionalInfo"></CustomInputTextArea>
+                                                <div style="float:right"><label>@(this.CandidateProviderVM.AdditionalInfo != null ? CandidateProviderVM.AdditionalInfo.Length : 0)/512</label></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                        </AccordionItems>
+                    </SfAccordion>
+                </p>
+            </div>
+        </div>
+    </EditForm>
+</fieldset>

@@ -1,0 +1,50 @@
+﻿@inherits BlazorBaseComponent
+
+@using Syncfusion.Blazor.Spinner
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="50%" EnableResize="true" AllowDragging="true" Height="40%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Позволено действие</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <div>
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Наименование на позволено действие:
+                                    </label>
+                                    <InputText Readonly="true" class="form-control"  @bind-Value="policy.PolicyCode"></InputText>
+                                </div>
+
+                                <div class="form-group ">
+                                    <label class="control-label">
+                                        Описание:
+                                    </label>
+                                    <InputTextArea @bind-Value="policy.PolicyDescription" class="form-control"></InputTextArea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+            
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float-">
+                        <button class="btn btn-info" type="submit" @onclick="ChangePolicy" form="saveForm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ToastMsg @ref="toast" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

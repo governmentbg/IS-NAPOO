@@ -1,0 +1,76 @@
+﻿@inherits BlazorBaseComponent
+ 
+
+<SfDialog @ref="@sfDialog" Target="#target" Width="50%" Height="60%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="@isVisible" ZIndex="3000">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Управление на срокове по процедури
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="managementDeadlineProcedureForm">
+                <div id="validation-errors">
+                    <ValidationSummary />
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Вид лицензия:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" DataSource="@kvLicensingTypeSource" 
+                                            CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" 
+                                            AllowCustom="false" AllowFiltering="true" @bind-Value="this.managementDeadlineProcedureVM.IdLicensingType">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Статус/Етап на процедурата по лицензиране:
+                                </label>
+                                <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" DataSource="@kvApplicationStatusSource" 
+                                    CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="this.managementDeadlineProcedureVM.IdApplicationStatus"
+                                    AllowCustom="false" AllowFiltering="true">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Срок:
+                                </label>
+                                <InputText class="form-control" @bind-Value="this.managementDeadlineProcedureVM.TermAsStr" />
+                            </div>
+                        </div>
+                    </div>
+             
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-info" form="managementDeadlineProcedureForm">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+         
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

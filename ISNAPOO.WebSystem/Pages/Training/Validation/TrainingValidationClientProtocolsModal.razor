@@ -1,0 +1,100 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    @if (this.IsEditable)
+                    {
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                            <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на нов протокол" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddProtocolBtn">Добави протокол</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="protocolsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="protocolsGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ValidationProtocolVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(protocolsGrid, (context as ValidationProtocolVM).IdValidationProtocol).Result
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="10" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Данни за протокол" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditProtocolBtn(context as ValidationProtocolVM))"><i class="fa fa-wpforms"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="10" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteProtocolBtn(context as ValidationProtocolVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdValidationProtocol" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="ValidationProtocolTypeName" HeaderText="Вид на протокола" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ValidationProtocolNumber" HeaderText="№ на протокол" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ValidationProtocolDate" HeaderText="Дата" TextAlign="TextAlign.Left" Width="30" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Файл" TextAlign="TextAlign.Left" Width="50">
+                                <Template>
+                                    @{
+                                        var entry = (context as ValidationProtocolVM);
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry.FileName))">@entry.FileName</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.FileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="8">
+                                    <Template>
+                                        @{
+                                            var ctx = context as ValidationProtocolVM;
+                                            var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx.IdValidationClient, "TrainingCourseProtocol");
+                                            if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                            {
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                    <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                                </SfTooltip>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            }
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ValidationProtocolModal @ref="validationProtocolModal" CallbackAfterSubmit="UpdateAfterModalSubmit" />

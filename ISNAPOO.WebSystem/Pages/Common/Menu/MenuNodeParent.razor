@@ -1,0 +1,156 @@
+﻿@inject IMenuNodeService MenuNodeService
+@inherits BlazorBaseComponent
+<hr />
+@if (model == null)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <SfDialog Target="#target" Width="50%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="this.isVisible">
+        <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+        <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+        <DialogTemplates>
+            <Header>
+                Данни за елемент от навигационното меню
+            </Header>
+            <Content>
+                <div>
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                </div>
+                <EditForm EditContext="editContext" OnSubmit="OnSubmitHandler" id="parentForm">
+                    <div class="form-group">
+                        <label><b>Избери меню</b></label>
+                        <SfComboBox TValue="int?" TItem="MenuNodeVM" PopupHeight="230px" Placeholder="Меню" DataSource="roots" @bind-Value="model.IdParentNode">
+                            <ComboBoxFieldSettings Text="Name" Value="IdMenuNode" />
+                        </SfComboBox>
+                    </div>
+                    <div class="form-group">
+                        <label>Наименование:</label>
+                        <InputText class="form-control" @bind-Value="model.Name" />
+                    </div>
+                    <div class="form-group">
+                        <label>Ред:</label>
+                        <InputNumber class="form-control" @bind-Value="model.NodeOrder" />
+                    </div>
+                    <div class="form-group">
+                        <label>URL:</label>
+                        <InputText class="form-control" @bind-Value="model.URL" />
+                    </div>
+                    <div class="form-group">
+                        <label>Query параметри:</label>
+                        <InputText class="form-control" @bind-Value="model.QueryParams" />
+                    </div>
+                    <div class="form-group">
+                        <label>Target:</label>
+                        <InputText class="form-control" @bind-Value="model.Target" />
+                    </div>
+                    <div class="form-group">
+                        <label>CSS Class:</label>
+                        <InputText class="form-control" @bind-Value="model.CssClass" />
+                    </div>
+                    <div class="form-group">
+                        <label>CSS Icon Class:</label>
+                        <InputText class="form-control" @bind-Value="model.CssClassIcon" />
+                    </div>
+                </EditForm>
+            </Content>
+            <FooterTemplate>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <div class="text-right">
+                                <button class="btn btn-info" type="submit" form="parentForm">Запиши</button>
+
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </FooterTemplate>
+        </DialogTemplates>
+    </SfDialog>
+}
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    List<string> validationMessages = new List<string>();
+    List<MenuNodeVM> roots = new List<MenuNodeVM>();
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private MenuNodeVM model = new MenuNodeVM();
+    public override bool IsContextModified => this.editContext.IsModified();
+    ToastMsg toast;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.editContext = new EditContext(this.model);
+        this.roots = await this.MenuNodeService.GetAllMenuNodesRootsAsync();
+    }
+    public async Task OpenModal(int id = 0)
+    {
+        this.validationMessages.Clear();
+        this.editContext = new EditContext(this.model);
+        if (id != 0)
+        {
+            this.model = await this.MenuNodeService.GetMenuNodeByIdAsync(id);
+        }
+        else
+        {
+            this.model = new MenuNodeVM() { Type = MenuNodeTypes.MenuNodeParent };
+        }
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+    private async Task OnSubmitHandler()
+    {
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+            this.editContext = new EditContext(this.model);
+            this.editContext.EnableDataAnnotationsValidation();
+
+            this.validationMessages.Clear();
+            bool isValid = this.editContext.Validate();
+            this.validationMessages.AddRange(this.editContext.GetValidationMessages().ToList());
+            if (isValid)
+            {
+                int result;
+
+                if (this.model != null)
+                {
+                    result = await this.MenuNodeService.UpdateMenuNodeAsync(this.model);
+                }
+                else
+                {
+                    result = await this.MenuNodeService.CreateMenuNodeAsync(this.model);
+                }
+                if (result > 0)
+                {
+                    await this.ShowSuccessAsync("Записът е успешен!");
+                }
+                await this.OnSubmit.InvokeAsync();
+                if (this.model.IdMenuNode == 0)
+                {
+                    this.isVisible = false;
+                }
+                this.StateHasChanged();
+            }
+        }
+        finally
+        {
+            this.loading = false;
+        }
+    }
+}

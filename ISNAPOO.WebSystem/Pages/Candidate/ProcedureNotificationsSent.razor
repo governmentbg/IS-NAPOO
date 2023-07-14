@@ -1,0 +1,45 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                    <SfGrid DataSource="notificationsSource" AllowSorting="true" @ref="notificationsGrid"
+                            EnableAltRow="true" EnableHover="false" AllowSelection="false" AllowFiltering="true" AllowTextWrap="true" 
+                            AllowPaging=true Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="NotificationVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" QueryCellInfo="CellInfoHandler"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(this.notificationsGrid, (context as NotificationVM).IdNotification).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                    <button @onclick="(async () => await this.ReviewNotification(context as NotificationVM))" class="btn-row"> <i class="fa fa-search-plus"></i> </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdNotification" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="About" HeaderText="Относно" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="NotificationText" HeaderText="Коментар" Width="18%"></GridColumn>
+                            <GridColumn Field="SendDate" HeaderText="Дата на изпращане" Format="dd.MM.yyyy HH:mm:ss" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="PersonFrom.FullName" HeaderText="Изпратено от" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="PersonTo.FullName" HeaderText="Изпратено до" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="StatusNotificationName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="ReviewDate" HeaderText="Дата на преглед" Format="dd.MM.yyyy HH:mm:ss" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NotificationModal @ref="notificationModal" />
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

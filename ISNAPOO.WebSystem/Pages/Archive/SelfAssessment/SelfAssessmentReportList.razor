@@ -1,0 +1,154 @@
+﻿@page "/SelfAssessmentReportList"
+
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ManageSelfAssessmentReports")]
+
+@{
+    base.CheckUserActionPermission("ManageSelfAssessmentReports", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Доклади за самооценка</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterBtn">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            @if (showButtonCreateAssessmentReport)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="(async () => await CreateAssessmentReport())">Добави доклад</button>
+                                </li>
+                            }
+                            @if (this.isNapoo == true)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateSelfAssessmentsReport">Справка</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="OpenRejectSelfAssModal">Връщане на доклад</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-success btn-outline-success waves-effect md-trigger" @onclick="OpenApproveSelfAssModal">Одобрение на доклад</button>
+                                </li>
+                            }
+
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="reportsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="reportsGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>                       
+                        <GridEvents TValue="SelfAssessmentReportVM" OnToolbarClick="ToolbarClick" RowSelected="RowSelectedHandler" RowDeselected="RowDeselectedHandler"/>            
+                        <GridColumns>
+                            @if (this.isNapoo == true)
+                            {
+                                <GridColumn Type="ColumnType.CheckBox" Width="20" HeaderText=""></GridColumn>
+                            }                            
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                <Template>
+                                    @GetRowNumber(reportsGrid, (context as SelfAssessmentReportVM).IdSelfAssessmentReport).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="5%" HeaderText=" ">
+                                <Template>
+                                    @if(this.isNapoo == true)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.EditReportBtn(context as SelfAssessmentReportVM))"><i class="fa fa-search-plus"></i></button>
+                                        </SfTooltip>
+                                    }
+                                    else if(this.isNapoo == false)
+                                    {
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.EditReportBtn(context as SelfAssessmentReportVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdSelfAssessmentReport" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumberString" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="@nameof(selfAssessmentReportVM.CandidateProvider.MixCPOandCIPONameOwner)" HeaderText="@this.cpoCipoHeaderTxt" TextAlign="TextAlign.Left" Width="15%">
+                                <Template>
+                                    @{
+                                        var ctx = context as SelfAssessmentReportVM;
+                                        if (this.cpoCipoHeaderTxt == "ЦПО")
+                                        {
+                                            ctx.CandidateProvider.MixCPOandCIPONameOwner = ctx.CandidateProvider.CPONameOwnerGrid;
+                                        }
+                                        else
+                                        {
+                                            ctx.CandidateProvider.MixCPOandCIPONameOwner = ctx.CandidateProvider.CIPONameOwnerGrid;
+                                        }
+                                        @ctx.CandidateProvider.MixCPOandCIPONameOwner
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Year" HeaderText="Година" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="FilingDateAsStr" HeaderText="Дата на подаване" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Field="Status" HeaderText="Статус" TextAlign="TextAlign.Center" Width="15%">
+                                <Template>
+                                    @{
+                                        var ctx = context as SelfAssessmentReportVM;
+                                        switch (ctx.Status)
+                                        {
+                                            case "Създаден":
+                                                <label class="form-label-status label label-warning" style="width: 60%;">@ctx.Status</label>
+                                                break;
+                                            case "Подаден":
+                                                <label class="form-label-status label label-primary" style="width: 60%;">@ctx.Status</label>
+                                                break;
+                                            case "Върнат":
+                                                <label class="form-label-status label label-danger" style="width: 60%;">@ctx.Status</label>
+                                                break;
+                                            case "Одобрен":
+                                                <label class="form-label-status label label-success" style="width: 60%;">@ctx.Status</label>
+                                                break;
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommentSelfAssessmentReportStatus" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Width="5%">
+                                <Template>
+                                    @{
+                                        var ctx = context as SelfAssessmentReportVM;
+                                        var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx.IdSelfAssessmentReport, "SelfAssessmentReport");
+                                        if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SelfAssessmentReportModal @ref="selfAssessmentReportModal" CallbackAfterSubmit="UpdateAfterModalSubmit" />
+<SelfAssessmentApproveRejectModal @ref="selfAssessmentApproveRejectModal" CallbackAfterSubmit="this.UpdateAfterModalSubmit" />
+<SelfAssessmentReportFilterListModal @ref="selfAssessmentReportFilterListModal" CallbackAfterSubmit="OnFilterModalSubmit" />
+
+
+

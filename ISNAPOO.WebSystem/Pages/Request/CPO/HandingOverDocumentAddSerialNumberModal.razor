@@ -1,0 +1,54 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="handingOverDocumentAddSerialNumberModal" @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" Height="60%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Добавяне на фабрични номера</Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-11">
+                                <SfGrid DataSource="fabricNumbersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                        AllowTextWrap="true" @ref="fabricNumbersGrid" AllowSelection="true" AllowPaging="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridEvents TValue="DocumentSerialNumberVM" RowSelected="DocumentSerialNumberSelected" RowDeselected="DocumentSerialNumberDeselected"></GridEvents>
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Width="20" Type="ColumnType.CheckBox"></GridColumn>
+                                        <GridColumn Field="TypeOfRequestedDocument.NumberWithName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+                                        <GridColumn Field="ReceiveDocumentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                        <GridColumn Field="DocumentSeriesName" HeaderText="Серия" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                        <GridColumn Field="SerialNumber" HeaderText="Фабричен номер" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="saveForm" @onclick="Add">Добави</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

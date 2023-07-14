@@ -1,0 +1,186 @@
+﻿@using ISNAPOO.Core.ViewModels.CPO.ProviderData
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@inherits BlazorBaseComponent
+
+<EditForm EditContext="editContext">
+    <div class="modal-body">
+        <SfAccordion>
+            <AccordionItems>
+                <AccordionItem Header="Подадени документи" Expanded="true">
+                    <ContentTemplate>
+                        <a href="#" style="text-transform: none">
+                            <span>Заявление № @CandidateProviderVM.ApplicationNumber/ @CandidateProviderVM.ApplicationDateFormated</span>
+                        </a>
+                    </ContentTemplate>
+                </AccordionItem>
+                <AccordionItem Header="Проверка на документация" Expanded="true">
+                    <ContentTemplate>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Водещ експерт: </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int" TItem="ExpertVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="leadingExpertDatasource" AllowCustom="false" @bind-Value="LeadingExpert.IdExpert">
+                                        <ComboBoxFieldSettings Text="Person.FullName" Value="IdExpert" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <p>
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" disabled="@isBtnDisabled" @onclick="PositiveStep">Положителна оценка</button>
+
+                                        <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" disabled="@isBtnDisabled" @onclick="NegativeStep">Отрицателна оценка</button>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </ContentTemplate>
+                </AccordionItem>
+                <AccordionItem Header="Положителна оценка" Expanded="true" Visible="@this.isVisiblePositiveStep">
+                    <ContentTemplate>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="form-group required">
+                                    <label class="control-label">Професионално направление:</label>
+                                    <SfComboBox TValue="int?" TItem="ProfessionalDirectionVM" AllowCustom="false" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                @bind-Value="this.procedureExternalExpert.IdProfessionalDirection" DataSource="@professionalDirectionSource" AllowFiltering="true">
+                                        <ComboBoxEvents TValue="int?" TItem="ProfessionalDirectionVM" OnValueSelect="FilterExternalExpert"></ComboBoxEvents>
+                                        <ComboBoxFieldSettings Text="DisplayNameAndCode" Value="IdProfessionalDirection" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group required">
+                                    <label class="control-label">Външен експерт: </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int" TItem="ExpertVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="externalExpertDatasource" AllowCustom="false" @bind-Value="procedureExternalExpert.IdExpert">
+                                        <ComboBoxFieldSettings Text="Person.FullName" Value="IdExpert" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">Представяне на доклад до:</label>
+                                    <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.expertReportDeadline"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <p>
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddExternalExpert">Добави експерт</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid ID="defaultGrid" @ref="externalExpertGrid" DataSource="addedExpertGridSource" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Width="5%">
+                                            <Template Context="expertContext">
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+												<button type="button" class="btn-row" @onclick="(() => DeleteRowExternalExpert(expertContext as ProcedureExternalExpertVM))"><i class="fa fa-trash-o"></i></button>
+                                          </SfTooltip>
+                                                    </Template>
+                                        </GridColumn>
+                                        @*<GridColumn Field="ProfessionalDirection.Code" HeaderText="Код" TextAlign="TextAlign.Left" Width="30px"></GridColumn>*@
+                                        <GridColumn Field="ProfessionalDirection.DisplayNameAndCode" HeaderText="Професионално направление" TextAlign="TextAlign.Left" Width="60%"></GridColumn>
+                                        <GridColumn Field="Expert.Person.FullName" HeaderText="Външен експерт" TextAlign="TextAlign.Left" Width="35%"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="form-group">
+                                    <label class="control-label">Експертна комисия: </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="expertCommissionValues" AllowCustom="false" @bind-Value="this.idExpertCommission">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="control-label">Представяне на доклад до:</label>
+                                    <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.napooReportDeadline"></SfDatePicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <p>
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PrintReportPositive">Приложение 1,2</button>
+
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="Application3">Приложение 3</button>
+
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="Application4">Приложение 4</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </ContentTemplate>
+                </AccordionItem>
+                <AccordionItem Header="Отрицателна оценка" Expanded="true" Visible="@this.isVisibleNegativeStep">
+                    <ContentTemplate>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Нередовност: </label>
+                                    <InputText class="form-control" @bind-Value="this.NegativeIssueText"></InputText>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <p>
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNegativeIssue">Добави нередовност</button>
+
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PrintReportNegative">Приложение 6,7</button>
+
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="LicenseDenial">Отказ лицензия</button>
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid ID="NegativeGrid" @ref="negativeIssueGrid" DataSource="addedNegativeIssueSource" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Width="5%">
+                                            <Template Context="negativeIssueContext">
+                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row"    @onclick="(() => DeleteRowNegativeIssue(negativeIssueContext as NegativeIssueVM))"><i class="fa fa-trash-o"></i></button>
+                                           </SfTooltip>
+                                                    </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="NegativeIssueText" HeaderText="Нередовности" TextAlign="TextAlign.Left" Width="95%"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </ContentTemplate>
+                </AccordionItem>
+            </AccordionItems>
+        </SfAccordion>
+    </div>
+</EditForm>
+
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ShowRegixDataModal @ref="regixData" />
+<ToastMsg @ref="toast"></ToastMsg>

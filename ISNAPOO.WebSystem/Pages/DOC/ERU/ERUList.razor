@@ -1,0 +1,132 @@
+﻿@using ISNAPOO.WebSystem.Pages.Common.Nomenclatures
+@inject IDOCService docService
+@inject IJSRuntime JsRuntime
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddNewERU">Нов</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="eruGrid" DataSource="erusource" AllowSorting="true" AllowTextWrap="true" AllowFiltering="true" AllowPaging="true">
+                        <GridPageSettings PageSize="10" PageCount="5" PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn Width="15px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="(() => SelectedRow(context as ERUVM))" class="btn-row"> <i class="fa fa-pencil-square-o"></i> </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="15px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => DeleteRowERU((context as ERUVM).IdERU))"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Code" HeaderText="Шифър на ЕРУ" TextAlign="TextAlign.Left" Width="50px"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Наименование на ЕРУ" TextAlign="TextAlign.Left" Width="100px"></GridColumn>
+                            <GridColumn Field="ProfessionalTrainingName" HeaderText="Вид професионална подготовка" TextAlign="TextAlign.Left" Width="100px"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ERUDataModal @ref="eruDataModal" OnSubmitHandler="OnModalSubmitHandler"></ERUDataModal>
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+
+@code {
+
+    [Parameter]
+    public DocVM docVM { get; set; }
+
+    ERUVM eruVM = new ERUVM();
+    List<ERUVM> erusource = new List<ERUVM>();
+    ERUDataModal eruDataModal = new ERUDataModal();
+    SfGrid<ERUVM> eruGrid = new SfGrid<ERUVM>();
+    ToastMsg toast;
+
+    int idEruToDelete = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!this.erusource.Any())
+        {
+            this.erusource = (await this.docService.GetAllERUsByDocIdAsync(new ERUVM() { IdDOC = this.docVM.IdDOC })).ToList();
+        }
+
+        this.StateHasChanged();
+    }
+
+    private async Task SelectedRow(ERUVM model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewDOCData", false);
+        if (!hasPermission) { return; }
+
+        model = await this.docService.GetERUByIdAsync(new ERUVM() { IdERU = model.IdERU });
+        this.eruDataModal.Open(model);
+    }
+
+    private async Task DeleteRowERU(int idEru)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageDOCData", false);
+        if (!hasPermission) { return; }
+
+        idEruToDelete = idEru;
+
+
+        string msg = "Сигурни ли сте, че искате да изтриете избрания запис?";
+        bool confirmed = await this.ShowConfirmDialogAsync(msg);
+        if (confirmed)
+        {
+            var result = await this.docService.DelteERUById(idEru);
+            if (result > 0)
+            {
+                this.toast.sfSuccessToast.Content = "Записът е изтрит успешно!";
+                await toast.sfSuccessToast.ShowAsync();
+            }
+
+            this.erusource = (await this.docService.GetAllERUsByDocIdAsync(new ERUVM() { IdDOC = this.docVM.IdDOC })).ToList();
+            this.eruGrid.Refresh();
+        }
+
+    }
+
+    public void Clear()
+    {
+        this.erusource = new List<ERUVM>();
+    }
+
+    private async Task AddNewERU()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageDOCData", false);
+        if (!hasPermission) { return; }
+
+        this.eruDataModal.Open(new ERUVM() { IdDOC = this.docVM.IdDOC });
+    }
+
+    private async Task OnModalSubmitHandler()
+    {
+        this.erusource = (await this.docService.GetAllERUsByDocIdAsync(new ERUVM() { IdDOC = this.docVM.IdDOC })).ToList();
+        this.StateHasChanged();
+
+    }
+}

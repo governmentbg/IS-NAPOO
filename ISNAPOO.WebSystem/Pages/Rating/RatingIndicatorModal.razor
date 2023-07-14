@@ -1,0 +1,132 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="50%" EnableResize="true" AllowDragging="true" Height="60%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @if (this.indicator.IdIndicator == 0) 
+            {
+                <span>Настройка на индикатор за рейтинг</span>
+            }
+            else
+            {
+                <span>Редакция</span>
+            }
+        </Header>
+            
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.ValidationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-block">
+                    <p>
+                        <div class="row">
+                            <div class="col-12">
+                                <div>
+                                    <label class="control-label">Индикатор</label>
+                                    <SfComboBox TValue="int?" TItem="KeyValueVM" Placeholder="Изберете вид на идентификатора" @bind-Value="TypeOfIndicator" DataSource="kvTypesOfIndicators">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        <ComboBoxEvents TValue="int?" TItem="KeyValueVM" OnValueSelect="SelectedType"></ComboBoxEvents>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        </div>
+                        &nbsp;
+                        <div class="row">
+                            @if (IsTypeOfIndicatorSelected)
+                            {
+                                <EditForm OnSubmit="CreateNewIndicator" id="editform" EditContext="this.editContext">
+                                @if (this.TypeOfIndicator != null)
+                                {
+                                    @switch (this.kvTypesOfIndicators.First(y => y.IdKeyValue == TypeOfIndicator).DefaultValue1)
+                                    {
+                                        case "Numerical":
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Година</label>
+                                                        <SfNumericTextBox TValue="int" Format="####"  @bind-Value="indicator.Year" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Точки</label>
+                                                        <SfNumericTextBox ShowSpinButton="false" TValue="decimal" Min="0" @bind-Value="indicator.Points" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Диапазон от</label>
+                                                            <SfNumericTextBox TValue="decimal" Format="n2" Min="0" @bind-Value="indicator.RangeFrom" />
+                                                            
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Диапазон до</label>
+                                                            <SfNumericTextBox TValue="decimal" Format="n2" Min="0" @bind-Value="indicator.RangeTo" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            break;
+                                        case "Quality":
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">Година</label>
+                                                            <SfNumericTextBox TValue="int" Format="#### г." Max="2100" Min="2000" @bind-Value="indicator.Year" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">Точки "Да"</label>
+                                                            <SfNumericTextBox TValue="decimal" Min="0" @bind-Value="indicator.PointsYes" Format="n2" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group required">
+                                                            <label class="control-label">Точки "Не"</label>
+                                                            <SfNumericTextBox TValue="decimal" Min="0" @bind-Value="indicator.PointsNo" Format="n2" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                </EditForm>
+                            }
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (IsTypeOfIndicatorSelected)
+                            {
+                                <button style="margin-right: 5px;" form="editform" class="btn btn-info" type="submit">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

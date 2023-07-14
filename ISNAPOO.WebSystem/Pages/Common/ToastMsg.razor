@@ -1,0 +1,13 @@
+﻿
+<SfToast @ref="sfSuccessToast" CssClass="e-toast-success" Timeout="10000" ShowCloseButton="true">
+    <ToastPosition X="Right"></ToastPosition>
+</SfToast>
+
+<SfToast @ref="sfErrorToast" CssClass="e-toast-danger" Timeout="10000" ShowCloseButton="true">
+    <ToastPosition X="Right"></ToastPosition>
+</SfToast>
+
+@code {
+    public SfToast sfSuccessToast = new SfToast();
+    public SfToast sfErrorToast = new SfToast();
+}

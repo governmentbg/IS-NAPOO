@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<RdpzsdRegisterEntriesResponse xmlns="http://egov.bg/RegiX/NACID/Rdpzsd/RdpzsdRegisterEntriesResponse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <RdpzsdRegisterEntry>
+    <FullName>Йордан Любомиров Чорбаджийски</FullName>
+    <Uan>VK11454</Uan>
+    <Uin>6305156261</Uin>
+    <IdNumber>1234567</IdNumber>
+    <Email>test@test.com</Email>
+    <SpecialityInfo>
+      <Institution>Софийски университет "Св. Климент Охридски"</Institution>
+      <AdmissionReason>За студенти и докторанти в държавни и частни ВУ - по реда на  чл. 68 ал. 1 от ЗВО</AdmissionReason>
+      <Speciality>Спортни дейности и туризъм</Speciality>
+      <Municipality>Софийска</Municipality>
+      <EducationForm>Редовно</EducationForm>
+      <EducationalQualification>Магистър след висше</EducationalQualification>
+      <StudentStatus>Дипломиран</StudentStatus>
+    </SpecialityInfo>
+    <SpecialityInfo>
+      <Institution>"Великотърновски университет "Св. св. Кирил и Методий"</Institution>
+      <AdmissionReason>За  студенти и докторанти в държавни и частни ВУ - по реда на  чл. 68 ал. 1 от ЗВО</AdmissionReason>
+      <Speciality>Публична администрация</Speciality>
+      <Municipality>Велико Търново</Municipality>
+      <EducationForm>Редовно</EducationForm>
+      <EducationalQualification>Бакалавър</EducationalQualification>
+      <StudentStatus>Дипломиран</StudentStatus>
+    </SpecialityInfo>
+    <DoctoralInfo>
+      <Institution>Софийски университет "Св. Климент Охридски"</Institution>
+      <AdmissionReason>За  студенти и докторанти в държавни и частни ВУ - по реда на  чл. 68 ал. 1 от ЗВО</AdmissionReason>
+      <Speciality>Изкуствознание и изобразителни изкуства</Speciality>
+      <Municipality>Софийска</Municipality>
+      <EducationForm>Редовно</EducationForm>
+      <EducationalQualification>Доктор</EducationalQualification>
+      <StartDate>01.01.2021</StartDate>
+      <Duration>1.5</Duration>
+      <StudentStatus>Действащ</StudentStatus>
+    </DoctoralInfo>
+  </RdpzsdRegisterEntry>
+</RdpzsdRegisterEntriesResponse>

@@ -1,0 +1,84 @@
+﻿@inherits BlazorBaseComponent
+
+@page "/SelfAssessmentSurveyList"
+
+@attribute [AuthorizeAttribute(Policy = "ShowSurveyList")]
+
+@{
+    base.CheckUserActionPermission("ShowSurveyList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Настройки на шаблон на доклад за самооценка на @this.SurveyTargetName</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSurveyBtn">Добави шаблон</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="surveySource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="surveyGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="SurveyVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="11">
+                                <Template>
+                                    @GetRowNumber(surveyGrid, (context as SurveyVM).IdSurvey).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="13" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.EditSurveyBtn(context as SurveyVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="13" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.DeleteSurveyBtn(context as SurveyVM))"><i class="fa fa-trash-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdSurvey" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Наименование" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+                            <GridColumn Field="SurveyTypeValue" HeaderText="Тип на шаблона" TextAlign="TextAlign.Left" Width="70"></GridColumn>
+                            <GridColumn Field="Year" HeaderText="Година" TextAlign="TextAlign.Left" Width="50"></GridColumn>                       
+                            <GridColumn Width="10">
+                                <Template>
+                                    @{
+                                        var ctx = context as SurveyVM;
+                                        var openedRow = this.GetAllCurrentlyOpenedModalsConcurrencyInfoValue(ctx!.IdSurvey, "Survey");
+                                        if (openedRow != null && openedRow.IdPerson != this.UserProps.IdPerson)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Записът е в процес на редакция" OpensOn="Hover">
+                                                <button class="btn-row" disabled><i class="fa fa-lock"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<SelfAssessmentSurveyModal @ref="surveyModal" CallbackAfterSubmit="UpdateAfterSurveyModalSubmitAsync" />

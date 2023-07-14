@@ -1,0 +1,135 @@
+﻿@using Data.Models.Data.SqlView.Archive
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="98%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Курсисти</Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid ID="sfGrid" @ref="sfGrid" DataSource="dataGridSource" EnableAltRow="true" EnableHover="false" AllowTextWrap="true" AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                                    <GridEvents OnToolbarClick="ToolbarClick" TValue="AnnualStudents" />
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn HeaderText="Записани курсисти в курсове за придобиване на степен на професионална квалификация и придобили степен на професионална квалификация по пол и година на раждане" TextAlign="TextAlign.Left" Width="100%">
+                                            <GridColumns>
+                                                <GridColumn Field="IdAnnualStudent" IsPrimaryKey="true" Visible="false" />
+                                                <GridColumn Field="BirthDate" HeaderText="Година"/>
+                                                <GridColumn HeaderText="Записани курсисти по степен на ПК">
+                                                    <GridColumns>
+                                                        <GridColumn HeaderText="Първа степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountIncludedMan_I_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountIncludedWomen_I_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Втора степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountIncludedMan_II_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountIncludedWomen_II_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Трета степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountIncludedMan_III_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountIncludedWomen_III_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Четвърта степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountIncludedMan_IV_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountIncludedWomen_IV_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </GridColumn>
+
+                                                <GridColumn HeaderText="Придобили степен на професионална квалификация">
+                                                    <GridColumns>
+                                                        <GridColumn HeaderText="Първа степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountCertificateMan_I_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountCertificateWomen_I_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Втора степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountCertificateMan_II_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountCertificateWomen_II_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Трета степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountCertificateMan_III_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountCertificateWomen_III_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Четвърта степен на ПК">
+                                                            <GridColumns>
+                                                                <GridColumn HeaderText="Мъже" Field="CountCertificateMan_IV_VQS">
+
+                                                                </GridColumn>
+                                                                <GridColumn HeaderText="Жени" Field="CountCertificateWomen_IV_VQS">
+
+                                                                </GridColumn>
+                                                            </GridColumns>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </GridColumn>
+                                            </GridColumns>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

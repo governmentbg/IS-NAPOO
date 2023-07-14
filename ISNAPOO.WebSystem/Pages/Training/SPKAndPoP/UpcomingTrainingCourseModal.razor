@@ -1,0 +1,248 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<CourseVM>
+
+<SfDialog @bind-Visible="isVisible" Width="96%" Height="auto" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-header">
+                                <nav class="navbar navbar-expand  ">
+                                    <!-- Left navbar links -->
+                                    <ul class="navbar-nav">
+                                        @*<li class="nav-item d-none d-sm-inline-block">
+                                        <SfTooltip Content="Избиране на програма за обучение" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenSelectProgramModal">Избери програма</button>
+                                        </SfTooltip>
+                                        </li>
+                                        <li class="nav-item d-none d-sm-inline-block">
+                                        &nbsp;
+                                        </li>*@
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="card-body">
+                                <EditForm EditContext="this.editContext">
+                                    @if (this.selectedProgram.Speciality is not null && this.selectedProgram.FrameworkProgram is not null)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-7">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <p style="font-weight: bold;">@this.selectedProgram.Speciality.CodeAndName - @this.selectedProgram.Speciality.VQS_Name @(this.selectedProgram.FrameworkProgram.IdTypeFrameworkProgram == this.kvPartProfession.IdKeyValue ? "(по част от професия)" : "(по професионална квалификация (СПК))")</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-5">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <p style="font-weight: bold;">Рамкова програма @this.selectedProgram.FrameworkProgram.Name</p>
+                                                        <p style="display: grid">
+                                                            <span>- <b>входящо ниво на образование:</b> @this.selectedProgram.FrameworkProgram.MinimumLevelEducationName</span>
+                                                            <span>- <b>форма на обучение:</b> @this.selectedProgram.FrameworkProgram.FormEducationNames</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Програма за обучение: </label>
+                                                        <InputText class="form-control" @bind-Value="this.courseVM.ProgramName" disabled />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>&nbsp;</label>
+                                                        <p>
+                                                            <button style="padding-top: 6px; padding-bottom: 6px;" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenSelectProgramModal">Избор</button>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Наименование на курса: </label>
+                                                        <SfTextBox @bind-Value="this.courseVM.CourseName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Форма на обучение: </label>
+                                                        <SfComboBox Enabled="this.courseVM.IdProgram != 0" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="formEducationSource" AllowCustom="false" @bind-Value="this.courseVM.IdFormEducation">
+                                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                        </SfComboBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Основна учебна база: </label>
+                                                        <SfComboBox Enabled="@(this.isTrainingProgramSelected)" ShowClearButton="true" TValue="int?" TItem="CandidateProviderPremisesVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="premisesSource" AllowCustom="false" @bind-Value="this.courseVM.IdCandidateProviderPremises">
+                                                            <ComboBoxFieldSettings Text="PremisesName" Value="IdCandidateProviderPremises" />
+                                                            <ComboBoxEvents TItem="CandidateProviderPremisesVM" TValue="int?" ValueChange="PremisesSelectedHandler" />
+                                                        </SfComboBox>
+                                                    </div>
+                                                </div>
+                                                @if (this.courseVM.CandidateProviderPremises is not null)
+                                                {
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Населено място: </label>
+                                                            <SfTextBox @bind-Value="this.courseVM.CandidateProviderPremises.Location.DisplayJoinedNames" Enabled="false" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Населено място: </label>
+                                                            <SfTextBox @bind-Value="this.emptyPremises" Enabled="false" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Вид на курса: </label>
+                                                        <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="measureTypeSource" AllowCustom="false" @bind-Value="this.courseVM.IdMeasureType">
+                                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                            <ComboBoxEvents TItem="KeyValueVM" TValue="int?" ValueChange="OnMeasureTypeSelected" />
+                                                        </SfComboBox>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Основен източник на финансиране: </label>
+                                                        <SfComboBox Enabled="@(this.courseVM.IdMeasureType != null)" ShowClearButton="true" TValue="int?" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="assignTypeSource" AllowCustom="false" @bind-Value="this.courseVM.IdAssignType">
+                                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                        </SfComboBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label>Задължителни учебни часове: </label>
+                                                        <InputNumber class="form-control" @bind-Value="this.selectedProgram.MandatoryHours" disabled />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label>Избираеми учебни часове: </label>
+                                                        <InputNumber class="form-control" @bind-Value="this.selectedProgram.SelectableHours" disabled />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Цена (в лева за един курсист): </label>
+                                                        <InputNumber class="form-control" min="0" @bind-Value="this.courseVM.Cost" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-group">
+                                                        <label>Други пояснения: </label>
+                                                        <textarea style="width:-webkit-fill-available; border-block:"
+                                                                  ondrop="5"
+                                                                  rows="4"
+                                                                  @bind="this.courseVM.AdditionalNotes"
+                                                                  @bind:event="oninput"
+                                                                  maxlength="4000">
+                                                        </textarea>
+                                                        <div style="float:right"><label>@(this.courseVM.AdditionalNotes != null ? this.courseVM.AdditionalNotes.Length : 0)/4000</label></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label>Крайна дата за записване: </label>
+                                                        <SfDatePicker @bind-Value="this.courseVM.SubscribeDate" Format="dd.MM.yyyy" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Дата за започване на курса: </label>
+                                                        <SfDatePicker @bind-Value="this.courseVM.StartDate" Format="dd.MM.yyyy" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group required">
+                                                        <label class="control-label">Дата за завършване на курса: </label>
+                                                        <SfDatePicker @bind-Value="this.courseVM.EndDate" Format="dd.MM.yyyy" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    @if (this.courseVM.IdCourse != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.courseVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.courseVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.courseVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.courseVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (!this.hideBtnsConcurrentModal)
+                            {
+                                @if (this.courseVM.IdStatus == this.kvUpcomingCourse.IdKeyValue && this.courseVM.IdCourse != 0)
+                                {
+                                    <button style="margin-right: 30px;" class="btn btn-info" type="submit" @onclick="(async () => await this.StartTrainingCourseBtn())">Стартиране на курса</button>
+                                }
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn(true))">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SelectTrainingProgramModal @ref="selectTrainingProgramModal" CallbackAfterSubmit="GetSelectedProgramAfterModalSubmit" />
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

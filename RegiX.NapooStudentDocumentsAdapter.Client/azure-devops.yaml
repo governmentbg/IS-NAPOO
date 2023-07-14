@@ -1,0 +1,35 @@
+variables:
+  BuildConfiguration: debug
+resources:
+- repo: self
+queue:
+  name: RegiX
+steps:
+- task: VisualStudioTestPlatformInstaller@1
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'select'
+    vstsFeed: 'RegiX'
+- task: MSBuild@1
+  displayName: 'Build'
+  inputs:
+    configuration: '$(BuildConfiguration)' 
+    solution: '**/*.sln' 
+- task: MSBuild@1
+  displayName: 'Publish project RegiX.Adapters.WCFAdapterHost.Impl/RegiX.Adapters.WCFAdapterHost.Impl.proj'
+  inputs:
+    project: '$(Build.Repository.LocalPath)\RegiX.Adapters.WCFAdapterHost.Impl\RegiX.Adapters.WCFAdapterHost.Impl.csproj'
+    msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile="$(Build.Repository.LocalPath)\RegiX.Adapters.WCFAdapterHost.Impl\Properties\PublishProfiles\FolderProfile.pubxml"'
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+        $productVersion = Get-Item $(Build.Repository.LocalPath)\RegiX.Adapters.WCFAdapterHost.Impl\bin\Release\Publish\bin\RegiX.Adapters.WCFAdapterHost.Impl.dll |Select-Object -ExpandProperty VersionInfo|Select-Object -ExpandProperty ProductVersion
+        New-Item -Path $(Build.Repository.LocalPath)\RegiX.Adapters.WCFAdapterHost.Impl\bin\Release\Publish -Name "$productVersion.ver"
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: $(Build.SourceBranchName)'
+  inputs:
+    artifactName: '$(Build.SourceBranchName)'
+    PathtoPublish: '$(Build.Repository.LocalPath)\RegiX.Adapters.WCFAdapterHost.Impl\bin\Release\Publish'

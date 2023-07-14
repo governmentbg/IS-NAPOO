@@ -1,0 +1,264 @@
+﻿@page "/StartRegistration"
+@inherits BlazorBaseComponent
+@using ISNAPOO.Core.Contracts.Candidate
+@using ISNAPOO.Core.Contracts.Mailing
+@using ISNAPOO.Core.ViewModels.Common.ValidationModels
+@using ISNAPOO.WebSystem.Extensions
+@using ISNAPOO.WebSystem.Pages.Framework
+@using Microsoft.AspNetCore.DataProtection
+@using System.ComponentModel.DataAnnotations
+@using RegiX
+@inject Microsoft.JSInterop.IJSRuntime JsRuntime
+@inject NavigationManager NavMgr
+@inject IRegiXService RegiXService
+@inject IDataSourceService DataSourceService
+@inject ICandidateProviderService CandidateProviderService
+@inject ILocationService LocationService
+@inject IUploadFileService uploadService
+@inject IMailService MailService
+@inject ICommonService CommonService
+
+
+
+
+<SfDialog @bind-Visible="isVisible" Target="#target" Width="900px" EnableResize=true ZIndex="2000" AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Нова електронна регистрация в ИС на НАПОО
+        </Header>
+        <Content>
+            <fieldset disabled=@isSubmitClicked>
+                <EditForm EditContext="editContext" OnSubmit="@StartRegistrationProcedure" id="regForm">
+                    <ValidationSummary />
+
+                    <div class="modal-body">
+                        <div class="card text-muted">
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label class="control-label font-weight-bold">
+                                                Статус на заявката за е-Автентикация:
+                                            </label>
+                                            @startRegistrationModel.EAuthStatusFormatted
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Информация от е-Автентикация:
+                                            </label>
+                                            @startRegistrationModel.EAuthPersonName
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                ЕГН :
+                                            </label>
+                                            @startRegistrationModel.EAuthEGN
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                E-mail:
+                                            </label>
+                                            @startRegistrationModel.EAuthEmail
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label class="text-gray" style="font-weight: bold;">
+                                                Моля, въведете информация за юридическото лице, за което искате да направите електронна регистрация в информационната система на НАПОО.
+                                                След подаването на формата за регистрация, ще получите информация по e-mail, за потвърждение и последващи стъпки.
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-4">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        ЕИК (БУЛСТАТ):
+                                    </label>
+                                    <SfTextBox ID="EIK" @bind-Value="@startRegistrationModel.EIK" ></SfTextBox>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <label class="control-label">
+                                    &nbsp;
+                                </label>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="CheckEIKinReGIX">Зареди данни</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Юридическо лице:
+                                    </label>
+
+                                    <SfTextBox ID="CompanyName" Enabled=false @bind-Value="@startRegistrationModel.CompanyName"></SfTextBox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            @{
+                                if (useAttorney)
+                                {
+
+                                    <div class="col-4">
+                                        <!-- text input -->
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Пълномощник :
+                                            </label>
+                                            <SfTextBox ID="Attorney" @bind-Value="@startRegistrationModel.AttorneyName" ></SfTextBox>
+                                        </div>
+                                    </div>
+
+                                }
+                                else
+                                {
+                                    <div class="col-4">
+                                        <!-- text input -->
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Представлявано от :
+                                            </label>
+                                            <SfTextBox ID="ManagerName" @bind-Value="@startRegistrationModel.ManagerName" ></SfTextBox>
+                                        </div>
+                                    </div>
+
+                                }
+                            }
+
+
+                            <div class="col-4">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        E-mail:
+                                    </label>
+                                    <SfTextBox ID="Email" @bind-Value="@startRegistrationModel.Email" ></SfTextBox>
+
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Вид на лицензията:
+                                    </label>
+                                    <SfComboBox TValue="int" TItem="KeyValueVM" AllowCustom="false" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                DataSource="licensingType" AllowFiltering="true" @bind-Value="@startRegistrationModel.IdLicensingType">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <!-- text input -->
+                                <div class="form-group required">
+                                    <label class="control-label">
+                                        Длъжност:
+                                    </label>
+                                    <SfTextBox ID="Title" @bind-Value="@startRegistrationModel.Title" ></SfTextBox>
+
+                                </div>
+                            </div>
+                        </div>
+                        @{
+                            if (useAttorney)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Пълномощно :
+                                            </label>
+                                            <SfUploader AutoUpload="false" AllowMultiple="false">
+                                                <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                            </SfUploader>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                if (startRegistrationModel.HasUploadedFile)
+                                {
+                                    <div class="row e-upload" style="margin-left:0px">
+                                        <div class="col-sm-8">
+                                            <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@startRegistrationModel.FileName</a></span>
+                                        </div>
+                                    </div>
+                                }
+
+
+                            }
+                        }
+                    </div>
+                </EditForm>
+            </fieldset>
+        </Content>
+        <FooterTemplate>
+            <fieldset disabled=@isSubmitClicked>
+                <div class="row">
+                    <div class="col">
+                        <div class="float-">
+                            <button type="submit" class="btn btn-primary btn-outline-primary waves-effect md-trigger" form="regForm">Заяви</button>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+
+@if (this.showConfirmDialog)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(this.showConfirmDialog ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Внимание!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>@ConfirmMessages.UnsavedChanges</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(async () => { this.closeConfirmed = true; SetConfirmDialogVisibility(); })">Да</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="(() => this.showConfirmDialog = false)">Отказ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

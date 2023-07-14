@@ -1,0 +1,95 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="98%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Процедура за лицензиране Заявление № <span style="font-size: 18px;color: white !important;">@candidateProviderVM.ApplicationNumber/ @candidateProviderVM.ApplicationDateFormated, @this.candidateProviderVM.ProviderName,</span> Статус <span style="font-size: 18px;color: white !important;">@this.candidateProviderVM.ApplicationStatus</span></Header>
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.validationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <SfTab EnablePersistence="true" LoadOn="ContentLoad.Init" @bind-SelectedItem="selectedTab">
+                <TabEvents Selecting="Select" Selected="OnTabSelected" />
+                <TabItems>
+                    <TabItem Visible="!this.hideTabs">
+                        <ChildContent>
+                            <TabHeader Text="Проверка за пълнота и редовност"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOCompletenessCheckModal @ref="completenessCheck" CandidateProviderVM="candidateProviderVM" CallbackRefreshDocumentsGrid="RefreshDocumentsGrid" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.hideTabs">
+                        <ChildContent>
+                            <TabHeader Text="Оценка на възможността"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOOpportunityAssessment @ref="opportunityAssessment" CandidateProviderVM="candidateProviderVM" CallbackRefreshDocumentsGrid="RefreshDocumentsGrid" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Административни документи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOProcedureDocuments @ref="procedureDocuments" CandidateProviderVM="candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.hideTabs">
+                        <ChildContent>
+                            <TabHeader Text="Срокове"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <ProcedureDeadlines @ref="procedureDeadlines" CandidateProviderVM="candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.hideTabs">
+                        <ChildContent>
+                            <TabHeader Text="Издаване на лицензия"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <CIPOLicenseIssuing @ref="licenseIssuing" CandidateProviderVM="candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.hideTabs">
+                        <ChildContent>
+                            <TabHeader Text="Изпратени известия"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <ProcedureNotificationsSent @ref="procedureNotificationsSent" CandidateProviderVM="candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Доклади ВЕ"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <ExternalExpertsReports @ref="externalExpertsReports" CandidateProviderVM="candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="CheckInRegix">Проверка в RegiX</button>
+                        <button class="btn btn-info" type="submit" @onclick="Submit">Запиши</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

@@ -1,0 +1,102 @@
+﻿@inherits BlazorBaseComponent
+<div id="validation-errors">
+    @if (this.validationMessages.Any())
+    {
+        <ul class="validation-errors">
+            @foreach (var msg in this.validationMessages)
+            {
+                <li class="validation-message">@msg</li>
+            }
+        </ul>
+    }
+</div>
+<div class="card" style="margin-bottom: 0px;">
+    <div class="card-block" style="">
+        <p>
+            @if (this.IsEditable)
+            {
+                <EditForm EditContext="editContext">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Име: </label>
+                                <SfTextBox @bind-Value="this.model.FirstName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Презиме: </label>
+                                <SfTextBox @bind-Value="this.model.SecondName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Фамилия: </label>
+                                <SfTextBox @bind-Value="this.model.FamilyName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="new-task" style="margin-top: 28px;">
+                                <div class="to-do-list">
+                                    <div class="checkbox-fade fade-in-primary">
+                                        <label class="form-label">
+                                            <input type="checkbox" @bind-value="this.model.IsChairman" checked="@(this.model.IsChairman ? "checked" : null)">
+                                            <span class="cr">
+                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                            </span> <span>Председател</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <p>
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddMemberBtn">Добави</button>
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </EditForm>
+            }
+            <div class="row">
+                <div class="col-sm-12">
+                    <label class="text-gray"><b>Членове на комисия и Квестори:</b></label>
+                    <SfGrid DataSource="membersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ValidationCommissionMemberVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ValidationCommissionMemberVM).IdValidationCommissionMember).Result
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                            {
+                                <GridColumn Width="5" HeaderText=" ">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteMemberBtn(context as ValidationCommissionMemberVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdValidationCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="IsChairmanAsStr" HeaderText="Председател" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </p>
+    </div>
+</div>
+

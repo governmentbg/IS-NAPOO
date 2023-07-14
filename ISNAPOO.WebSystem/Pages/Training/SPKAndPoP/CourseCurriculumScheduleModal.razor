@@ -1,0 +1,160 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<CourseScheduleVM>
+
+<SfDialog @bind-Visible="isVisible" Width="90%" Height="90%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3010" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-body">
+                                <EditForm EditContext="this.editContext">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group required">
+                                                <label class="control-label">Вид на обучението: </label>
+                                                <SfComboBox Enabled="courseScheduleVM.IdCourseSchedule == 0 && IsEditable" ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="curriculumScheduleTypeSource" AllowCustom="false" @bind-Value="this.courseScheduleVM.IdTrainingScheduleType">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                    <ComboBoxEvents TItem="KeyValueVM" TValue="int" ValueChange="ScheduleTypeSelectedHandler" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Вид професионална подготовка: </label>
+                                                <SfTextBox @bind-Value="this.courseScheduleVM.TrainingCurriculum.ProfessionalTraining" Enabled="false" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <div class="form-group">
+                                                <label class="control-label">Предмет: </label>
+                                                <SfTextBox @bind-Value="this.courseScheduleVM.TrainingCurriculum.Subject" Enabled="false" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9">
+                                            <div class="form-group required">
+                                                <label class="control-label">Тема: </label>
+                                                <SfTextBox @bind-Value="this.courseScheduleVM.TrainingCurriculum.Topic" Enabled="false" />
+                                            </div>
+                                        </div>
+                                        @if (IsEditable)
+                                        {
+                                            <div class="col-sm-1">
+                                                <div class="form-group">
+                                                    <label>&nbsp;</label>
+                                                    <p>
+                                                        <button style="padding-top: 6px; padding-bottom: 6px;" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenSelectTopicModal" disabled="@(this.courseScheduleVM.IdTrainingScheduleType == 0)">Избор</button>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Дата: </label>
+                                                <SfDatePicker Enabled="IsEditable" TValue="DateTime?" @bind-Value="this.courseScheduleVM.ScheduleDate" Format="dd.MM.yyyy" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Часове: </label>
+                                                <SfNumericTextBox Enabled="IsEditable" ShowSpinButton="false" Format="###.###" @bind-Value="this.courseScheduleVM.Hours" Min="0" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Продължителност от: </label>
+                                                <SfTimePicker Enabled="IsEditable" TValue="DateTime?" @bind-Value="this.courseScheduleVM.TimeFrom" ShowClearButton="true" Step="5" ValidateOnInput="false" Min="@timeFromMin" Max="@timeToMax">
+                                                    <TimePickerEvents TValue="DateTime?" ValueChange="@SetMinValueForTimeTo"></TimePickerEvents>
+                                                </SfTimePicker>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Продължителност до: </label>
+                                                <SfTimePicker Enabled="@(this.timeFromEntered && IsEditable)" TValue="DateTime?" @bind-Value="this.courseScheduleVM.TimeTo" ShowClearButton="true" Min="@timeToMin" Max="@timeToMax" Step="5" ValidateOnInput="false"></SfTimePicker>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="control-label">Преподавател: </label>
+                                                <SfComboBox Enabled="@(this.courseScheduleVM.IdTrainingScheduleType != 0 && IsEditable)" ShowClearButton="true" TValue="int?" TItem="CandidateProviderTrainerVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="trainerSource" AllowCustom="false" @bind-Value="this.courseScheduleVM.IdCandidateProviderTrainer">
+                                                    <ComboBoxFieldSettings Text="FullName" Value="IdCandidateProviderTrainer" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="control-label">МТБ: </label>
+                                                <SfComboBox Enabled="@(this.courseScheduleVM.IdTrainingScheduleType != 0 && IsEditable)" ShowClearButton="true" TValue="int?" TItem="CandidateProviderPremisesVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="premisesSource" AllowCustom="false" @bind-Value="this.courseScheduleVM.IdCandidateProviderPremises">
+                                                    <ComboBoxFieldSettings Text="PremisesName" Value="IdCandidateProviderPremises" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    @if (this.courseScheduleVM.IdCourseSchedule != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.courseScheduleVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.courseScheduleVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.courseScheduleVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.courseScheduleVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                @if (IsEditable)
+                {
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div class="text-right">
+                                @if (!this.hideBtnsConcurrentModal)
+                                {
+                                    <button style="margin-right: 15px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitAndContinueBtn())"><i class="fa fa-save"></i>Запиши и добави нов</button>
+                                    <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Запиши</button>
+                                }
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SelectTopicModal @ref="selectTopicModal" CallbackAfterSubmit="UpdateAfterTopicSelected" />
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

@@ -1,0 +1,138 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<ClientCourseVM>
+
+<SfDialog @bind-Visible="isVisible" Width="95%" Height="95%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3010" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за курсист <span style="color: #ffffff;">@this.clientCourseVM.FullName @(this.clientCourseVM.IdFinishedType.HasValue ? $"- {this.finishedTypeSource.FirstOrDefault(x => x.IdKeyValue == this.clientCourseVM.IdFinishedType.Value)?.Name}" : string.Empty)</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            @if (this.addedClientCourses.Count > 1)
+            {
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" style="margin-right: 15px;" @onclick="PreviousClient" disabled="@(this.disablePreviousBtn)"><i class="fa fa-arrow-circle-left"></i>Предишен курсист</button>
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextClient" disabled="@(this.disableNextBtn)"><i class="fa fa-arrow-circle-right"></i>Следващ курсист</button>
+                    </div>
+                </div>
+            }
+            <SfTab @ref="currentCourseClientTab" EnablePersistence="false" LoadOn="ContentLoad.Dynamic" @bind-SelectedItem="this.selectedTab">
+                <TabEvents Selecting="Select" />
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Данни за курсист"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ClientCourseInformation @ref="clientCourseInformation" ClientCourseVM="this.clientCourseVM" CourseVM="this.courseVM" IsEditEnabled="@(this.IsEditable && (!this.isDocumentPresent))" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    @if (!this.isClientCourseNew)
+                    {
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Документи на курсист"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <div class="wrap">
+                                    <article>
+                                        <ClientCourseEducation @ref="clientCourseEducation" ClientCourseVM="this.clientCourseVM" CourseVM="this.courseVM" IsEditEnabled="@(this.IsEditable && (!this.isDocumentPresent))" CallbackAfterDocUpload="UpdateClientsAfterDocumentsUploadedAsync" />
+                                    </article>
+                                </div>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Данни за завършване"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <div class="wrap">
+                                    <article>
+                                        <ClientCourseFinishedData @ref="clientCourseFinishedData" ClientCourseVM="this.clientCourseVM" CourseVM="this.courseVM" CallbackAfterEditContextValidation="GetValidationModelFromClientCourseFinishedData" IsEditEnabled="@(this.IsEditable && (!this.isDocumentPresent))" EntryFromCourseGraduatesList="this.EntryFromCourseGraduatesList" />
+                                    </article>
+                                </div>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem Visible="this.finishedDataModel.DocumentDate.HasValue && this.showIssueDuplicateTab">
+                            <ChildContent>
+                                <TabHeader Text="Издаване на дубликат"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <div class="wrap">
+                                    <article>
+                                        <ClientCourseIssueDuplicate @ref="clientCourseIssueDuplicate" ClientCourseVM="this.clientCourseVM" CourseVM="this.courseVM" CallbackAfterEditContextValidation="GetValidationModelFromClientCourseIssueDuplicate" IsEditEnabled="@(!this.IsEditable ? false : (!this.isDocumentPresent ? true : false))" EntryFromCourseGraduatesList="this.EntryFromCourseGraduatesList" />
+                                    </article>
+                                </div>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem Visible="this.courseVM.Program is not null && this.courseVM.Program.IdLegalCapacityOrdinanceType.HasValue">
+                            <ChildContent>
+                                <TabHeader Text="Документ за правоспособност"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <div class="wrap">
+                                    <article>
+                                        <ClientCourseIssueLegalCapacityOrdinance @ref="clientCourseIssueLegalCapacityOrdinance" ClientCourseVM="this.clientCourseVM" CourseVM="this.courseVM" CallbackAfterEditContextValidation="GetValidationModelFromClientCourseIssueLegalCapacityOrdinance" IsEditEnabled="@(!this.IsEditable ? false : (!this.isDocumentPresent ? true : false))" EntryFromCourseGraduatesList="this.EntryFromCourseGraduatesList" />
+                                    </article>
+                                </div>
+                            </ContentTemplate>
+                        </TabItem>
+                    }
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.clientCourseVM.IdClientCourse != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.clientCourseVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.clientCourseVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.clientCourseVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.clientCourseVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+
+                            @*@if (this.addedClientCourses.Count > 1)
+                            {
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="PreviousClient" disabled="@(this.disablePreviousBtn)">Предишен курсист</button>
+                            <button style="margin-right: 90px;" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="NextClient" disabled="@(this.disableNextBtn)">Следващ курсист</button>
+                            }*@
+                            @if (!this.hideBtnsConcurrentModal && (!this.IsEditable ? false : (!this.isDocumentPresent ? true : false)))
+                            {
+                                <button style="margin-right: 15px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitAndContinueBtn())"><i class="fa fa-save"></i>Запиши и добави нов</button>
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

@@ -1,0 +1,204 @@
+﻿@inherits BlazorBaseComponent
+
+@implements IConcurrencyCheck<SelfAssessmentReportVM>
+
+<SfDialog @bind-Visible="isVisible" Width="98%" Height="98%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2008" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <SfTab EnablePersistence="false" LoadOn="ContentLoad.Init" @bind-SelectedItem="this.selectedTab">
+                <TabEvents Selecting="Select" />
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Основни данни"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <SelfAssessmentReportMainData @ref="selfAssessmentReportMainData" SelfAssessmentReportVM="this.selfAssessmentReportVM" DisableFields="this.hideFileInReportBtn" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem> <TabItem Visible=@showTabTrainingConsulting>
+                        <ChildContent>
+                            <TabHeader Text=@tabTitleTrainingConsulting></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <SfGrid ID="summaryGrid1" DataSource="@summarySourceGroup1" @ref="summaryGrid1">
+                                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                <GridAggregates>
+                                                    <GridAggregate>
+                                                        <GridAggregateColumns>
+                                                            <GridAggregateColumn Field=@nameof(SelfAssessmentSummaryProfessionalTrainingVM.ProfessionalTrainingIndicatorCount) Type="AggregateType.Sum">
+                                                                <FooterTemplate>
+                                                                    @{
+                                                                        var aggregate = (context as AggregateTemplateContext);
+                                                                        <div>
+                                                                            <p>Общо: @aggregate.Sum</p>
+                                                                        </div>
+                                                                    }
+                                                                </FooterTemplate>
+                                                            </GridAggregateColumn>
+                                                        </GridAggregateColumns>
+                                                    </GridAggregate>
+
+                                                </GridAggregates>
+
+                                                <GridColumns>
+                                                    <GridColumn Field="ProfessionalTrainingIndicatorId" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                    <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="11">
+                                                        <Template>
+                                                            @GetRowNumber(summaryGrid1, (context as SelfAssessmentSummaryProfessionalTrainingVM).ProfessionalTrainingIndicatorId).Result
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Field="ProfessionalTrainingIndicatorName" HeaderText="Индикатор" TextAlign="TextAlign.Left" Width="500"></GridColumn>
+                                                    <GridColumn Field="ProfessionalTrainingIndicatorCount" HeaderText="Брой" TextAlign="TextAlign.Right"  Width="60"></GridColumn>
+                                                </GridColumns>
+                                            </SfGrid>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <SfGrid ID="summaryGrid2" DataSource="@summarySourceGroup2" @ref="summaryGrid2">
+                                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                <GridColumns>
+                                                    <GridColumn Field="ProfessionalTrainingIndicatorId" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                    <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="11">
+                                                        <Template>
+                                                            @GetRowNumber(summaryGrid2, (context as SelfAssessmentSummaryProfessionalTrainingVM).ProfessionalTrainingIndicatorId).Result
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Field="ProfessionalTrainingIndicatorName" HeaderText="Индикатор" TextAlign="TextAlign.Left" Width="500"></GridColumn>
+                                                    <GridColumn Field="ProfessionalTrainingIndicatorCount" HeaderText="Брой" TextAlign="TextAlign.Right" Width="60"></GridColumn>
+                                                </GridColumns>
+                                            </SfGrid>
+                                        </div>
+                                    </div>
+                                    @if (summarySourceGroup3.Any())
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <SfGrid ID="summaryGrid3" DataSource="@summarySourceGroup3" @ref="summaryGrid3">
+                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                    <GridColumns>
+                                                        <GridColumn Field="ProfessionalTrainingIndicatorId" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="11">
+                                                            <Template>
+                                                                @GetRowNumber(summaryGrid3, (context as SelfAssessmentSummaryProfessionalTrainingVM).ProfessionalTrainingIndicatorId).Result
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="ProfessionalTrainingIndicatorName" HeaderText="Индикатор" TextAlign="TextAlign.Left"  Width="500"></GridColumn>
+                                                        <GridColumn Field="ProfessionalTrainingIndicatorCount" HeaderText="Брой" TextAlign="TextAlign.Right" Width="60"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            </div>
+                                        </div>
+                                    }
+
+
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Годишен доклад за самооценяване"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <SelfAssessmentFilingOut @ref="selfAssessmentFilingOut" SelfAssessmentReportVM="this.selfAssessmentReportVM" CallbackAfterSubmit="UpdateAfterSurveyModalSubmit" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.selfAssessmentReportVM.IdSelfAssessmentReport != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.selfAssessmentReportVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.selfAssessmentReportVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.selfAssessmentReportVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.selfAssessmentReportVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.showAppRejBtn)
+                            {
+                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="OpenRejectSelfAssModal">Връщане на доклад</button>
+                                <button type="button" class="btn btn-success btn-outline-success waves-effect md-trigger" @onclick="OpenApproveSelfAssModal">Одобрение на доклад</button>
+
+                            }
+                            @if (!this.hideFileInReportBtn && !this.hideBtnsConcurrentModal)
+                            {
+                                <button style="margin-right: 60px;" class="btn btn-info" type="submit" @onclick="(async () => await this.FileInReportBtn())">Подаване на доклада</button>
+                            }
+                            @if (!this.hideBtnsConcurrentModal && !this.hideSubmitBtn)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn(true))">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<SelfAssessmentApproveRejectModal @ref="selfAssessmentApproveRejectModal" CallbackAfterSubmit="this.CallbackAfterRejectApprove" />
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+
+<style>
+
+    #summaryGrid2.e-grid .e-gridheader .e-columnheader {
+        display: none;
+    }
+
+    #summaryGrid3.e-grid .e-gridheader .e-columnheader {
+        display: none;
+    }
+
+    #summaryGrid1.e-grid .e-headercelldiv {
+        height: 30px;
+        line-height: 33px;
+    }
+
+    #summaryGrid2.e-grid .e-headercelldiv {
+        height: 30px;
+        line-height: 33px;
+    }
+
+    #summaryGrid3.e-grid .e-headercelldiv {
+        height: 30px;
+        line-height: 33px;
+    }
+</style> 

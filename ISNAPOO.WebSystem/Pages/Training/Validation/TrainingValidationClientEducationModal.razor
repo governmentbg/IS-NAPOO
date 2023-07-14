@@ -1,0 +1,85 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    @if (this.IsEditable)
+                    {
+                        <nav class="navbar navbar-expand  ">
+                            <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Content="Добавяне на нов документ" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenNewModal">Добави документ</button>
+                                    </SfTooltip>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="documentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="ValidationClientRequiredDocumentVM"></GridEvents>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as ValidationClientRequiredDocumentVM).IdValidationClientRequiredDocument).Result
+                                </Template>
+                            </GridColumn>
+                            @if (this.IsEditable)
+                    {
+                                <GridColumn Width="5">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => EditDocumentBtn(context as ValidationClientRequiredDocumentVM))"><i class="fa fa-pencil-square-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="5">
+                                    <Template>
+
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => DeleteDocument(context as ValidationClientRequiredDocumentVM))">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </button>
+                                            </SfTooltip>
+                                      
+                                    </Template>
+                                </GridColumn>
+                            }
+                            <GridColumn Field="IdValidationClientRequiredDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CourseRequiredDocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="25">
+                                <Template>
+                                    @{
+                                        var client = context as ValidationClientRequiredDocumentVM;
+                                        <div style="line-height: 14px;">
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="@client.FileName" OpensOn="Hover">
+                                                <a href="#" @onclick="(async () => await this.OnDownloadClick(client))">@(client.FileName)</a>
+                                            </SfTooltip>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="30" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="CreatePersonName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ValidationClientDocumentModal @ref="validationEducationModal" ClientVM="this.ClientVM" CallBackAfterSave="CallBackAfterSubmit"></ValidationClientDocumentModal>

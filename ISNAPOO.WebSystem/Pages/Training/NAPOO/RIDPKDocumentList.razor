@@ -1,0 +1,60 @@
+﻿@page "/RIDPKDocumentList"
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@this.title</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @*<li class="nav-item d-none d-sm-inline-block">
+                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddSurveyBtn">Добави анкета</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                            &nbsp;
+                            </li>*@
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="candidateProviderSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="candidateProviderGrid" AllowSelection="false" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="RIDPKVM" OnToolbarClick="ToolbarClick" />
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="7%">
+                                <Template>
+                                    @GetRowNumber(candidateProviderGrid, (context as RIDPKVM).IdRIDPK).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="9%" HeaderText=" ">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед на подадени документи за ПК за проверка" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(async () => await this.OpenRIDPKControlModalBtn(context as RIDPKVM))"><i class="fa fa-flag-checkered"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdRIDPK" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="35%"></GridColumn>
+                            <GridColumn Field="CandidateProvider.CPONameOwnerGrid" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="70%"></GridColumn>
+                            <GridColumn Field="Course.CourseName" HeaderText="Курс" TextAlign="TextAlign.Left" Width="50%" Visible="@(this.type == GlobalConstants.TOKEN_RIDPK_DOCUMENTLIST_COURSE)"></GridColumn>
+                            <GridColumn Field="FrameworkProgram.Name" HeaderText="Рамкова програма" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                            <GridColumn Field="Speciality.VQS_Name" HeaderText="СПК" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                            <GridColumn Field="Speciality.CodeAndName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                            <GridColumn Field="SubmittedDocumentCount" HeaderText="Брой подадени документи за ПК" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                            <GridColumn Field="SubmitDateAsStr" HeaderText="Дата на подаване" TextAlign="TextAlign.Left" Width="40%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<RIDPKDocumentModal @ref="ridpkDocumentModal" CallbackAfterSubmit="UpdateRIDPKDataAfterModalSubmit" />

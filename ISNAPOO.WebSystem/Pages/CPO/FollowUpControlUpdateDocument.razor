@@ -1,0 +1,94 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" @ref="sfDialog" Width="60%" Height="60%" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="this.isVisible" ZIndex="1999">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Изпращане на доклад на ЦПО за изпълнени препоръки от ПК
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="updateForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <nav class="navbar navbar-expand" style="padding-top:0">
+                                <ul class="navbar-nav">
+                                    <label>&nbsp</label>
+                                    <li class="nav-item d-none d-sm-inline-block">
+                                        @if (CPOorCIPO == "ЦПО")
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Печат на шаблон на доклад на ЦПО за изпълнени препоръки от Последващ контрол" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateReport">Печат на доклад</button>
+                                            </SfTooltip>
+                                        }
+                                        else
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Печат на шаблон на доклад на ЦИПО за изпълнени препоръки от Последващ контрол" OpensOn="Hover">
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="GenerateReport">Печат на доклад</button>
+                                            </SfTooltip>
+                                        }
+                                    </li>
+                                    <label>&nbsp</label>
+
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    <label>
+                        Прикачен файл:
+                    </label>
+                    <div class="row e-upload" style="margin-left:0px">
+                        <div class="col-sm-8">
+                            @if (this.model.HasUploadedFile)
+                            {
+                                var files = this.model.FileName.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                                foreach (var file in files)
+                                {
+                                    var fileName = file.Split(($"\\{this.model.IdFollowUpControlDocument}\\"), StringSplitOptions.RemoveEmptyEntries).ToArray().LastOrDefault();
+                                    <span class="align-text-bottom">
+                                        @if (!this.isBlankGenerated)
+                                        {
+                                            <button type="button" class="btn-row" @onclick="(() => OnRemove(fileName))"><i class="fa fa-trash-o"></i></button>
+                                        }
+                                        <a @onclick="(() => OnDownloadClick(fileName))" href="#" class="link-primary">@fileName</a>
+                                    </span>
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <label>
+                                    Няма прикачен файл
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <SfUploader AutoUpload="false" AllowMultiple="true" Enabled="!isBlankGenerated" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-warning" type="submit" form="updateForm">Изпрати към НАПОО</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ToastMsg @ref="toast"></ToastMsg>

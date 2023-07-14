@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EmploymentContractsRequest xmlns="http://egov.bg/RegiX/NRA/EmploymentContracts/Request">
+  <Identity>
+    <ID>123456789</ID>
+    <TYPE>Bulstat</TYPE>
+  </Identity>
+  <ContractsFilter>All</ContractsFilter>
+</EmploymentContractsRequest>

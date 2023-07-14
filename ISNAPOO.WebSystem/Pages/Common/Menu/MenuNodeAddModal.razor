@@ -1,0 +1,202 @@
+﻿@inherits BlazorBaseComponent
+@*<SfDialog @ref="sfDialog" Target="#target" Width="50%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="isVisibleAddModal" ZIndex="2000">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>
+            Данни за елемент от навигационното меню
+        </Header>
+        <Content>
+            
+            <div>
+                <ul class="validation-errors">
+					@foreach (var msg in this.validationMessages)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+                        <EditForm id="submitFormAreaModal" EditContext="editContext" OnSubmit="SubmitHandler">
+            <label><b>Избери тип</b></label>
+            <SfComboBox TValue="string" TItem="Type" PopupHeight="230px" Placeholder="напр. меню" @bind-Value="typeValue" DataSource="typesData">
+                <ComboBoxEvents TValue="string" TItem="Type" ValueChange="OnChange" />
+                <ComboBoxFieldSettings Text="Name" Value="Id" />
+            </SfComboBox>
+            @{
+                switch (typeValue)
+                {
+                    case MenuNodeTypes.MenuNodeRootBG:
+                        <br />
+                            <MenuNodeRoot OnClose="CloseModal" OnSubmit="OnSubmitHandler" IsModified="() => IsContextModified = true" MenuNodeVM="menuNodeVM" editContext="editContext"></MenuNodeRoot>
+                        break;
+                    case MenuNodeTypes.MenuNodeParentBG:
+                        <br />
+                            <MenuNodeParent OnClose="CloseModal" OnSubmit="OnSubmitHandler" IsModified="() => IsContextModified = true" MenuNodeVM="menuNodeVM" editContext="editContext"></MenuNodeParent>
+                        break;
+                    case MenuNodeTypes.MenuNodeLinkBG:
+                        <br />
+                            <MenuNodeLink OnClose="CloseModal" OnSubmit="OnSubmitHandler" IsModified="() => IsContextModified = true" MenuNodeVM="menuNodeVM" editContext="editContext"></MenuNodeLink>
+                        break;  
+                }
+            }
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>*@
+
+@if (this.showConfirmDialog)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(this.showConfirmDialog ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Внимание!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>@ConfirmMessages.UnsavedChanges</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(async () => { this.closeConfirmed = true; CancelHandler(); })">Да</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="(() => this.showConfirmDialog = false)">Отказ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    EditContext editContext;
+    MenuNodeVM menuNodeVM = new MenuNodeVM();
+    SfDialog sfDialog = new SfDialog();
+    List<string> validationMessages = new List<string>();
+    List<Type> typesData = new List<Type>
+    {
+        new Type()
+        {
+            Id = "1",
+            Name = MenuNodeTypes.MenuNodeRootBG
+        },
+        new Type()
+        {
+            Id = "2",
+            Name = MenuNodeTypes.MenuNodeParentBG
+        },
+        new Type()
+        {
+            Id = "3",
+            Name = MenuNodeTypes.MenuNodeLinkBG
+        }
+    };
+
+    bool isVisibleAddModal = false;
+    string typeValue = string.Empty;
+    bool IsContextModified = false;
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.isVisibleAddModal = false;
+        this.editContext = new EditContext(menuNodeVM);
+    }
+
+    private void OnChange(ChangeEventArgs<string, Type> args)
+    {
+        this.typeValue = args.ItemData?.Name;
+        this.IsContextModified = true;
+    }
+
+    private void CancelHandler()
+    {
+        if (!this.isSubmitClicked)
+        {
+            if (this.closeConfirmed)
+            {
+                this.showConfirmDialog = false;
+                this.closeConfirmed = false;
+                this.isVisible = false;
+                this.isVisibleAddModal = false;
+                this.StateHasChanged();
+            }
+            else
+            {
+                this.showConfirmDialog = true;
+                this.closeConfirmed = false;
+            }
+        }
+    }
+
+    private void ClosedHandler()
+    {
+        this.typeValue = string.Empty;
+    }
+
+    public void OpenModal()
+    {
+        this.editContext = new EditContext(menuNodeVM);
+        typeValue = null;
+        menuNodeVM = new MenuNodeVM();
+        validationMessages.Clear();
+        this.IsContextModified = false;
+        this.isVisibleAddModal = true;
+        this.StateHasChanged();
+    }
+
+    private async Task CloseModal()
+    {
+        if (IsContextModified)
+        {
+            this.showConfirmDialog = true;
+            if (this.closeConfirmed)
+            {
+                this.showConfirmDialog = false;
+                this.closeConfirmed = false;
+                this.isVisible = false;
+                this.isVisibleAddModal = false;
+                this.StateHasChanged();
+            }
+            else
+            {
+                this.showConfirmDialog = true;
+                this.closeConfirmed = false;
+            }
+        }
+        else
+        {
+            this.isVisibleAddModal = false;
+            this.StateHasChanged();
+        }
+
+    }
+
+    private async Task OnSubmitHandler(List<string> messages)
+    {
+        this.validationMessages = messages;
+        if(this.validationMessages.Count > 0)
+        {
+            return;
+        }
+        this.isVisibleAddModal = false;
+        this.StateHasChanged();
+        await this.OnSubmit.InvokeAsync();
+    }
+
+    private class Type
+    {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    protected virtual void OnXClickHandler(BeforeCloseEventArgs args)
+    {
+        if (args.ClosedBy == "Close Icon")
+        {
+            args.Cancel = true;
+
+            this.CloseModal();
+        }
+    }
+}

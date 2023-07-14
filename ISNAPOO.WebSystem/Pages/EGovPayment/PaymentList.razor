@@ -1,0 +1,178 @@
+﻿@page "/PaymentList"
+
+@attribute [AuthorizeAttribute(Policy = "ShowPaymentList")]
+
+@using ISNAPOO.Core.ViewModels.EGovPayment
+@inherits BlazorBaseComponent
+
+
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Заявки за плащания</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="openNewPaymentModal">Ново плащане</button>
+                            </li>                          
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <SfGrid DataSource="payments" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                        AllowTextWrap="true" @ref="paymentsGrid" AllowSelection="false" AllowPaging="true">
+                        @*Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">*@
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                    <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+
+                    <GridColumns>
+                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                            <Template>
+                                @GetRowNumber(paymentsGrid, (context as PaymentVM).IdPayment).Result
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Width="10">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button @onclick="( ()=>SelectPayment(context as PaymentVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn> 
+                        <GridColumn Width="10">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Код за плащане" OpensOn="Hover">
+                                    <button @onclick="@( ()=>ShowPaymentCode(context as PaymentVM))" class="btn-row"><i class="fa fa-lock"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Width="10">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Платежно нареждане" OpensOn="Hover">
+                                    <button @onclick="@( ()=>ShowPaymentOrder(context as PaymentVM))" class="btn-row"><i class="fa fa-file-text-o"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="ReceiptId" HeaderText="Номер на заявка в pay.egov.bg" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                        <GridColumn Field="CandidateProvider.ProviderName" HeaderText="ЦПО" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                        <GridColumn Field="ApplicantName" HeaderText="Задължено лице" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                        <GridColumn Field="PaymentAmount" HeaderText="Сума" TextAlign="TextAlign.Right" Width="15">
+                                <Template>
+                                        @{
+                                          var ctx = context as PaymentVM;                            
+                                          string amount = $"{ctx.PaymentAmount:0.00}";
+                                            @amount
+                                        }
+                                </Template>
+                        </GridColumn>
+                        <GridColumn Field="Currency" HeaderText="Валута" TextAlign="TextAlign.Left" Width="15"></GridColumn>
+                        <GridColumn Field="CreationDate" HeaderText="Дата на задължението" TextAlign="TextAlign.Left" Width="20">
+                                <Template>
+                                        @{
+                                var ctx = context as PaymentVM;
+                                var date = ctx.CreationDate.ToString("dd.MM.yyyy") + "г.";
+                                            @date
+                                        }
+                                </Template>
+                         </GridColumn>
+                        <GridColumn Field="ExpirationDate" HeaderText="Дата на изтичане" TextAlign="TextAlign.Left" Width="30">
+                            <Template>
+                                @{
+                                    var ctx = context as PaymentVM;                                   
+                                    var expDateFormat = ctx.ExpirationDate;
+                                    @expDateFormat
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="PaymentStatus" HeaderText="Статус" TextAlign="TextAlign.Center" Width="40">
+                            <Template>
+                                <div class="text-center">
+                                    @{
+                                        var payment = context as PaymentVM;
+
+                                        switch (payment.PaymentStatusIntCode)
+                                        {
+                                            case "pending":
+                                                <label class="form-label label label-warning">@payment.PaymentStatus</label>
+                                                break;
+                                            case "authorized":
+                                                <label class="form-label label label-success">@payment.PaymentStatus</label>
+                                                break;
+                                            case "ordered":
+                                                <label class="form-label label label-success">@payment.PaymentStatus</label>
+                                                break;
+                                            case "paid":
+                                                <label class="form-label label label-success">@payment.PaymentStatus</label>
+                                                break;
+                                            case "expired":
+                                                <label class="form-label label label-danger">@payment.PaymentStatus</label>
+                                                break;
+                                            case "canceled":
+                                                <label class="form-label label label-danger">@payment.PaymentStatus</label>
+                                                break;
+                                            case "suspended":
+                                                <label class="form-label label label-danger">@payment.PaymentStatus</label>
+                                                break;
+                                            case "inprocess":
+                                                <label class="form-label label label-info">@payment.PaymentStatus</label>
+                                                break;
+                                        }
+                                    }
+                                </div>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Width="10">
+                            <Template>
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отказване на заявка" OpensOn="Hover">
+                                    <button @onclick="@( ()=>SuspendPaymentRequest(context as PaymentVM))" class="btn-row"><i class="fa fa-trash"></i></button>
+                                </SfTooltip>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="IdPayment" IsPrimaryKey="true" Visible="false"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<PaymentModal @ref="paymentModal" CallbackAfterSubmit="LoadPaymentsDataAsync"></PaymentModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback"  @ref="ConfirmDialog"></ConfirmDialog>
+
+<SfDialog @bind-Visible="this.showCodeDialog" Width="30%" EnableResize="true"
+          AllowDragging="true" Height="30%" IsModal="true" ZIndex="5000" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Код за плащане</Header>
+        <Content>
+            <p style="text-align:center;font-size:2vw;">@AccessCode</p>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">                        
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="(() => this.showCodeDialog = false)">Затвори</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+@code {
+
+    protected DialogEffect AnimationEffect = DialogEffect.Zoom;
+
+    public bool showCodeDialog = false;
+
+}

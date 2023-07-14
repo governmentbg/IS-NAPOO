@@ -1,0 +1,75 @@
+variables:
+  Major: '1'
+  Minor: '0'
+  Patch: '27'
+  BuildConfiguration: release
+resources:
+- repo: self
+queue:
+  name: RegiX
+steps:
+- powershell: |
+   # Matches $(Major).$(Minor).$(Patch) string.
+   $regex = "(\$\(Major\)\.\$\(Minor\)\.\$\(Patch\))"
+   # File contents to be replaced
+   $fileName = "RegiX.NapooStudentDocumentsAdapter.Mocks\RegiX.NapooStudentDocumentsAdapter.Mocks.nuspec"
+   # Iterates through all the file's lines
+   $tmp = Get-Content $fileName | `
+   foreach `
+   { `
+       [regex]::replace($_,$regex, "$(Major).$(Minor).$(Patch)") `
+   }
+   # Update the file's content to the one containing the changed Patch version
+   Set-Content $fileName $tmp
+  displayName: 'Replace version in Mock nuspec'
+- task: VisualStudioTestPlatformInstaller@1
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'select'
+    vstsFeed: 'RegiX'
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    arguments: '--configuration $(BuildConfiguration)' 
+- task: VSTest@2
+  inputs:    
+    codeCoverageEnabled: True
+    vsTestVersion: 'toolsInstaller'
+    runSettingsFile: RegiX.NapooStudentDocumentsAdapter.Tests\.runsettings
+    testAssemblyVer2: |
+     **\$(BuildConfiguration)\*test*.dll
+     **\$(BuildConfiguration)\**\*test*.dll
+     !**\*Microsoft.VisualStudio.TestPlatform*
+     !**\obj\**
+- task: NuGetCommand@2
+  displayName: 'NuGet pack (prerelease)'
+  condition: eq(variables['BuildConfiguration'], 'debug')
+  inputs:
+    command: pack
+    packagesToPack: 'RegiX.NapooStudentDocumentsAdapter/RegiX.NapooStudentDocumentsAdapter.csproj;RegiX.NapooStudentDocumentsAdapter.Mocks/RegiX.NapooStudentDocumentsAdapter.Mocks.csproj'
+    versioningScheme: 'byPrereleaseNumber' # Options: off, byPrereleaseNumber, byEnvVar, byBuildNumber
+    majorVersion: '$(Major)'
+    minorVersion: '$(Minor)'
+    patchVersion: '$(Patch)'
+    packDestination: '$(Build.ArtifactStagingDirectory)'
+- task: NuGetCommand@2
+  displayName: 'NuGet pack (release)'
+  condition: eq(variables['BuildConfiguration'], 'release')
+  inputs:
+    command: pack
+    packagesToPack: 'RegiX.NapooStudentDocumentsAdapter/RegiX.NapooStudentDocumentsAdapter.csproj;RegiX.NapooStudentDocumentsAdapter.Mocks/RegiX.NapooStudentDocumentsAdapter.Mocks.csproj'
+    majorVersion: '$(Major)'
+    minorVersion: '$(Minor)'
+    patchVersion: '$(Patch)'
+    packDestination: '$(Build.ArtifactStagingDirectory)'
+- task: NuGetCommand@2
+  displayName: 'NuGet push'
+  inputs:
+    command: push
+    publishVstsFeed: 'RegiX'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' # Required when command == Push
+
+
+

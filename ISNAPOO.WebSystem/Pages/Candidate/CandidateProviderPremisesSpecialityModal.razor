@@ -1,0 +1,75 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="this.isVisible" Width="70%" EnableResize="true" AllowDragging="true" Height="70%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Добавяне на специалности за материално-техническа база</Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="row" style="margin-top:10px">
+                                <div class="col-sm-5 col-md-5 col-lg-4 col-12" style="margin-left:20px">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Вид на провежданото обучение:
+                                        </label>
+                                        <SfComboBox AllowCustom="false" TItem="string" TValue="string" DataSource="@TrainingTypes" @bind-Value="@currentTrainingType">
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 col-md-4 col-lg-3 col-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">
+                                            Съответствие с ДОС:
+                                        </label>
+                                        <SfComboBox AllowCustom="false" TItem="string" TValue="string" DataSource="@DocTypes" @bind-Value="@currentDocType">
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <SfGrid ID="eruGrid" @ref="specialitiesGrid" DataSource="specialitiesSource" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true" EnableVirtualization="true" Height="500">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                    <GridSelectionSettings CheckboxOnly="true" />
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn Field="IdSpeciality" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                                            <Template>
+                                                @GetRowNumber(specialitiesGrid, (context as SpecialityVM).IdSpeciality).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Type="ColumnType.CheckBox" HeaderText="Съответствие с ДОС" Width="5%"></GridColumn>
+                                        <GridColumn Field="CodeAndName" HeaderText="Специалност" Width="45%"></GridColumn>
+                                        <GridColumn Field="DOCMTBRequirements" HeaderText="Изисквания към материалната база" Width="45%"></GridColumn>
+                                    </GridColumns>
+                                    <GridEvents TValue="SpecialityVM" RowSelected="SpecialitySelectedHandler" RowDeselected="SpecialityDeselectedHandler" />
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="button" @onclick="AddSelectedSpecialitiesHandler">Добави</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+

@@ -1,0 +1,98 @@
+﻿@using ISNAPOO.Core.Contracts.Control
+@using ISNAPOO.Core.Contracts.Training
+@using ISNAPOO.Core.ViewModels.Training
+@using ISNAPOO.WebSystem.Pages.Control
+
+@inject ITrainingService TrainingService
+@inject ICandidateProviderService CandidateProviderService
+@inject IDataSourceService DataSourceService
+@inject IJSRuntime JsRuntime
+@inject ILocationService LocationService
+@inject IApplicationUserService ApplicationUserService
+@inject IControlService ControlService
+
+@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="1900" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Курс:  <span style="font-size: 18px;color: white !important;">@this.CourseName</span></Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid DataSource="this.courseCheckingsSource" TValue="CourseCheckingVM" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false" AllowExcelExport="true" AllowPdfExport="true"
+                                        AllowTextWrap="true" @ref="this.sfGrid" AllowPaging="true">
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridColumns>
+                                        <GridColumn Field="IdCourseChecking" IsPrimaryKey="true" Visible="false" ></GridColumn>
+                                        <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                            <Template>
+                                                @GetRowNumber(sfGrid, (context as CourseCheckingVM).IdCourseChecking).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Width="4%">
+                                            <Template>
+                                                @{
+                                                    var ctx = context as CourseCheckingVM;
+
+                                                    @if(ctx.IdFollowUpControl.HasValue)
+                                                    {
+                                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори данни за последващ контрол" OpensOn="Hover">
+                                                            <button @onclick="(() => OpenFollowUpControl(context as CourseCheckingVM))" class="btn-row"><i class="fa fa-flag-checkered"></i></button>
+                                                        </SfTooltip>
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="15%" Type="ColumnType.Date" Format="dd.MM.yyyy" />
+                                        <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="15%" />
+                                        <GridColumn Field="CreationDate" HeaderText="Дата на създаване" TextAlign="TextAlign.Left" Width="15%" Type="ColumnType.Date" Format="dd.MM.yyyy"/>
+                                        <GridColumn Field="" HeaderText="Създадено от" TextAlign="TextAlign.Left" Width="15%" >
+                                            <Template>
+                                                @GetPersonName((context as CourseCheckingVM).IdCreateUser).Result
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<FollowUpControlReadonlyModal @ref="followUpControlModal" LicenseType="@this.LicensingType" IsEditable="false"></FollowUpControlReadonlyModal>
+@code
+{
+
+    SfGrid<CourseCheckingVM> sfGrid = new SfGrid<CourseCheckingVM>();
+    List<CourseCheckingVM> courseCheckingsSource = new List<CourseCheckingVM>();
+    FollowUpControlReadonlyModal followUpControlModal = new FollowUpControlReadonlyModal();
+    private string CourseName = "";
+    private string LicensingType = "LicensingCPO";
+
+    public async Task OpenModal(int IdCourse, string? Name)
+    {
+        this.CourseName = Name;
+        var temp = await this.TrainingService.GetAllActiveCourseCheckingsAsync(IdCourse);
+        this.courseCheckingsSource = temp.Count > 0 ? temp : new List<CourseCheckingVM>();
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+    private async Task<string> GetPersonName(int PersonId)
+    {
+        return await this.ApplicationUserService.GetApplicationUsersPersonNameAsync(PersonId);
+    }
+    private async Task OpenFollowUpControl(CourseCheckingVM courseChecking)
+    {
+        var model = await this.ControlService.GetControlByIdFollowUpControlAsync(courseChecking.IdFollowUpControl.Value);
+        this.LicensingType = (await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("LicensingType")).FirstOrDefault(x => x.IdKeyValue == model.CandidateProvider.IdTypeLicense).KeyValueIntCode;
+        this.followUpControlModal.OpenModal(model);
+    }
+}

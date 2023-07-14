@@ -1,0 +1,173 @@
+﻿@page "/RegisterProviderList"
+@attribute [Authorize(Policy = "ShowRegisterCPOList")]
+
+@using ISNAPOO.Core.Contracts.Candidate
+@using ISNAPOO.WebSystem.Pages.Mail
+@inject IDataSourceService dataSourceService
+@inject ICandidateProviderService candidateProviderService
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">@Header</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterBtn">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                            @if (showInactiveProviders == false)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-warning btn-outline-warning" @onclick="sendEmail">Изпрати e-mail към @this.type</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="SendNotificationAsync">Изпрати известие към @this.type</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterReport">Справка обучения</button>
+                                </li>
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }                         
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="sfGrid" DataSource="candidateProviderVMs" AllowSorting="true" AllowTextWrap="true" AllowFiltering="true"
+                            AllowPaging="true" AllowSelection="true"  Toolbar="@(new List<string>() { "ExcelExport", "CsvExport" ,"PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridPageSettings PageCount="5" PageSizes="true" />
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="CandidateProviderVM" />
+                        <GridSelectionSettings CheckboxOnly="true"></GridSelectionSettings>
+                        <GridColumns>
+
+                            <GridColumn HeaderText=" " AllowResizing="false" AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="7px">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as CandidateProviderVM).IdCandidate_Provider).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="10"></GridColumn>
+                            <GridColumn Width="15px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => OpenProfileModalBtn(context as CandidateProviderVM))"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="15px">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Промени в лицензията" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => OpenProviderLicenceListModal(context as CandidateProviderVM))"><i class="fa fa-expeditedssl"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdCandidate_Provider" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Left" Width="40" Visible=false></GridColumn>
+                            <GridColumn Field="LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="35px"></GridColumn>
+                            <GridColumn Field="CPONameOwnerGrid" HeaderText="@this.cpoOrCipo" TextAlign="TextAlign.Left" Width="100px">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        if (LicensingType == "LicensingCIPO")
+                                        {
+                                            <span>ЦИПО @ctx.ProviderName към @ctx.ProviderOwner</span>
+                                        }
+                                        else
+                                        {
+                                            <span>ЦПО @ctx.ProviderName към @ctx.ProviderOwner</span>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="LocationCorrespondence.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="30px"></GridColumn>
+                            <GridColumn Field="ProviderAddressCorrespondence" HeaderText="Контакти" TextAlign="TextAlign.Left" Width="95px">
+                                <Template>
+                                    @{
+                                        var ctx = context as CandidateProviderVM;
+                                        <p style="margin-bottom: -4px;"><b>адрес:</b> @ctx.ProviderAddressCorrespondence</p>
+                                        <p style="margin-bottom: -4px;"><b>лице за контакт:</b> @ctx.PersonNameCorrespondence</p>
+                                        <p style="margin-bottom: -4px;"><b>телефон:</b> @ctx.ProviderPhoneCorrespondence</p>
+                                        <p><b>e-mail:</b> @ctx.ProviderEmailCorrespondence</p>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="LicenceStatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="70px">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var status = context as CandidateProviderVM;
+
+                                            switch (status.LicenceStatusName)
+                                            {
+                                                case "Временно отнета за срок от 3 месеца":
+                                                    <label class="form-label label label-warning">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Временно отнета за срок от 4 месеца":
+                                                    <label class="form-label label label-warning">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Временно отнета за срок от 6 месеца":
+                                                    <label class="form-label label label-warning">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Активна":
+                                                    <label class="form-label label label-success">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Окончателно отнета":
+                                                    <label class="form-label label label-danger">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Прекратени права по лицензията":
+                                                    <label class="form-label label label-danger">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Заличена":
+                                                    <label class="form-label label label-danger">@status.LicenceStatusName</label>
+                                                    break;
+                                                case "Подадени документи":
+                                                    <label class="form-label label label-info">@status.LicenceStatusName</label>
+                                                    break;                                                   
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="20px">
+                                <Template>
+                                     @{
+                                         var ctx = context as CandidateProviderVM;
+                                         if (ctx.HaveFollowUpControls == true)
+                                         {
+                                           <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                           <button type="button" class="btn-row" @onclick="(() => OpenChecking(context as CandidateProviderVM))"><i class="fa fa-check-square-o"></i></button>
+                                           </SfTooltip>
+                                         }
+                                      }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SendMailModal CallbackAfterSubmit="sendEmails" @ref="sendMailModal"></SendMailModal>
+<ApplicationModal @ref="applicationModal" />
+<CIPOApplicationModal @ref="cipoApplicationModal" />
+<ProviderLicenceListModal @ref="providerLicenceListModal" CallbackAfterSubmit="LoadCandidateProvidersLicenseList" />
+<NAPOOCandidateProviderSearchModal @ref="napooCandidateProviderSearchModal" CallbackAfterSubmit="UpdateAfterFilterBtn" />
+<RegisterProviderReportFilter @ref="reportFilter" CallbackAfterSubmit="@Filter"></RegisterProviderReportFilter>
+<RegisterProviderFollowUpControlModal @ref="registerProviderFollowUpControlModal"></RegisterProviderFollowUpControlModal>
+

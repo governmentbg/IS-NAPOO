@@ -1,0 +1,135 @@
+﻿@page "/Login"
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.Common.HelperClasses
+@using ISNAPOO.WebSystem.Extensions
+@using Microsoft.AspNetCore.DataProtection
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@using global::Data.Models.Data.ProviderData
+@using static ISNAPOO.WebSystem.Extensions.BlazorCookieLoginMiddleware
+
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container login-container">
+            <h6 class="page-title">ВХОД В ИНФОРМАЦИОННАТА СИСТЕМА</h6>
+            <div class="card">
+                <div class="card-body">
+                    <EditForm Model="@signInModel" OnValidSubmit="@RegisterUser" id="loginForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="modal-body">
+                            <p class="validation-message">@error</p>
+                            <div class="row">
+                                <div class="col-12">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Потребителско име:
+                                        </label>
+                                        <InputText id="UserName" class="form-control" type="text" @bind-Value="@signInModel.UserName"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Парола:
+                                        </label>
+                                        <div class="password-input-icons">
+                                            <i class="@(this.passwordIconClass)" @onclick="ShowPassword"></i>
+                                            <InputText id="password" class="form-control" type="@this.inputPasswordType" @bind-Value="@signInModel.Password"></InputText>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*Изграждане на функционалност за "Забравена парола"*@
+                            <div class="text-right">
+                                <a href="#" @onclick="ForgotPassword">Забравена парола</a>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row gx-1 gy-1 align-items-center">
+                                <!-- text input -->
+                                <div class="col-12 col-lg-2">
+                                    <button type="submit" class="btn btn-info w-100" form="loginForm"><i class="icofont icofont-user-alt-3"></i>ВХОД</button>
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                    <button type="button" class="btn btn-info btn-outline-info w-100" @onclick="eAuth"><i class="fa fa-exchange"></i>Вход е-Автентикация</button>
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                    <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger w-100" @onclick="(() => this.IsContinue = true)"><i class="fa fa-wpforms"></i>Нова регистрация</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<SfDialog @bind-Visible="this.IsContinue" Width="70%" EnableResize="true"
+          AllowDragging="true" Height="auto" IsModal="true" ZIndex="3001" CloseOnEscape="false" ShowCloseIcon="false">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+
+    <DialogTemplates>
+        <Header>Внимание!</Header>
+        <Content>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        За да извършите електронна регистрация в Информационната система на Национална агенция за професионално образование и обучение, е необходима успешна автентикация в Системата за електронна автентикация на Министерство на електронното управление, по някой от следните начини:
+                    </div>
+                </div>
+                <ul>
+                    <div class="row">
+                    <li>- Чрез Квалифициран Ел. Подпис КЕП</li>
+            </div>
+            <div class="row">
+        <li>- Чрез Мобилен КЕП Борика</li></div>
+        <div class="row">
+        <li>- Чрез Мобилен КЕП Евротръст</li></div>
+        <div class="row">
+        <li>- Чрез ПИК на НАП</li></div>
+        <div class="row">
+        <li>- Чрез ПИК на НОИ</li></div>
+        </ul>
+        <br />
+        <div class="row">
+            <div class="col-12">
+                <p>Подробни инструкции за начина на електронна автентикация ще намерите като следвате последователно всяка една от стъпките от процеса на регистрация.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p>Електронна регистрация в Информационната система на Национална агенция за професионално образование и обучение е необходима само за кандидати за ЦПО/ЦИПО, които нямат активна регистрация! Всички останали потребители на Информационната система получават достъп до системата по служебен път!</p>
+            </div>
+        </div>
+        <p><b>Сигурни ли сте, че искате да продължите?</b></p>
+        </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-primary" @onclick="StartRegistration">Да</button>
+                            <button type="button" class="btn btn-secondary" @onclick="(() => this.IsContinue = false)">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+
+}

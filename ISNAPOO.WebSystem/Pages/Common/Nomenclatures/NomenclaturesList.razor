@@ -1,0 +1,377 @@
+﻿@page "/NomenclaturesList"
+@attribute [Authorize(Policy = "ShowNomenclaturesList")]
+
+@using ISNAPOO.Common.Constants
+@using ISNAPOO.Core.ViewModels.Common
+@using ISNAPOO.Core.ViewModels.Common.ValidationModels
+@using global::Data.Models.Common
+@using global::Data.Models.Data.Common
+@using global::Data.Models.Framework
+
+@inject IKeyTypeService KeyTypeService
+@inject IJSRuntime JsRuntime
+@inject IDataSourceService Datasourceservice
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Списък номенклатури и стойности</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FilterGrid">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">&nbsp;</li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+
+                    <SfGrid ID="defaultGrid" DataSource="@nomenclatures" AllowSorting="true" EnableAltRow="true" EnableHover="false" AllowSelection="true"
+                            AllowFiltering="true" @ref="defaultGrid"
+                            AllowPaging="true" AllowReordering="true" AllowResizing="true" AllowTextWrap="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                        AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="KeyTypeVM"></GridEvents>
+
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(defaultGrid, (context as KeyTypeVM).IdKeyType).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                    <button type="button" class="btn-row" @onclick="(() => SelectedRow(context as KeyTypeVM))">
+                                        <i class="fa fa-pencil-square-o"></i>
+                                    </button>
+                                        </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdKeyType" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Width="40" Visible="false"></GridColumn>
+                            <GridColumn Field="KeyTypeName" HeaderText="Номенклатура" TextAlign="TextAlign.Left" Width="80"></GridColumn>                            
+                            <GridColumn Field="Description" HeaderText="Описание" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                            <GridColumn Field="IsSystem" HeaderText="Системна" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="40"></GridColumn>
+                            <GridColumn Field="KeyTypeIntCode" HeaderText="Код" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SfDialog @ref="@sfDialog" Width="40%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@IsVisibleAddModal">
+    <DialogTemplates>
+        <Header>
+            Създаване на нова номенклатура
+        </Header>
+        <Content>
+            <EditForm id="sF" Model="model" OnValidSubmit="@SubmitAddNewHandler">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Наименование: </label>
+                                        <InputText class="form-control" @bind-Value="model.KeyTypeName"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Код: </label>
+                                        <InputText class="form-control" @bind-Value="model.KeyTypeIntCode"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Описание: </label>
+                                        <InputTextArea class="form-control" @bind-Value="model.Description"></InputTextArea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="model.IsSystem" checked="@(model.IsSystem ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Системен</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <button class="btn btn-info" type="submit" form="sF">Запиши</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="@CancelAddNewHandler">Отказ</button>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<SfDialog @ref="@sfDialog" Width="40%" EnableResize="true" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false" @bind-Visible="@IsFilterVisible">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+    <DialogTemplates>
+        <Header>
+            Филтър
+        </Header>
+        <Content>
+            <EditForm id="sF" Model="filterValueData" OnValidSubmit="FilterGrid" >
+
+             <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Стойност на номенклатурата: </label>
+                                        <SfTextBox @bind-Value="@filterValueData"></SfTextBox>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+        </EditForm>
+            </Content>
+        <FooterTemplate>
+            <button type="submit" class="btn btn-info" form="sF" @onclick="(() =>  { this.IsSearchConfirmed = true;})">Търси</button>
+            <button type="button" class="btn btn-warning btn-outline-warning waves-effect md-trigger" @onclick="ClearFilter">Изчисти</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="(() =>  this.IsFilterVisible = false)">Отказ</button>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<EditKeyTypeModal @ref="editKeyTypeModal" OnEditSubmit="Reload"></EditKeyTypeModal>
+
+@code {
+    ToastMsg toast;
+
+    List<KeyTypeVM> nomenclatures;
+    IEnumerable<KeyTypeVM> allKeyTypes;
+    SfGrid<KeyTypeVM> defaultGrid;
+    KeyTypeVM model = new KeyTypeVM();
+    SfDialog sfDialog;
+    EditKeyTypeModal editKeyTypeModal = new EditKeyTypeModal();
+
+    private bool IsVisibleAddModal { get; set; } = false;
+    private bool IsFilterVisible { get; set; } = false;
+    private bool IsSearchConfirmed { get; set; } = false;
+    private string filterValueData = "";
+
+    private DialogEffect AnimationEffect = DialogEffect.Zoom;
+    private async void OnKeyPress(KeyboardEventArgs args)
+    {
+        if(args.Key.ToString() == "Enter")
+        {
+            this.IsSearchConfirmed = true; 
+            await FilterGrid();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.allKeyTypes = await this.KeyTypeService.GetAllKeyTypesIncludeKeyValuesAsync();
+        this.nomenclatures = allKeyTypes.OrderBy(kp => kp.KeyTypeName).ToList();
+
+    }
+
+    private async Task SubmitAddNewHandler()
+    {
+        string msg = await this.KeyTypeService.CreateKeyType(this.model);
+
+        if (msg.Contains("успешeн"))
+        {
+            this.SpinnerShow();
+            this.ShowSuccessAsync(msg);
+            this.IsVisibleAddModal = false;
+            this.nomenclatures = allKeyTypes.OrderBy(kp => kp.KeyTypeName).ToList();
+            this.StateHasChanged();
+        }
+        else
+        {
+            this.ShowErrorAsync(msg);
+        }
+    }
+
+    private async Task Reload()
+    {
+        allKeyTypes = await this.KeyTypeService.GetAllKeyTypesIncludeKeyValuesAsync();
+        this.nomenclatures = allKeyTypes.OrderBy(kp => kp.KeyTypeName).ToList();
+        this.IsFilterVisible = true;
+        this.IsSearchConfirmed = true;
+        await this.FilterGrid();
+        await this.defaultGrid.Refresh();
+    }
+
+    private async Task OpenAddNewModal()
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        this.model = new KeyTypeVM();
+        this.IsVisibleAddModal = true;
+    }
+
+    private void CancelAddNewHandler()
+    {
+        this.IsVisibleAddModal = false;
+    }
+
+    private async Task SelectedRow(KeyTypeVM model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        this.editKeyTypeModal.OpenModal(model);
+    }
+    private async Task FilterGrid()
+    {
+        bool hasPermission = await CheckUserActionPermission("ViewNomenclaturesData", false);
+        if (!hasPermission) { return; }
+        this.IsFilterVisible = !this.IsFilterVisible;
+        IEnumerable<KeyTypeVM> filteredNomenclatures = new List<KeyTypeVM>();
+        var allNomenclatures = await this.KeyTypeService.GetAllKeyTypesIncludeKeyValuesAsync();
+        if (IsSearchConfirmed)
+        {
+            if (!string.IsNullOrEmpty(filterValueData))
+            {
+                filteredNomenclatures = allNomenclatures.Where(n => n.KeyValues.Any(k => (k.Name.ToLower() == filterValueData.ToLower()) || (k.Name.ToLower().Contains(this.filterValueData.ToLower())))).ToList();
+            }
+            else
+            {
+                this.nomenclatures = allKeyTypes.OrderBy(kp => kp.KeyTypeName).ToList();
+                return;
+            }
+
+            if (filteredNomenclatures.Count() == 0)
+            {
+                toast.sfErrorToast.Content = "Няма намерена номенклатура, която да отговаря на зададените критерии за търсене!";
+                await toast.sfErrorToast.ShowAsync();
+            }
+            nomenclatures = filteredNomenclatures.ToList();
+        }
+        IsSearchConfirmed = false;
+        this.StateHasChanged();
+    }
+    private async Task ClearFilter()
+    {
+        this.nomenclatures = allKeyTypes.OrderBy(kp => kp.KeyTypeName).ToList();
+        this.filterValueData = "";
+    }
+
+    private async Task DeleteRow(KeyTypeVM model)
+    {
+        bool hasPermission = await CheckUserActionPermission("ManageNomenclaturesData", false);
+        if (!hasPermission) { return; }
+
+        string msg = "Сигурен ли си, че искаш да изтриеш този запис?";
+        bool isConfirmed = await this.ShowConfirmDialogAsync(msg);
+
+        if (isConfirmed)
+        {
+            var result = await this.KeyTypeService.DeleteKeyTypeAsync(model);
+
+            if (result.Contains("успешно"))
+            {                
+                this.ShowSuccessAsync(result);               
+                this.nomenclatures = allKeyTypes.OrderBy(kp => kp.KeyTypeName).ToList();
+                await this.Reload();
+            }
+            else
+            {
+                this.ShowErrorAsync(result); 
+            }
+        }
+    }
+    protected async Task ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+        {
+            if (args.Item.Id == "defaultGrid_pdfexport")
+            {
+                int temp = defaultGrid.PageSettings.PageSize;
+                defaultGrid.PageSettings.PageSize = nomenclatures.Count();
+                await defaultGrid.Refresh();
+                PdfExportProperties ExportProperties = new PdfExportProperties();
+
+                List<GridColumn> ExportColumns = new List<GridColumn>();
+#pragma warning disable BL0005
+                ExportColumns.Add(new GridColumn() { HeaderText = " ", Width = "30" });
+                ExportColumns.Add(new GridColumn() { Field = "KeyTypeName", HeaderText = "Номенклатура", Width = "180", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "Description", HeaderText = "Описание", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "IsSystem", HeaderText = "Системна", Width = "80", TextAlign = TextAlign.Left });
+                ExportColumns.Add(new GridColumn() { Field = "KeyTypeIntCode", HeaderText = "Код", Width = "80", TextAlign = TextAlign.Left });
+#pragma warning restore BL0005
+
+                ExportProperties.Columns = ExportColumns;
+                ExportProperties.PageOrientation = PageOrientation.Landscape;
+                ExportProperties.IncludeTemplateColumn = true;
+                PdfTheme Theme = new PdfTheme();
+                PdfThemeStyle RecordThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Regular, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+
+                PdfThemeStyle HeaderThemeStyle = new PdfThemeStyle()
+                {
+                    Font = new PdfGridFont() { IsTrueType = true, FontStyle = PdfFontStyle.Bold, FontFamily = FontFamilyPDF.fontFamilyBase64String }
+                };
+                Theme.Record = RecordThemeStyle;
+                Theme.Header = HeaderThemeStyle;
+
+                ExportProperties.Theme = Theme;
+                ExportProperties.FileName = $"Nomenclatures_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.pdf";
+
+                await this.defaultGrid.ExportToPdfAsync(ExportProperties);
+                defaultGrid.PageSettings.PageSize = temp;
+                await defaultGrid.Refresh();
+            }
+            else if (args.Item.Id == "defaultGrid_excelexport")
+            {
+                ExcelExportProperties ExportProperties = new ExcelExportProperties();
+                ExportProperties.FileName = $"Nomenclatures_{DateTime.Now.ToString(GlobalConstants.DATE_FORMAT_DELETED_FILE)}.xlsx";
+                await this.defaultGrid.ExportToExcelAsync(ExportProperties);
+            }
+        }
+        public void PdfQueryCellInfoHandler(PdfQueryCellInfoEventArgs<KeyTypeVM> args)
+        {
+            if (args.Column.HeaderText == " ")
+            {
+                args.Cell.Value = GetRowNumber(defaultGrid, args.Data.IdKeyType).Result.ToString();
+            }
+        }
+}

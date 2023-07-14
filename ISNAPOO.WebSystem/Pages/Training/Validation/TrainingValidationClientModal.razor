@@ -1,0 +1,197 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="98%" Height="98%" IsModal="true" ZIndex="2003" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за <span style="color: #ffffff;">@this.client.FullName</span></Header>
+        <Content>
+            <div>
+                <ul class="validation-errors">
+                    @foreach (var msg in this.validations)
+                    {
+                        <li class="validation-message">@msg</li>
+                    }
+                </ul>
+            </div>
+            <SfTab EnablePersistence="true" LoadOn="ContentLoad.Dynamic" @bind-SelectedItem="selectedTab">
+                @*                <TabEvents Selecting="Select" Selected="OnTabSelected"></TabEvents>
+                *@                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Основни данни"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientDataModel IsEditable="@(this.areTabsEditable)" IsSPK="HideWhenSPK" CallbackAfterSubmit="UpdateClient" @ref="ClientDataModal" ClientVM="client"></TrainingValidationClientDataModel>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(this.client.IdValidationClient != 0)">
+                        <ChildContent>
+                            <TabHeader Text="Валидиране"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientValidationModal IsEditable="@(this.areTabsEditable)" PageType="PageType" CallbackAfterSubmit="UpdateClient" ClientVM="client" @ref="ClientValidationModal" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && this.client.IdValidationClient != 0)">
+                        <ChildContent>
+                            <TabHeader Text="Учебен план и учебни програми"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ValidationCurriculumModal IsEditable="@(this.areTabsEditable)" @ref="validationCurriculumModal" HideBtnsWhenSPK="HideWhenSPK" validationClientVM="client" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && this.client.IdValidationClient != 0 && docVM is not null && docVM.IsDOI)">
+                        <ChildContent>
+                            <TabHeader Text="Компетентности"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientCompetenciesModal IsEditable="@(this.areTabsEditable)" CallbackAfterSubmit="UpdateClient" ClientVM="client" @ref="ClientCompetenciesModal" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && this.client.IdValidationClient != 0)">
+                        <ChildContent>
+                            <TabHeader Text="Заповеди"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <TrainingValidationClientOrdersList IsEditable="@(this.areTabsEditable)" ClientVM="client" @ref="trainingValidationClientOrdersList"></TrainingValidationClientOrdersList>
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="false">
+                        <ChildContent>
+                            <TabHeader Text="МТБ"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <TrainingValidationClientPremisiesModal IsEditable="@(this.areTabsEditable)" @ref="clientPremisiesModal" ClientVM="client" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="false">
+                        <ChildContent>
+                            <TabHeader Text="Преподаватели"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ValidationClientTrainersModal IsEditable="@(this.areTabsEditable)" @ref="ClientTrainerModal" ClientVM="client" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && client.IdFrameworkProgram != null && this.client.IdValidationClient != 0)">
+                        <ChildContent>
+                            <TabHeader Text="Документи на лицето"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientEducationModal IsEditable="@(this.areTabsEditable)" ClientVM="client" @ref="ClientEducationModal" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && this.client.IdValidationClient != 0 && docVM is not null && !docVM.IsDOI)">
+                        <ChildContent>
+                            <TabHeader Text="ЕРУ"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <ValidationERUList clientVM="client" @ref="eruList" docVM="this.docVM"></ValidationERUList>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && this.client.IdValidationClient != 0)">
+                        <ChildContent>
+                            <TabHeader Text="Комисия"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientCommisionModal IsEditable="@(this.areTabsEditable)" CallbackAfterSubmit="GetValidationMessage" ClientVM="client" @ref="ClientCommisionModal" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(client.IdSpeciality != null && this.client.IdValidationClient != 0)">
+                        <ChildContent>
+                            <TabHeader Text="Протоколи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientProtocolsModal IsEditable="@(this.areTabsEditable)" ClientVM="client" @ref="ClientProtocols" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="@(this.client.OldId.HasValue || (client.IdSpeciality != null && this.client.IdValidationClient != 0))">
+                        <ChildContent>
+                            <TabHeader Text="Данни за завършване"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <TrainingValidationClientFinishedDataModal IsEditable="@(this.areTabsEditable)" ClientVM="client" PageType="PageType" @ref="ClientFinishedDataModal" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="(this.client.ValidationClientDocuments.Any(x => x.DocumentDate.HasValue) || this.finishedDataModel.DocumentDate.HasValue) && this.showIssueDuplicateTab">
+                        <ChildContent>
+                            <TabHeader Text="Издаване на дубликат"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ValidationClientIssueDuplicate IsEditable="@(this.areTabsEditable)" @ref="validationClientIssueDuplicate" ClientVM="this.client" PageType="PageType" CallbackAfterEditContextValidation="GetValidationModelFromValidationClientIssueDuplicate" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="(this.client.IdStatus == this.kvCourseCompleted.IdKeyValue || this.client.IsArchived) && this.client.IdFinishedType == this.kvCourseFinished.IdKeyValue && this.HideWhenSPK && !this.entryFromRIDPKModule">
+                        <ChildContent>
+                            <TabHeader Text="Подаване за проверка"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ValidationVerificationSubmission IsEditable="@(this.areTabsEditable)" @ref="verificationSubmission" ClientVM="this.client" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.areTabsEditable)
+                            {
+                           
+                                @if (!string.IsNullOrEmpty(this.client.UploadedFileName))
+                                {
+                                    @if (HideWhenSPK)
+                                    {
+                                        <button style="margin-right: 5px;" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.SendDocumentForExam())">Изпрати известие за държавен изпит към НАПОО</button>
+                                    }
+                                    else
+                                    {
+                                        <button style="margin-right: 5px;" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="(async () => await this.SendDocumentForExam())">Изпрати известие за изпит към НАПОО</button>
+                                    }
+                                }
+
+
+                                @if (this.client.IdValidationClient != 0 && (this.client.IdStatus is null || this.client.IdStatus != this.kvCourseCompleted.IdKeyValue))
+                                {
+                                    <button style="margin-right: 10px;" class="btn btn-info" type="submit" @onclick="(async () => await this.CompleteValidationBtn())">Приключване на валидирането</button>
+                                }
+                                <button type="button" class="btn btn-info btn-primary" @onclick="(async () => await this.Submit(true))">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog" />
+

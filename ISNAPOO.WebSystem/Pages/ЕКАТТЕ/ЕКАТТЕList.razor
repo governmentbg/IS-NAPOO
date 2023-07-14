@@ -1,0 +1,238 @@
+﻿@page "/EKATTEList"
+@using Syncfusion.XlsIO
+@attribute [Authorize(Policy = "ShowEKATTEList")]
+
+@inject IDistrictService DistrictService
+@inject IMunicipalityService MunicipalityService
+@inject ILocationService LocationService
+@inject IRegionService RegionService
+@inject IJSRuntime JSRuntime;
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Единен класификатор на административно-териториалните и териториалните единици (ЕКАТТЕ)</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="UpdateData">Обнови</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfTreeGrid AllowFiltering="true" AllowPaging="true" @ref="sfTreeGrid" ID="sfTreeGridId" DataSource="eKATTEDataList" EnablePersistence="false" EnableCollapseAll="true" IdMapping="Id" ParentIdMapping="ParentId" TreeColumnIndex="0">
+                        <TreeGridFilterSettings HierarchyMode="@FilterHierarchyMode.Parent" Type="Syncfusion.Blazor.TreeGrid.FilterType.Menu"></TreeGridFilterSettings>
+                        <TreeGridPageSettings PageSize="20" PageCount="5" />
+                        <TreeGridColumns>
+                            <TreeGridColumn Field="Name" HeaderText="Име" Width="70px" TextAlign="TextAlign.Left"></TreeGridColumn>
+                            <TreeGridColumn Field="Code" HeaderText="Код" Width="30px" TextAlign="TextAlign.Left"></TreeGridColumn>
+                            <TreeGridColumn Field="Kmetstvo" HeaderText="Кметство" Width="100px" TextAlign="TextAlign.Left"></TreeGridColumn>
+                            <TreeGridColumn Field="PostCode" HeaderText="Пощенски код" Width="100px" TextAlign="TextAlign.Left"></TreeGridColumn>
+                        </TreeGridColumns>
+                    </SfTreeGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .e-treegrid .e-altrow {
+        background-color: white;
+    }
+</style>
+
+@code {
+    SfTreeGrid<EKATTETreeGridData> sfTreeGrid = new SfTreeGrid<EKATTETreeGridData>();
+
+    List<EKATTETreeGridData> eKATTEDataList = new List<EKATTETreeGridData>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.sfTreeGrid = new SfTreeGrid<EKATTETreeGridData>();
+        this.SetData(await this.DistrictService.GetAllDistrictsAsync());
+    }
+
+    private void SetData(IEnumerable<DistrictVM> districts)
+    {
+        this.eKATTEDataList = new List<EKATTETreeGridData>();
+
+        int id = 1;
+
+        foreach (var district in districts)
+        {
+            EKATTETreeGridData newDistrict = new EKATTETreeGridData()
+                {
+                    Id = id++,
+                    ParentId = null,
+                    Name = district.DistrictName,
+                    Code = district.DistrictCode,
+                    EntityId = district.idDistrict,
+                    EntityType = EKATTETypes.District
+                };
+
+            this.eKATTEDataList.Add(newDistrict);
+
+            foreach (var municipality in district.Municipalities)
+            {
+                EKATTETreeGridData newMunicipality = new EKATTETreeGridData()
+                    {
+                        Id = id++,
+                        ParentId = newDistrict.Id,
+                        Name = municipality.MunicipalityName,
+                        Code = municipality.MunicipalityCode,
+                        EntityId = municipality.idMunicipality,
+                        EntityType = EKATTETypes.Municipality
+                    };
+
+                this.eKATTEDataList.Add(newMunicipality);
+
+                foreach (var location in municipality.Locations)
+                {
+                    EKATTETreeGridData newLocation = new EKATTETreeGridData()
+                        {
+                            Id = id++,
+                            ParentId = newMunicipality.Id,
+                            Name = location.LocationName,
+                            Code = location.LocationCode,
+                            Kmetstvo = location.Kmetstvo,
+                            EntityId = location.idLocation,
+                            PostCode = location.PostCode.ToString(),
+                            EntityType = EKATTETypes.Location
+                        };
+
+                    this.eKATTEDataList.Add(newLocation);
+                }
+
+                foreach (var region in municipality.Regions)
+                {
+                    EKATTETreeGridData newRegion = new EKATTETreeGridData()
+                        {
+                            Id = id++,
+                            ParentId = newMunicipality.Id,
+                            Name = region.RegionName,
+                            EntityId = region.idRegion,
+                            EntityType = EKATTETypes.Region
+                        };
+
+                    this.eKATTEDataList.Add(newRegion);
+                }
+            }
+        }
+
+        this.StateHasChanged();
+    }
+    private async void UpdateData()
+    {
+        this.SpinnerShow();
+        List<LocationVM> locationsToCreate = new List<LocationVM>();
+        List<LocationVM> updatedLocations = new List<LocationVM>();
+        var allLocations = await this.LocationService.GetAllLocationsAsync();
+        var allMunicipalities = await this.MunicipalityService.GetAllMunicipalitiesAsync();
+
+        // Instantiate the spreadsheet creation engine
+        using (ExcelEngine excelEngine = new ExcelEngine())
+        {
+            //@"C:\Users\kristian\Desktop\ekatte\Ek_atte.xlsx"
+            string inputFileName = Directory.GetCurrentDirectory() + @"\Data\Ekatte\Ek_atte.xlsx";
+            using (FileStream fileStream = new FileStream(inputFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                //Initialize application
+                IApplication app = excelEngine.Excel;
+
+                //Set default application version as Xlsx
+                app.DefaultVersion = ExcelVersion.Xlsx;
+
+                //Open existing Excel workbook from the specified location
+                IWorkbook workbook = app.Workbooks.Open(fileStream, ExcelOpenType.Automatic);
+
+                //Access the first worksheet
+                IWorksheet worksheet = workbook.Worksheets[0];
+
+                IRange usedRange = worksheet.UsedRange;
+                int lastRow = usedRange.LastRow;
+
+                for (int row = 3; row <= lastRow; row++)
+                {
+                    string ekatteLocationCode = worksheet[$"A{row}"].Text;
+
+                    string tvm = worksheet[$"B{row}"].Text;
+
+                    string name = worksheet[$"C{row}"].Text;
+
+                    string municipalityCode = worksheet[$"E{row}"].Text;
+
+                    string kmetstvo = worksheet[$"F{row}"].Text;
+
+                    string category = worksheet[$"H{row}"].Text;
+
+                    string altitude = worksheet[$"I{row}"].Text;
+
+                    var getMuncipailityByMunicipalityCode = allMunicipalities.FirstOrDefault(m => m.MunicipalityCode == municipalityCode);
+                    LocationVM location = new LocationVM
+                        {
+                            idMunicipality = getMuncipailityByMunicipalityCode.idMunicipality,
+                            LocationCode = ekatteLocationCode,
+                            LocationName = tvm + " " + name,
+                            kati = name,
+                            Cat = category,
+                            Height = altitude,
+                            Kmetstvo = kmetstvo,
+                            LocationNameEN = ""
+                        };
+
+                    var checkIfLocationExists = allLocations.Any(m => m.kati == location.kati && m.LocationCode == location.LocationCode);
+                    if (!checkIfLocationExists && location.kati.Length <= 50)
+                    {
+                        locationsToCreate.Add(location);
+                    }
+                    else
+                    {
+                        var currentLocation = allLocations.Where(m => m.LocationCode == location.LocationCode).FirstOrDefault();
+                        bool isDifference = (currentLocation.kati != location.kati) || (currentLocation.Kmetstvo != location.Kmetstvo);
+                        if (isDifference)
+                        {
+                            currentLocation.kati = location.kati;
+                            currentLocation.LocationName = tvm + " " + location.kati;
+                            currentLocation.Kmetstvo = location.Kmetstvo;
+                            updatedLocations.Add(currentLocation);
+                        }
+                    }
+                }
+            }
+        }
+        foreach (var location in locationsToCreate)
+        {
+            await this.LocationService.CreateLocationAsync(location);
+        }
+        foreach (var location in updatedLocations)
+        {
+            await this.LocationService.UpdateLocationAsync(location);
+        }
+        this.SpinnerHide();
+        this.StateHasChanged();
+    }
+
+    private class EKATTETreeGridData
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Code { get; set; }
+
+        public string PostCode { get; set; }
+
+        public string? Kmetstvo { get; set; }
+
+        public int? ParentId { get; set; }
+
+        public int EntityId { get; set; }
+
+        public string EntityType { get; set; }
+    }
+}

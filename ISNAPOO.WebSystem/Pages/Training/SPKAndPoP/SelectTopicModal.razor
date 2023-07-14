@@ -1,0 +1,68 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="80%" Height="80%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="3012" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за учебен план</Header>
+        <Content>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <SfGrid @ref="this.curriculumsGrid" DataSource="curriculumSource" AllowSelection="true" EnableAltRow="true" AllowTextWrap="true" AllowFiltering="true"
+                                                 AllowPaging="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                                            <GridEditSettings AllowDeleting="true" />
+                                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                            <GridEvents TValue="TrainingCurriculumVM" RowSelecting="RowSelectingHandler" />
+                                            <GridTemplates>
+                                                <EmptyRecordTemplate Context="emptyRecord">
+                                                    <span>Няма намерени резултати.</span>
+                                                </EmptyRecordTemplate>
+                                            </GridTemplates>
+                                            <GridColumns>
+                                                <GridColumn Type="ColumnType.CheckBox" Width="8">
+                                                    <HeaderTemplate>
+                                                    </HeaderTemplate>
+                                                </GridColumn>
+                                                <GridColumn Field="IdCandidateCurriculum" HeaderText="" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="9" AllowFiltering="false">
+                                                    <Template Context="idContext">
+                                                        @if ((idContext as TrainingCurriculumVM).IdTrainingCurriculum != 0)
+                                                        {
+                                                            @GetRowNumber(curriculumsGrid, (idContext as TrainingCurriculumVM).IdTrainingCurriculum).Result
+                                                        }
+                                                    </Template>
+                                                </GridColumn>
+                                                <GridColumn Field="IdTrainingCurriculum" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                <GridColumn Field="ProfessionalTraining" HeaderText="Р" TextAlign="TextAlign.Left" Width="15"></GridColumn>
+                                                <GridColumn Field="Subject" HeaderText="Предмет" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                <GridColumn Field="Topic" HeaderText="Тема" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                <GridColumn Field="Hours" HeaderText="@trainingType" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn())">Добави</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

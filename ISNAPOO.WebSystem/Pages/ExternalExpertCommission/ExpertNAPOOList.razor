@@ -1,0 +1,151 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+@using ISNAPOO.WebSystem.Pages.ExternalExpertCommission.Modals.ExpertNAPOO
+
+@inject IJSRuntime JsRuntime
+@inject IExpertService ExpertService
+
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Въвеждане на информация за служител на НАПОО" OpensOn="Hover">
+                                    <button type="button" class="btn btn-info" hidden="@(this.IsRegister && !this.IsEditable)" @onclick="OpenAddNewModal">Нов</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@expertsNAPOOSource" AllowSorting="true" EnableAltRow="true"
+                            EnableHover="false" AllowSelection="true"
+                            AllowFiltering="true" @ref="sfGrid" AllowPaging="true" AllowReordering="true"
+                            AllowExcelExport="false" AllowPdfExport="false" AllowTextWrap="true">
+                        <GridSelectionSettings CheckboxOnly="false" Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                        <GridTextWrapSettings WrapMode="Syncfusion.Blazor.Grids.WrapMode.Both"></GridTextWrapSettings>
+                        <GridColumns>
+                            <GridColumn Width="15">
+                                <Template>
+                                    @if (!this.IsRegister && this.IsEditable)
+                                    {
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                            <button class="btn-row" @onclick="(() => SelectedRow(context as ExpertNapooVM))">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdExpertNapoo" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Width="40" Visible="false"></GridColumn>
+                            <GridColumn Field="Occupation" HeaderText="Длъжност" TextAlign="TextAlign.Left" Width="105"></GridColumn>
+                            <GridColumn Field="AppointmentDate" HeaderText="Дата на назначаване" TextAlign="TextAlign.Left" Width="89" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn Field="StatusName" HeaderText="Статус" TextAlign="TextAlign.Left" Width="40">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var providerStatus = context as ExpertNapooVM;
+                                            if (providerStatus.IdStatus != 0)
+                                            {
+                                                switch (providerStatus.StatusName)
+                                                {
+                                                    case "Активен":
+                                                        <label class="form-label-status label label-success">@providerStatus.StatusName</label>
+                                                        break;
+                                                    case "Неактивен":
+                                                        <label class="form-label-status label label-danger">@providerStatus.StatusName</label>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ExpertNAPOOModal @ref="expertNAPOOModal" CallbackAfterSave="UpdateAfterSaveExpertNAPOO"></ExpertNAPOOModal>
+@code {
+    [Parameter]
+    public EventCallback CallbackAfterSave { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; } = true;
+
+    [Parameter]
+    public bool IsRegister { get; set; } = true;
+
+    [Parameter]
+    public bool IsEditable { get; set; } = true;
+    private ExpertNAPOOModal expertNAPOOModal = new ExpertNAPOOModal();
+    private SfGrid<ExpertNapooVM> sfGrid = new SfGrid<ExpertNapooVM>();
+    private ExpertVM expertVM = new ExpertVM();
+
+    private IEnumerable<ExpertNapooVM> expertsNAPOOSource;
+
+    public async Task OpenList(IEnumerable<ExpertNapooVM> source, int idExpert)
+    {
+        this.SpinnerShow();
+        if (this.loading)
+        {
+            return;
+        }
+        try
+        {
+            this.loading = true;
+
+            this.expertsNAPOOSource = source;
+            this.expertVM = await this.ExpertService.GetExpertByIdAsync(idExpert);
+            this.StateHasChanged();
+        }
+        finally
+        {
+            this.SpinnerHide();
+            this.loading = false;
+        }
+    }
+
+    private void OpenAddNewModal()
+    {
+        expertNAPOOModal.OpenModal(new ExpertNapooVM(), expertVM);
+    }
+
+    private void SelectedRow(ExpertNapooVM model)
+    {
+        expertNAPOOModal.OpenModal(model, expertVM);
+    }
+
+    private async Task<Task> UpdateAfterSaveExpertNAPOO(ExpertNapooVM _model)
+    {
+        if (_model.IdExpert == 0)
+        {
+            this.expertsNAPOOSource = await ExpertService.GetAllExpertsNAPOOAsync(this.expertVM.IdExpert);
+        }
+        else
+        {
+            this.expertsNAPOOSource = await ExpertService.GetAllExpertsNAPOOAsync(_model.IdExpert);
+        }
+
+        await CallbackAfterSave.InvokeAsync();
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,91 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog ID="dialog" @ref="@sfDialog" Target="#target" Width="50%" Height="auto" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="@isVisible" ZIndex="3010">
+    <DialogAnimationSettings Effect="@AnimationEffect" Duration=500 />
+
+    <DialogTemplates>
+        <Header>
+            Импорт на учебна програма
+        </Header>
+        <Content>
+            @if (this.candidateCurriculumModificationVM.IdCandidateProviderSpeciality != 0)
+            {
+                <label>
+                    Прикачен файл:
+                </label>
+                <div class="row e-upload" style="margin-left:0px">
+                    <div class="col-sm-8">
+                        @if (candidateCurriculumVM.HasUploadedFile)
+                        {
+                            <span class="align-text-bottom"><a href="#" class="link-primary">@candidateCurriculumVM.FileName</a></span>
+                        }
+                        else
+                        {
+                            <label>
+                                Няма прикачен файл
+                            </label>
+                        }
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <SfUploader @ref="@sfUpload" AutoUpload="false" AllowMultiple="false" Enabled="true" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_EXCEL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                <UploaderEvents ValueChange="OnChange"></UploaderEvents>
+                            </SfUploader>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (this.idProgram != 0)
+            {
+                <label>
+                    Прикачен файл:
+                </label>
+                <div class="row e-upload" style="margin-left:0px">
+                    <div class="col-sm-8">
+                        @if (trainingCurriculumVM.HasUploadedFile)
+                        {
+                            <span class="align-text-bottom"><a href="#" class="link-primary">@trainingCurriculumVM.FileName</a></span>
+                        }
+                        else
+                        {
+                            <label>
+                                Няма прикачен файл
+                            </label>
+                        }
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <SfUploader @ref="@sfUpload" AutoUpload="false" AllowMultiple="false" Enabled="true" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_EXCEL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                <UploaderEvents ValueChange="OnChangeTrainingCurriculum"></UploaderEvents>
+                            </SfUploader>
+                        </div>
+                    </div>
+                </div>
+            }
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <!-- text input -->
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@ImportCandidateCurriculumAync">Импорт</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="@Cancel">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+
+

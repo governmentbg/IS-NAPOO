@@ -1,0 +1,190 @@
+﻿@page "/RatingResultList"
+@using ISNAPOO.Core.ViewModels.Rating;
+@inherits BlazorBaseComponent
+
+@attribute [AuthorizeAttribute(Policy = "ManageRatingResultList")]
+
+@{
+    base.CheckUserActionPermission("ManageRatingResultList", true);
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Критерии за рейтинг</h6>
+            <div class="card">
+                <div class="card-body">                   
+                    <div class="row">
+                        @if (this.LicensingType == "LicensingCPO")
+                        {
+                        <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Област на образование: </label>
+                                <SfAutoComplete @ref="this.sfAutoCompleteDistrict" TValue="DistrictVM" TItem="DistrictVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                @bind-Value="this.currentFilter.DistrictVM"
+                                                DataSource="this.districtSource" AllowFiltering="true">
+                                    <AutoCompleteTemplates TItem="DistrictVM">
+                                        <NoRecordsTemplate>
+                                            Няма намерени резултати.
+                                        </NoRecordsTemplate>
+                                    </AutoCompleteTemplates>
+                                    <AutoCompleteFieldSettings Text="DistrictName" Value="idDistrict" />
+                                    <AutoCompleteEvents TValue="DistrictVM" TItem="DistrictVM" Filtering="OnFilterLocationCorrespondence"></AutoCompleteEvents>
+                                </SfAutoComplete>
+                            </div>
+                        </div>                      
+                           <div class="col-5">
+                              <div class="form-group">
+                                  <label class="control-label">Професиoнално направление: </label>
+                                      <SfComboBox OnBlur="OnProfessionalDirectionSelect" TValue="int" TItem="ProfessionalDirectionVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                @bind-Value="this.currentFilter.IdProfessionalDirection"
+                                                DataSource="this.professionalDirectionSource" AllowFiltering="true">
+                                      <ComboBoxFieldSettings Value="IdProfessionalDirection" Text="DisplayNameAndCode" />
+                                  </SfComboBox>
+                              </div>
+                           </div>
+                        </div>                             
+                          <div class="row">
+                           <div class="col-3">
+                            <div class="form-group">
+                               <label class="control-label">Професия: </label>
+                                     <SfComboBox OnBlur="OnProfessionSelect" TValue="int" TItem="ProfessionVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                @bind-Value="this.currentFilter.IdProfession"
+                                                DataSource="this.professionFiltered" AllowFiltering="true">
+                                            <ComboBoxFieldSettings Value="IdProfession" Text="CodeAndName" />
+                                     </SfComboBox>
+                                </div>
+                           </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Специалност: </label>
+                                        <SfMultiSelect @ref="SpecialitiesMultiSelect" CssClass="form-control" TValue="List<SpecialityVM>" ShowDropDownIcon="true" TItem="SpecialityVM" PopupHeight="230px" AllowFiltering="true" ShowClearButton="true" AllowCustomValue="false"
+                                                   DataSource="@this.specialities"
+                                                   @bind-Value="this.currentFilter.Specialities">
+                                            <MultiSelectTemplates TItem="SpecialityVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                            </MultiSelectTemplates>
+                                            <MultiSelectFieldSettings Text="CodeAndAreaForAutoCompleteSearch" Value="IdSpeciality" />
+                                            <MultiSelectEvents TValue="List<SpecialityVM>" TItem="SpecialityVM" Filtering="OnFilterSpeciality" Focus="OnFocusSpeciality" />
+                                        </SfMultiSelect>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="control-label">СПК: </label>
+                                        <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                @bind-Value="this.currentFilter.VQS"
+                                                DataSource="this.VqsSource" AllowFiltering="true">
+                                            <ComboBoxFieldSettings Value="IdKeyValue" Text="Name" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                         </div>
+                        }
+                        @if (this.LicensingType == "LicensingCIPO")
+                        {
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="control-label">Услуга: </label>
+                                    <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            @bind-Value="this.currentFilter.IdConsulting"
+                                            DataSource="this.consultingTypes" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <h6 class="page-title-left">Индикатори</h6>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <label class="control-label">Година: </label>
+                        <div class="col-1">
+                            <SfNumericTextBox @bind-Value="this.Year" ShowSpinButton="false" OnChange="FilterIndicators" Format="##.##" TValue="int" />
+                        </div>
+                        @if (IsYearSelected)
+                        {
+                            <label class="control-label">Индикатор: </label>
+                            <div class="col-7">
+                                <SfComboBox @ref=@combobox TValue="KeyValueVM" TItem="KeyValueVM" PopupHeight="210px"
+                                        AllowCustom="false" ShowClearButton="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                        DataSource="this.FilteredIndicators" AllowFiltering="true"
+                                        @bind-Value="this.selectedIndicator">
+                                    <ComboBoxFieldSettings Value="IdKeyValue" Text="Name" />
+                                </SfComboBox>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-info" type="button" @onclick="this.AddIndicator">Добави</button>
+                            </div>
+                        }
+                    </div>
+                    &nbsp;
+                    @if (IsYearSelected)
+                    {
+                        <SfGrid ID="sfGrid" DataSource="this.selectedIndicators" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="sfGrid" AllowSelection="true" AllowPaging="true"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                            <GridEvents RowSelected="((RowSelectEventArgs<KeyValueVM> x) => this.gridselectedIndicator = x.Data)" RowDeselecting="((RowDeselectEventArgs<KeyValueVM> x) => this.gridselectedIndicator = x.Data)"></GridEvents>
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                            <GridColumns>
+                                <GridColumn Field="IdKeyValue" IsPrimaryKey="true" Visible="false" />
+                                <GridColumn TextAlign="TextAlign.Left" Width="3%">
+                                    <Template>
+                                        @{
+                                            var ctx = context as KeyValueVM;
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.RemoveIndicator(ctx))">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="Name" HeaderText="Вид на индикатора" TextAlign="TextAlign.Left" Width="70%" />
+                                <GridColumn HeaderText="Тежест" TextAlign="TextAlign.Left" Width="27%">
+                                    <Template>
+                                        @{
+                                            if (context != null)
+                                            {
+                                                var ctx = context as KeyValueVM;
+                                                if (this.kVWeightPair.Any(x => x.Key == ctx))
+                                                {
+                                                    <SfNumericTextBox TValue="decimal" @bind-Value="this.kVWeightPair[ctx]">
+                                                        <NumericTextBoxEvents OnFocus="(() => this.selectedIndicator = ctx)" TValue="decimal" ValueChange="SetIndicatorsWeight"></NumericTextBoxEvents>
+                                                    </SfNumericTextBox>
+                                                }
+
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                        <div>
+                            &nbsp;
+                        </div>
+                        <div style="float:right">
+                            @if (this.IsYearSelected)
+                            {
+                                <button class="btn btn-info" type="button" @onclick="async () => await this.ValidateData()">Изчисли рейтинг</button>
+                            }
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,355 @@
+﻿@using System.Linq.Expressions
+@using ISNAPOO.Common.HelperClasses
+@using static ISNAPOO.WebSystem.Pages.SPPOO.ProfessionList
+
+@inject IDataSourceService DataSourceService
+@inject IAreaService AreaService
+
+@inherits BlazorBaseComponent
+<SfDialog @bind-Visible="isVisible" EnableResize="true" Width="70%" AllowDragging="true" Height="auto" IsModal="true" ShowCloseIcon="true" ZIndex="2000" CloseOnEscape="false">
+    <DialogTemplates>
+        <Header>Филтър</Header>
+        <Content>
+            <EditForm id="sF" Model="filterModel" OnSubmit="Submit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Код: </label>
+                                        <InputText class="form-control" @bind-Value="filterModel.Code"></InputText>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Наименование: </label>
+                                        <InputText class="form-control" @bind-Value="filterModel.Name"></InputText>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Статус на валидност: </label>
+                                        <SfComboBox AllowCustom="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="statusSPOOOValues" AllowFiltering="true" @bind-Value="filterModel.IdStatus">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Ключова дума (в описанието на професията в ДОС): </label>
+                                        <InputTextArea class="form-control" @bind-Value="filterModel.Description"></InputTextArea>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Възможност за реализация по (НКПД), код: </label>
+                                        <InputTextArea class="form-control" @bind-Value="filterModel.NkpdCode"></InputTextArea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Номер на заповед: </label>
+                                        <InputText class="form-control" @bind-Value="filterModel.OrderNumber" />
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>СПК: </label>
+                                        <SfComboBox ShowClearButton="false" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="spkValue" AllowFiltering="true" @bind-Value="filterModel.IdVQS" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Ниво по НКР: </label>
+                                        <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="nkrValue" AllowFiltering="true" @bind-Value="filterModel.IdNKRLevel" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Ниво по ЕКР: </label>
+                                        <SfComboBox TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="ekrValue" AllowFiltering="true" @bind-Value="filterModel.IdEKRLevel" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="new-task">
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="filterModel.IsStateProtectedSpecialties" checked="@(filterModel.IsStateProtectedSpecialties ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Включване в „Списък със защитените от държавата специалности от професии“</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="filterModel.IsShortageSpecialistsLaborMarket" checked="@(filterModel.IsShortageSpecialistsLaborMarket ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Включване в „Списък със специалности от професии, по които е налице очакван недостиг от специалисти на пазара на труда“</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                    <input type="checkbox" @bind-value="filterModel.IsPresupposeLegalCapacity" checked="@(filterModel.IsPresupposeLegalCapacity ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Професията предполага ли придобиването на правоспособност</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (this.filterModel.IsPresupposeLegalCapacity)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <div class="form-group">
+                                            <label class="control-label">Правоспособност: </label>
+                                            <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" AllowFiltering="true" DataSource="legalCapacityOrdinanceTypeSource" AllowCustom="false" @bind-Value="this.filterModel.IdLegalCapacityOrdinanceType">
+                                                <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                            </SfComboBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="sF">Търси</button>
+                            <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" @onclick="ClearFilter">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    FilterSPPOOVM filterModel = new FilterSPPOOVM()
+        {
+            IdStatus = 15
+        };
+
+    List<SPPOOTreeGridData> dataList = new List<SPPOOTreeGridData>();
+
+    IEnumerable<KeyValueVM> statusSPOOOValues = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> spkValue = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> nkrValue = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> ekrValue = new List<KeyValueVM>();
+    IEnumerable<KeyValueVM> legalCapacityOrdinanceTypeSource = new List<KeyValueVM>();
+    IEnumerable<SPPOOTreeGridData> resultsAfterFilter = new List<SPPOOTreeGridData>();
+    IEnumerable<string> filterNames = new List<string>();
+    bool isVisible = false;
+
+    [Parameter]
+    public EventCallback<Dictionary<string, HashSet<int>>> OnFilterSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback<IEnumerable<string>> OnFilterSubmitForNames { get; set; }
+
+    [Parameter]
+    public EventCallback RefreshGridAfterClearFilter { get; set; }        
+
+    public async Task OpenModal(List<SPPOOTreeGridData> data)
+    {
+        this.dataList = data;
+        this.spkValue = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync(SPPOOValues.SpkVQS);
+        this.nkrValue = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync(SPPOOValues.NKRLevel);
+        this.ekrValue = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync(SPPOOValues.EKRLevel);
+        this.legalCapacityOrdinanceTypeSource = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync("LegalCapacityOrdinanceType");
+        this.statusSPOOOValues = await this.DataSourceService.GetKeyValuesByKeyTypeIntCodeAsync(SPPOOValues.StatusSPPOO);
+
+        this.isVisible = true;
+        this.StateHasChanged();
+    }
+
+    private async Task ClearFilter()
+    {
+        this.filterModel = new FilterSPPOOVM()
+            {
+                IdStatus = 15
+            };
+
+        this.isVisible = false;
+
+        await this.RefreshGridAfterClearFilter.InvokeAsync();
+    }
+
+    private void CloseModal()
+    {
+        this.isVisible = false;
+    }
+
+    private async Task Submit()
+    {
+        this.SpinnerShow();
+
+        Dictionary<string, HashSet<int>> sppooTypesAndIntValues = new Dictionary<string, HashSet<int>>();
+
+        SetSPPOOTypesAndValues(sppooTypesAndIntValues);
+
+        this.CloseModal();
+
+        await this.OnFilterSubmit.InvokeAsync(sppooTypesAndIntValues);
+        await this.OnFilterSubmitForNames.InvokeAsync(this.filterNames);
+        this.SpinnerHide();
+    }
+
+    private void SetSPPOOTypesAndValues(Dictionary<string, HashSet<int>> sppooTypesAndIntValues)
+    {
+        sppooTypesAndIntValues.Add(SPPOOTypes.Area, new HashSet<int>());
+        sppooTypesAndIntValues.Add(SPPOOTypes.ProfessionalDirection, new HashSet<int>());
+        sppooTypesAndIntValues.Add(SPPOOTypes.Profession, new HashSet<int>());
+        sppooTypesAndIntValues.Add(SPPOOTypes.Speciality, new HashSet<int>());
+
+        IQueryable<SPPOOTreeGridData> dataListAsQ = this.dataList.AsQueryable();
+
+        this.resultsAfterFilter = dataListAsQ.Where(this.FilterSPPOO(this.filterModel));
+        this.filterNames = this.resultsAfterFilter.Select(x => x.Name).ToList();
+
+        foreach (var entry in this.resultsAfterFilter)
+        {
+            if (entry.EntityType == SPPOOTypes.Area)
+            {
+                sppooTypesAndIntValues[SPPOOTypes.Area].Add(entry.EntityId);
+            }
+            else if (entry.EntityType == SPPOOTypes.ProfessionalDirection)
+            {
+                sppooTypesAndIntValues[SPPOOTypes.Area].Add(entry.EntityParentId ?? default);
+                sppooTypesAndIntValues[SPPOOTypes.ProfessionalDirection].Add(entry.EntityId);
+            }
+            else if (entry.EntityType == SPPOOTypes.Profession)
+            {
+                sppooTypesAndIntValues[SPPOOTypes.ProfessionalDirection].Add(entry.EntityParentId ?? default);
+                sppooTypesAndIntValues[SPPOOTypes.Profession].Add(entry.EntityId);
+
+                SPPOOTreeGridData professionalDirection = this.dataList.FirstOrDefault(x => x.EntityId == entry.EntityParentId && x.EntityType == SPPOOTypes.ProfessionalDirection);
+                SPPOOTreeGridData area = this.dataList.FirstOrDefault(x => x.EntityId == professionalDirection.EntityParentId && x.EntityType == SPPOOTypes.Area);
+                sppooTypesAndIntValues[SPPOOTypes.Area].Add(area.EntityId);
+            }
+            else if (entry.EntityType == SPPOOTypes.Speciality)
+            {
+                sppooTypesAndIntValues[SPPOOTypes.Profession].Add(entry.EntityParentId ?? default);
+                sppooTypesAndIntValues[SPPOOTypes.Speciality].Add(entry.EntityId);
+
+                SPPOOTreeGridData profession = this.dataList.FirstOrDefault(x => x.EntityId == entry.EntityParentId && x.EntityType == SPPOOTypes.Profession);
+                SPPOOTreeGridData professionalDirection = this.dataList.FirstOrDefault(x => x.EntityId == profession.EntityParentId && x.EntityType == SPPOOTypes.ProfessionalDirection);
+                sppooTypesAndIntValues[SPPOOTypes.ProfessionalDirection].Add(professionalDirection.EntityId);
+
+                SPPOOTreeGridData area = this.dataList.FirstOrDefault(x => x.EntityId == professionalDirection.EntityParentId && x.EntityType == SPPOOTypes.Area);
+                sppooTypesAndIntValues[SPPOOTypes.Area].Add(area.EntityId);
+            }
+        }
+    }
+
+    protected Expression<Func<SPPOOTreeGridData, bool>> FilterSPPOO(FilterSPPOOVM model)
+    {
+        var predicate = PredicateBuilder.True<SPPOOTreeGridData>();
+
+        if (!string.IsNullOrEmpty(model.Code))
+        {
+            predicate = predicate.And(c => c.Code.ToLower().Contains(model.Code.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(model.Name))
+        {
+            predicate = predicate.And(n => n.Name.ToLower().Contains(model.Name.ToLower()));
+        }
+
+        if (model.IdStatus != 0)
+        {
+            predicate = predicate.And(p => p.IdStatus == model.IdStatus);
+        }
+
+        if (model.IdVQS != 0)
+        {
+            predicate = predicate.And(p => p.IdVQS == model.IdVQS);
+        }
+
+        if (model.IdNKRLevel != 0)
+        {
+            predicate = predicate.And(p => p.IdNKRLevel == model.IdNKRLevel);
+        }
+
+        if (model.IdEKRLevel != 0)
+        {
+            predicate = predicate.And(p => p.IdEKRLevel == model.IdEKRLevel);
+        }
+
+        if (model.IsPresupposeLegalCapacity)
+        {
+            predicate = predicate.And(p => p.IsPresupposeLegalCapacity == model.IsPresupposeLegalCapacity);
+        }
+
+        if (model.IsShortageSpecialistsLaborMarket)
+        {
+            predicate = predicate.And(p => p.IsShortageSpecialistsLaborMarket == model.IsShortageSpecialistsLaborMarket);
+        }
+
+        if (model.IsStateProtectedSpecialties)
+        {
+            predicate = predicate.And(p => p.IsStateProtectedSpecialties == model.IsStateProtectedSpecialties);
+        }
+
+        if (!string.IsNullOrEmpty(model.Description))
+        {
+            predicate = predicate.And(p => p.Description.ToLower().Contains(model.Description.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(model.OrderNumber))
+        {
+            predicate = predicate.And(p => p.OrderNumbers.Select(x => x.ToLower()).Any(x => x.Contains(model.OrderNumber.ToLower())));
+        }
+
+        if (!string.IsNullOrEmpty(model.NkpdCode))
+        {
+            predicate = predicate.And(p => p.NKPDCodes.Any(x => x.Contains(model.NkpdCode)));
+        }
+
+        if (model.IdLegalCapacityOrdinanceType != 0)
+        {
+            predicate = predicate.And(p => p.IdLegalCapacityOrdinanceType == model.IdLegalCapacityOrdinanceType);
+        }
+
+        return predicate;
+    }
+}

@@ -1,0 +1,96 @@
+﻿@using ISNAPOO.Core.Contracts.ExternalExpertCommission
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+
+
+@inject IDataSourceService dataSourceService
+@inject IExpertService expertService
+@inject IProviderService providerService
+@inherits BlazorBaseComponent
+<SfDialog @bind-Visible="isVisible" Width="70%" EnableResize="true" AllowDragging="true" Height="80%" IsModal="true" ZIndex="2001" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Справка експертни комисии</Header>
+        <Content>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Експертна комисия:
+                            </label>
+                             <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="expertCommissionsDataSource" AllowCustom="false" @bind-Value="this.model.IdExpertCommission">
+                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                    </SfComboBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <!-- text input -->
+                        <div class="form-group">
+                            <label class="control-label">
+                                Период от:
+                            </label>
+                            <SfDatePicker TValue="DateTime?" ShowClearButton="true" Format="@GlobalConstants.DATE_FORMAT" @onfocusout="() => DateValid()" @bind-Value="this.model.DateFrom"></SfDatePicker>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <!-- text input -->
+                        <div class="form-group">
+                            <label class="control-label">
+                                Период до:
+                            </label>
+                            <SfDatePicker TValue="DateTime?" ShowClearButton="true" Format="@GlobalConstants.DATE_FORMAT" @onfocusout="() => DateValid()" @bind-Value="this.model.DateTo"></SfDatePicker>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div style="text-align: right">
+                    <button class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="submit" @onclick="Submit">Справка</button>
+                    </div>
+                    <label>&nbsp;</label>
+                </div>
+            </div>
+             <div class="row">
+                            <div class="col-sm-12">
+                                <SfGrid ID="sfGrid" @ref="sfGrid" DataSource="expertCommissionsSourceGrid" AllowPaging="true" AllowTextWrap="true" AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport"})">
+                                    <GridPageSettings PageCount="5" PageSize="10" PageSizes="true"></GridPageSettings>
+                                    <GridEvents OnToolbarClick="ToolbarClick" TValue="ExpertCommissionsReportModal"></GridEvents>
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                            <Template>
+                                                @GetRowNumber(sfGrid, (context as ExpertCommissionsReportModal).IdExpertCommission).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdExpertCommission" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="ExpertCommissionName" HeaderText="Експертна комисия" TextAlign="TextAlign.Left" Width="100px"></GridColumn>
+                                        <GridColumn Field="ProcedureCount" HeaderText="Брой процедури" TextAlign="TextAlign.Left" Width="40px">
+                                             <Template>
+                                                <div class="text-center">
+                                        @{
+                                            var ctx = context as ExpertCommissionsReportModal;
+                                            <span>@ctx.ProcedureCount</span>
+                                                 }
+                                                </div>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Изготвени доклади" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                                     </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+
+<ToastMsg @ref="toast"></ToastMsg>

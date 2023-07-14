@@ -1,0 +1,42 @@
+﻿@using Data.Models.Data.SqlView.Archive
+@inherits BlazorBaseComponent
+
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" Width="98%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Получили документи за валидиране</Header>
+        <Content>
+            <SfGrid ID="sfGrid" DataSource="annualTrainingValidationClientCourses" EnableAltRow="true" EnableHover="false" AllowTextWrap="true" @ref="sfGrid" AllowExcelExport="true" AllowPdfExport="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })">
+                <GridEvents TValue="AnnualTrainingValidationClientCourse" OnToolbarClick="ToolbarClick" />
+                <GridColumns>
+                    <GridColumn Field="IdAnnualTrainingValidationClient" IsPrimaryKey="true" TextAlign="TextAlign.Center" Visible="true" Width="5%" HeaderText="   " MinWidth="20"></GridColumn>
+                    <GridColumn HeaderText="Професия" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="ProfessionCode" Width="10%" HeaderText="Код по СППОО" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>
+                    <GridColumn HeaderText="Специалност" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="SpecialityCode" Width="10%" HeaderText="Код по СППОО" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>
+                    <GridColumn Field="VQSName" Width="8%" HeaderText="Степен на ПК" TextAlign="TextAlign.Center" MinWidth="15"></GridColumn>
+                    <GridColumn Field="DistrictName" Width="10%" HeaderText="Административно териториална област на провеждане на курса" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    
+                    <GridColumn HeaderText="Получили документ чрез валидиране/брой" TextAlign="TextAlign.Center">
+                        <GridColumns>
+                            <GridColumn Field="CountValidationPK" Width="10%" HeaderText="Свидетелство за валидиране на ПК" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                            <GridColumn Field="CountValidPO" Width="10%" HeaderText="Удостоверение за валидиране на ПО" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                        </GridColumns>
+                    </GridColumn>        
+                    <GridColumn Field="CountDisabledPerson" Width="130" HeaderText="Брой обучаеми в неравностойно положение" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+                    <GridColumn Field="CountDisadvantagedPerson" Width="130" HeaderText="Брой обучаеми от уязвими групи" TextAlign="TextAlign.Center" MinWidth="10"></GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

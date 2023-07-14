@@ -1,0 +1,214 @@
+﻿@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Grids
+@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" Width="90%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за лице, ползвало услуги по информиране и консултиране от ЦИПО
+            @*Данни за лице, на което е издаден документ за ПК - <span style="color: #fff">@model.FirstName @model.FamilyName</span>*@
+        </Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+
+                    <SfAccordion>
+                        <AccordionItems>
+
+                            <AccordionItem Header="@header1" Expanded="true">
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    № на лицензия:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.LicenceNumber"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Населено място:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.Location.LocationName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Лице за контакт:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.AttorneyName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    Юридическо лице:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderOwner"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Телефон:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderPhone"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    E-mail:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderEmail"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>
+                                                    Адрес за кореспонденция:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.CandidateProvider.ProviderAddress"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem Header="@header2" Expanded="true">
+                                <ContentTemplate>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Име:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.FirstName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Презиме:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.SecondName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Фамилия:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.FamilyName"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Пол:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="sex.Name"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    ЕГН/ЛНЧ/ИДН:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="model.Indent"></input>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    Гражданство:
+                                                </label>
+                                                <input Readonly="true" class="form-control" @bind-value="nationality.Name"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem Header="@header3" Expanded="true">
+                                <ContentTemplate>
+                                    @if (isEditable)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">
+                                                        Вид на услугата:
+                                                    </label>
+                                                    <SfComboBox Enabled="@(this.ConsultingClientVM.IdConsultingClient != 0 && isEditable)" TValue="int" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.idConsultingType" DataSource="kvConsultingTypeSource" AllowFiltering="true" AllowCustom="false">
+                                                        <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                    </SfComboBox>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>&nbsp;</label>
+                                                    <p>
+
+                                                        <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" disabled="@(this.ConsultingClientVM.IdConsultingClient == 0)" @onclick="AddConsultingTypeBtn">Добави</button>
+
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <label class="text-gray"><b>Видове услуги:</b></label>
+                                            <SfGrid DataSource="consultingsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                                    AllowTextWrap="true" @ref="consultingsGrid" AllowSelection="false" AllowPaging="true">
+                                                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                                <GridColumns>
+                                                    <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5" Context="ctx">
+                                                        <Template>
+                                                            @GetRowNumber(consultingsGrid, (ctx as ConsultingVM).IdConsulting).Result
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Width="5" Context="ctx">
+                                                        <Template>
+                                                            @if (isEditable)
+                                                            {
+                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+
+                                                                    <button type="button" class="btn-row" @onclick="(async () => await this.DeleteConsultingTypeBtn(ctx as ConsultingVM))"><i class="fa fa-trash-o"></i></button>
+                                                                </SfTooltip>
+                                                            }
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Field="IdConsulting" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                                    <GridColumn Field="ConsultingTypeValue" HeaderText="Вид на услугата" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                </GridColumns>
+                                            </SfGrid>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                            </AccordionItem>
+                        </AccordionItems>
+                    </SfAccordion>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="float">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

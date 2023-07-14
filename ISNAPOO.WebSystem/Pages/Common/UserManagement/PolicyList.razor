@@ -1,0 +1,52 @@
+﻿@page "/PolicyList"
+@attribute [Authorize(Policy = "ShowPolicyList")]
+
+@inherits BlazorBaseComponent
+
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Позволени действия</h6>
+            <div class="card">
+                <div class="card-header">
+                    
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="roleGrid" DataSource="@policies" AllowTextWrap="true"  EnableAltRow="true" EnableHover="false" AllowSelection="true"
+                            AllowFiltering="true" @ref="refGrid"
+                            AllowPaging="true" AllowReordering="true" AllowResizing="true" Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+
+                        <GridPageSettings PageCount="5" PageSize="20" PageSizes="false"></GridPageSettings>
+                        <GridEvents PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" TValue="PolicyVM"></GridEvents>
+                        <GridColumns>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(refGrid, (context as PolicyVM).idPolicy).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="10">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button @onclick="( ()=>SelectRow(context as PolicyVM))" class="btn-row"><i class="fa fa-pencil-square-o"></i></button>
+                                    </SfTooltip>
+
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="idPolicy" IsPrimaryKey="true" Visible="false"></GridColumn>
+
+                            <GridColumn Field="PolicyCode" HeaderText="Код" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+                            <GridColumn Field="PolicyDescription" HeaderText="Описание" TextAlign="TextAlign.Left" Width="95"></GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<PolicyModal @ref="refModal" CallbackAfterSubmit="refreshAfterModalSubmit"></PolicyModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

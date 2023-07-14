@@ -1,0 +1,11 @@
+﻿@page "/EAuthEGovBG"
+@using ISNAPOO.WebSystem.Extensions
+@using ISNAPOO.WebSystem.Pages.Common.UserManagement
+@inject ICommonService CommonService
+@inject NavigationManager NavMgr
+
+@if (ShowMsgNoAccount) {
+    <h1>Нямате създаден профил в ИС на НАПОО</h1>
+}
+
+<EAuthModal @ref="eAuthModal"></EAuthModal>

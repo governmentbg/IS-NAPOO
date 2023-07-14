@@ -1,0 +1,81 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @ref="sfDialog" @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Width="90%" Height="90%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Позволено IP</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">                              
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">IP: </label>
+                                        <InputText class="form-control" @bind-Value="allowIPVM.IP"></InputText>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">                                                             
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Commnet: </label>
+                                        <InputText class="form-control" @bind-Value="allowIPVM.Commnet"></InputText>
+                                    </div>
+                                </div>
+                             </div>
+                             <div class="row">
+                                <div class="col-sm-12">
+                                   <div class="new-task">
+                                       <div class="to-do-list">
+                                            <div class="checkbox-fade fade-in-primary">
+                                                <label class="form-label">
+                                                        <input type="checkbox" @bind-value="allowIPVM.IsAllow" checked="@(allowIPVM.IsAllow ? "checked" : null)">
+                                                    <span class="cr">
+                                                        <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                    </span> <span>Позволено ли е IP-то</span>
+                                                </label>
+                                            </div>
+                                       </div>
+                                   </div>
+                                 </div>
+                            </div>                                              
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">                            
+                            <button type="button" class="btn btn-info btn-primary" @onclick="Submit">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+
+

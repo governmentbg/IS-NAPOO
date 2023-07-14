@@ -1,0 +1,117 @@
+﻿@inject IMenuNodeService MenuNodeService
+
+@inherits BlazorBaseComponent
+<SfDialog Target="#target" Width="50%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="this.isModalVisible">
+    <DialogEvents OnClose="@(() => {this.isModalVisible = false;})"></DialogEvents>
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>
+            Избор на тип меню
+        </Header>
+        <Content>
+            <EditForm id="mainForm" EditContext="editContext">
+                    <label><b>Избери тип</b></label>
+                    <SfComboBox TValue="string" TItem="Type" PopupHeight="230px" Placeholder="Напр. меню" @bind-Value="typeValue" DataSource="typesData">
+                        <ComboBoxEvents TValue="string" TItem="Type" ValueChange="OnChange" />
+                        <ComboBoxFieldSettings Text="Name" Value="Id" />
+                    </SfComboBox>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+<MenuNodeRoot @ref="this.menuNodeRoot" OnSubmit="OnModalSubmitHandler"></MenuNodeRoot>
+<MenuNodeParent @ref="this.menuNodeParent" OnSubmit="OnModalSubmitHandler"></MenuNodeParent>
+<MenuNodeLink @ref="this.menuNodeLink" OnSubmit="OnModalSubmitHandler"></MenuNodeLink>
+
+@code {
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private MenuNodeRoot menuNodeRoot = new MenuNodeRoot();
+    private MenuNodeParent menuNodeParent = new MenuNodeParent();
+    private MenuNodeLink menuNodeLink = new MenuNodeLink();
+    private MenuNodeVM menuNodeVM = new MenuNodeVM();
+    private MenuNodeVM model = new MenuNodeVM();
+    List<string> validationMessages = new List<string>();
+    List<Type> typesData = new List<Type>
+    {
+        new Type()
+        {
+            Id = "1",
+            Name = MenuNodeTypes.MenuNodeRootBG
+        },
+        new Type()
+        {
+            Id = "2",
+            Name = MenuNodeTypes.MenuNodeParentBG
+        },
+        new Type()
+        {
+            Id = "3",
+            Name = MenuNodeTypes.MenuNodeLinkBG
+        }
+    };
+    private string typeValue = string.Empty;
+    private int idMenuNode = 0;
+    private bool isModalVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.editContext = new EditContext(typeValue);
+    }
+    public async Task OpenModal(int id = 0, string type = null)
+    {
+        if(id != 0 && type != null)
+        {
+            if (type == MenuNodeTypes.MenuNodeRoot)
+            {
+                await this.menuNodeRoot.OpenModal(id);
+            }
+            else if (type == MenuNodeTypes.MenuNodeParent)
+            {
+                await this.menuNodeParent.OpenModal(id);
+            }
+            else if (type == MenuNodeTypes.MenuNodeLink)
+            {
+                await this.menuNodeLink.OpenModal(id);
+            }
+        }
+        else
+        {
+            typeValue = string.Empty;
+            this.isModalVisible = true;
+            this.StateHasChanged();
+        }
+    }
+    private async Task OnChange(ChangeEventArgs<string, Type> args)
+    {
+        if (args.ItemData?.Name != string.Empty && args.ItemData?.Id != string.Empty)
+        {
+            if (args.ItemData?.Name == MenuNodeTypes.MenuNodeRootBG)
+            {
+                await this.menuNodeRoot.OpenModal();
+            }
+            else if (args.ItemData?.Name == MenuNodeTypes.MenuNodeParentBG)
+            {
+                await this.menuNodeParent.OpenModal();
+            }
+            else if (args.ItemData?.Name == MenuNodeTypes.MenuNodeLinkBG)
+            {
+                await this.menuNodeLink.OpenModal();
+            }
+            this.isModalVisible = false;
+            this.StateHasChanged();
+        }
+    }
+
+    private async void OnModalSubmitHandler()
+    {
+        await this.OnSubmit.InvokeAsync();
+    }
+    private class Type
+    {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+    }
+}

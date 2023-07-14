@@ -1,0 +1,123 @@
+﻿@using ISNAPOO.Core.ViewModels.CPO.ProviderData
+@using ISNAPOO.Core.ViewModels.ExternalExpertCommission
+
+@inherits BlazorBaseComponent
+
+<SfDialog Target="#target" Width="65%" Height="650px" EnableResize="true" AllowDragging="true" IsModal="true" ShowCloseIcon="true"
+          CloseOnEscape="false" AllowPrerender="true" CssClass="@dialogClass" @bind-Visible="isVisible" ZIndex="3000">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            Данни за участие в експертна комисия на <span style="font-size: 18px;color: white !important;">@Person.FullName</span>
+        </Header>
+        <Content>
+            <EditForm EditContext="editContext" OnSubmit="Save" id="participationCommisionModal">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group required">
+                                <label class="control-label">Експертна комисия: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="expertCommissionValues" AllowCustom="false" @bind-Value="this.resultContext.ResultContextObject.IdExpertCommission">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group required">
+                                <label class="control-label">Роля: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="roleCommissionValues" AllowCustom="false" @bind-Value="this.resultContext.ResultContextObject.IdRole">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group required">
+                                <label class="control-label">Институция, която представя: </label>
+                                <InputText class="form-control" @bind-Value="this.resultContext.ResultContextObject.Institution"></InputText>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group required">
+                                <label class="control-label">Длъжност: </label>
+                                <InputText class="form-control" @bind-Value="this.resultContext.ResultContextObject.Occupation"></InputText>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">Титуляр/Заместник: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="kvMemberTypeECSource" AllowCustom="false" @bind-Value="this.resultContext.ResultContextObject.IdMemberType">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">Заповед №: </label>
+                                <InputText class="form-control" @bind-Value="this.resultContext.ResultContextObject.Protokol"></InputText>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">Дата:</label>
+                                <SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="this.resultContext.ResultContextObject.ProtokolDate"></SfDatePicker>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group required">
+                                <label class="control-label">Статус: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM" PopupHeight="230px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="statusValues" AllowCustom="false" @bind-Value="this.resultContext.ResultContextObject.IdStatus">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Коментар при промяна на статуса:
+                                </label>
+                                <div>
+                                    <InputTextArea rows="3" class="form-control" @bind-Value="this.resultContext.ResultContextObject.Comment" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.CreationDate</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.ModifyDate</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.resultContext.ResultContextObject.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.resultContext.ResultContextObject.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-info" form="participationCommisionModal">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="@CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

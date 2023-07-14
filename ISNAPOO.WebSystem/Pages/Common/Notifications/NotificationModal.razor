@@ -1,0 +1,214 @@
+﻿@using ISNAPOO.Core.ViewModels.Control
+@inherits BlazorBaseComponent
+
+<SfDialog Width="60%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="this.isVisible" ZIndex="3003">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            Данни за уведомление/известие
+        </Header>
+        <Content>
+            <EditForm EditContext="this.editContext" id="submitForm">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Относно:
+                                </label>
+                                <input type="text" disabled="@(!this.IsOpenedFromSPPOOModule)" class="form-control" @bind="model.About" @bind:event="oninput" />
+                                @if (this.IsOpenedFromSPPOOModule)
+                                {
+                                    <div style="float:right"><label>@(!string.IsNullOrEmpty(this.model.About) ? this.model.About.Length : 0)/100</label></div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Коментар:
+                                </label>
+                                <textarea disabled="@(!this.IsOpenedFromSPPOOModule)" rows="7" class="form-control" @bind="model.NotificationText" @bind:event="oninput" />
+                                @if (this.IsOpenedFromSPPOOModule)
+                                {
+                                    <div style="float:right"><label>@(!string.IsNullOrEmpty(this.model.NotificationText) ? this.model.NotificationText.Length : 0)/1000</label></div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (!this.IsOpenedFromSPPOOModule)
+                    {
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на изпращане:
+                                    </label>
+                                    <InputText disabled="true" class="form-control" @bind-Value="model.SendDateStrTime" />
+                                    @*<SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="model.SendDate"></SfDatePicker>*@
+                                </div>
+                            </div>
+                            @if (this.model.IdNotification != 0)
+                            {
+                                <div class="col-sm-4">
+                                    <label>Документи от времеви печат</label>
+                                    <div class="form-group text-center" style="display: flex;">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Документ, към който e прикрепено Удостоверение за време" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DownloadTXTFile(false))"><i class="fa fa-file-o"></i></button>
+                                        </SfTooltip>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Удостоверение за време (формат *.tsr)" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DownloadTSRFile(false))">
+                                                <i class="fa fa-wpforms"></i>
+                                            </button>
+                                        </SfTooltip>
+                                        <a class="btn btn-info" style="margin-left: 25px;" href="https://evalidation.egov.bg/Validation/TimeStamp" target="_blank">
+                                            Валидиране
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Дата на преглед:
+                                    </label>
+                                    <InputText disabled="true" class="form-control" @bind-Value="model.ReviewDateStrTime" />
+                                    @*<SfDatePicker TValue="DateTime?" Format="@GlobalConstants.DATE_FORMAT" @bind-Value="model.ReviewDate"></SfDatePicker>*@
+                                </div>
+                            </div>
+                            @if (this.model.IdNotification != 0)
+                            {
+                                <div class="col-sm-4">
+                                    <label><b>Документи от времеви печат</b></label>
+                                    <div class="form-group text-center" style="display: flex;">
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Документ, към който e прикрепено Удостоверение за време" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DownloadTXTFile(true))"><i class="fa fa-file-o"></i></button>
+                                        </SfTooltip>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Удостоверение за време (формат *.tsr)" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DownloadTSRFile(true))">
+                                                <i class="fa fa-wpforms"></i>
+                                            </button>
+                                        </SfTooltip>
+                                        <a class="btn btn-info" style="margin-left: 25px;" href="https://evalidation.egov.bg/Validation/TimeStamp" target="_blank">
+                                            Валидиране
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Изпратено от:
+                                    </label>
+                                    <InputText disabled="true" class="form-control" @bind-Value="model.PersonFrom.FullName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Изпратено до:
+                                    </label>
+                                    <InputText disabled="true" class="form-control" @bind-Value="model.PersonTo.FullName" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        Статус:
+                                    </label>
+                                    <InputText disabled="true" class="form-control" @bind-Value="model.StatusNotificationName" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (this.files.Any())
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="text-gray"><b>Приложени документи към известието:</b></label>
+                                <SfGrid @ref="documentGrid" DataSource="this.files" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5px">
+                                            <Template Context="docContext">
+                                                @GetRowNumber(documentGrid, (docContext as ProcedureDocumentVM).IdProcedureDocument).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Width="5%">
+                                            <Template Context="docContext">
+                                                <button @onclick="(() => GetDocument(docContext as ProcedureDocumentVM))" class="btn-row"><i class="fa fa-file-o"></i></button>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdProcedureDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="DocumentTypeNameDescription" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                                        <GridColumn Field="DS_OFFICIAL_DocNumber" HeaderText="№ на документ" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                                        <GridColumn Field="DS_OFFICIAL_DATEOnly" HeaderText="Дата" Format="dd.MM.yyyy" TextAlign="TextAlign.Left" Width="30px"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    }
+                    else if(this.filesFollowUpControl.Any())
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="text-gray"><b>Приложени документи към известието:</b></label>
+                                <SfGrid @ref="documentFollowUpControlGrid" DataSource="this.filesFollowUpControl" AllowSorting="false" AllowFiltering="false" AllowPaging=false AllowTextWrap="true">
+                                    <GridTemplates>
+                                        <EmptyRecordTemplate Context="emptyRecord">
+                                            <span>Няма намерени резултати.</span>
+                                        </EmptyRecordTemplate>
+                                    </GridTemplates>
+                                    <GridColumns>
+                                        <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5px">
+                                            <Template Context="docContext">
+                                                @GetRowNumber(documentFollowUpControlGrid, (docContext as FollowUpControlDocumentVM).IdFollowUpControlDocument).Result
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Width="5%">
+                                            <Template Context="docContext">
+                                                <button @onclick="(() => GetDocumentFollowUpControl(docContext as FollowUpControlDocumentVM))" class="btn-row"><i class="fa fa-file-o"></i></button>
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field="IdFollowUpControlDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                        <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="120px"></GridColumn>
+                                        <GridColumn Field="DS_OFFICIAL_DocNumber" HeaderText="№ на документ" TextAlign="TextAlign.Left" Width="40px"></GridColumn>
+                                        <GridColumn Field="DS_OFFICIAL_DATEOnly" HeaderText="Дата" Format="dd.MM.yyyy" TextAlign="TextAlign.Left" Width="30px"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        @if (this.IsOpenedFromSPPOOModule)
+                        {
+                            <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => { await this.SubmitBtn(); })" form="submitForm">Изпрати</button>
+                        }
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>

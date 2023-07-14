@@ -1,0 +1,238 @@
+﻿@inherits BlazorBaseComponent
+<SfDialog @ref="sfDialog" @bind-Visible="this.isVisible" Width="85%" EnableResize="true" AllowDragging="true" Height="85%" IsModal="true" ZIndex="3000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>           
+            Данни за: <span style="color: #fff">@registerPremisesModalVM.PremisesName</span>
+        </Header>
+        <Content>
+            <SfAccordion>
+                <AccordionItems>
+                    <AccordionItem Header="Данни за материално-техническа база" Expanded="true">
+                        <ContentTemplate>
+                            <EditForm Model="registerPremisesModalVM">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Материално-техническа база:
+                                            </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.PremisesName" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Кратко описание:
+                                            </label>
+                                            <InputTextArea rows="2" readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.PremisesNote" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group required">
+                                            <label class="control-label">Населено място: </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.Location.DisplayJoinedNames" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-10">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Адрес:
+                                            </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.ProviderAddress" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Пощ. код:
+                                            </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.ZipCode" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Телефон:
+                                            </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.Phone" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">
+                                                Статус:
+                                            </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.IdStatus" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Форма на собственост:
+                                            </label>
+                                            <InputText readonly="true" class="form-control" @bind-Value="registerPremisesModalVM.IdOwnership" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Данни за помещения" Expanded="@IsAnyRooms">
+                        <ContentTemplate>
+                            <div class="content-wrapper">
+                                <div class="card">
+                                    <div class="card-header">
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                @if (premisesRoomsSource.Any())
+                                                {
+                                                    <SfGrid ID="premisesRoomsGrid" DataSource="premisesRoomsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="premisesRoomsGrid" AllowSelection="false" style="min-height: 365px">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridColumns>
+                                                            <GridColumn Field="PremisesRoomName" HeaderText="Помещение" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                                                            <GridColumn HeaderText="Вид на помещението" TextAlign="TextAlign.Left" Width="40">
+                                                                <Template>
+                                                                    @{
+                                                                    var room = context as CandidateProviderPremisesRoomVM;
+                                                                    room.PremisesTypeName = this.DataSourceService.GetKeyValueByIdAsync(room.IdPremisesType).Result.Name;
+                                                                    @($"{room.PremisesTypeName}")
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Провеждано обучение" TextAlign="TextAlign.Left" Width="60">
+                                                            <Template>
+                                                                @{
+                                                                    var room = context as CandidateProviderPremisesRoomVM;
+                                                                    room.UsageName = this.DataSourceService.GetKeyValueByIdAsync(room.IdUsage).Result.Name;
+                                                                    @($"{room.UsageName}")
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                                }
+                                                else
+                                                {
+                                                    <SfGrid ID="premisesRoomsGrid" DataSource="premisesRoomsSource" EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="premisesRoomsGrid" AllowSelection="false">
+                                                        <GridColumns>
+                                                            <GridColumn Field="PremisesRoomName" HeaderText="Помещение" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                                                            <GridColumn HeaderText="Вид на помещението" TextAlign="TextAlign.Left" Width="40">
+                                                                <Template>
+                                                                    @{
+                                                                    var room = context as CandidateProviderPremisesRoomVM;
+                                                                    room.PremisesTypeName = this.DataSourceService.GetKeyValueByIdAsync(room.IdPremisesType).Result.Name;
+                                                                    @($"{room.PremisesTypeName}")
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Провеждано обучение" TextAlign="TextAlign.Left" Width="60">
+                                                            <Template>
+                                                                @{
+                                                                    var room = context as CandidateProviderPremisesRoomVM;
+                                                                    room.UsageName = this.DataSourceService.GetKeyValueByIdAsync(room.IdUsage).Result.Name;
+                                                                    @($"{room.UsageName}")
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </AccordionItem>
+                    <AccordionItem Header="Документи" Expanded="@IsAnyDocuments">
+                        <ContentTemplate>
+                            <div class="content-wrapper">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                @if (mtbDocumentsSource.Any())
+                                                {
+                                                    <SfGrid ID="mtbDocumentsGrid" DataSource="mtbDocumentsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="mtbDocumentsGrid" AllowSelection="false" style="min-height: 365px">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridColumns>
+                                                            <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                            <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                                                                <Template Context="docContext">
+                                                                    @{
+                                                                    var entry = (docContext as CandidateProviderPremisesDocumentVM);
+
+                                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                                    {
+                                                                        <a href="#" @onclick="(() => OnDownloadClick(entry.FileName))">@entry.FileName</a>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @entry.FileName
+                                                                    }
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="50%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                        <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                                }
+                                                else
+                                                {
+                                                    <SfGrid ID="mtbDocumentsGrid" DataSource="mtbDocumentsSource" EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="mtbDocumentsGrid" AllowSelection="false">
+                                                        <GridColumns>
+                                                            <GridColumn Field="DocumentTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                            <GridColumn Field="DocumentTitle" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="50%">
+                                                                <Template Context="docContext">
+                                                                    @{
+                                                                    var entry = (docContext as CandidateProviderPremisesDocumentVM);
+
+                                                                    if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                                                    {
+                                                                        <a href="#" @onclick="(() => OnDownloadClick(entry.FileName))">@entry.FileName</a>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @entry.FileName
+                                                                    }
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="50%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                        <GridColumn Field="UploadedByName" HeaderText="Прикачено от" TextAlign="TextAlign.Left" Width="50%"></GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </AccordionItem>
+                </AccordionItems>
+            </SfAccordion>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

@@ -1,0 +1,50 @@
+﻿@using ISNAPOO.Core.ViewModels.Archive
+@inherits BlazorBaseComponent
+
+<SfDialog ID="application" @ref="sfDialog" @bind-Visible="isVisible" Width="98%" EnableResize="true" AllowDragging="true" Height="98%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за годишна информация за дейността на @this.cpoCipo</Header>
+        <Content>
+            <SfGrid ID="sfGrid" DataSource="annualInfoSource"  EnableAltRow="true" EnableHover="false" AllowTextWrap="true" @ref="sfGrid">                
+                <GridColumns>
+                    <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5%">
+                        <Template>
+                            @GetRowNumber(sfGrid, (context as AnnualInfoStatusVM).IdAnnualInfoStatus).Result
+                        </Template>
+                    </GridColumn>                    
+                    <GridColumn Field="IdAnnualInfoStatus" IsPrimaryKey="true" Visible="false"></GridColumn>
+                    <GridColumn Field="PersonName" HeaderText="Потребител" TextAlign="TextAlign.Left" Width="25%"></GridColumn>
+                    <GridColumn Field="Title" HeaderText="Длъжност" TextAlign="TextAlign.Left" Width="30%"></GridColumn>
+                    <GridColumn Field="StatusDate" HeaderText="Дата на промяна" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                    <GridColumn Field="StatusValue" HeaderText="Статус" TextAlign="TextAlign.Center" Width="20%">
+                        <Template>
+                            <div class="text-center">
+                                @{
+                                    var status = context as AnnualInfoStatusVM;
+                                    switch (status.StatusValueIntCode)
+                                    {
+                                        case "Working":
+                                            <label class="form-label label label-info">@status.StatusValue</label>
+                                            break;
+                                        case "Submitted":
+                                            <label class="form-label label label-info">@status.StatusValue</label>
+                                            break;
+                                        case "Returned":
+                                            <label class="form-label label label-danger">@status.StatusValue</label>
+                                            break;
+                                        case "Approved":
+                                            <label class="form-label label label-success">@status.StatusValue</label>
+                                            break;
+                                    }
+                                }
+                            </div>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Center" Width="20%"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </Content>        
+    </DialogTemplates>
+</SfDialog>

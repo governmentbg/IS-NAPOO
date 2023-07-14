@@ -1,0 +1,66 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Прикачване на протокол</Header>
+        <Content>
+            <EditForm EditContext="editContext">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Описание на протокола:
+                                </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="3"
+                                                     @bind-Value="this.model.Description"
+                                                     maxlength="4000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.model.Description != null ? this.model.Description.Length : 0)/512</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(this.model.UploadedFileName))
+                    {
+                        <div class="row e-upload" style="margin-left:0px">
+                            <div class="col-sm-8">
+                                <button type="button" class="btn-row" @onclick="(() => OnRemove(this.model.UploadedFileName))"><i class="fa fa-trash-o"></i></button>
+                                <span class="align-text-bottom"><a @onclick="OnDownloadClick" href="#" class="link-primary">@this.model.FileName</a></span>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">
+                                    Прикачване на файл:
+                                </label>
+                                <SfUploader Enabled="this.model.IdRequestDocumentManagementUploadedFile != 0" @ref="this.uploader" AutoUpload="false" AllowMultiple="false" AllowedExtensions="@(GlobalConstants.ALLOWED_EXTENSIONS_ALL)" MinFileSize="this.MinFileSize" MaxFileSize="this.MaxFileSize">
+                                    <UploaderEvents ValueChange="OnChange" OnRemove="OnRemoveClick"></UploaderEvents>
+                                </SfUploader>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" @onclick="SubmitHandler">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>

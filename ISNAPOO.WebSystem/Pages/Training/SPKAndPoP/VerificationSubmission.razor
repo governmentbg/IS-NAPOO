@@ -1,0 +1,100 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card" style="margin-bottom: 0px;">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <SfTooltip Content="Подаване на документи за проверка към НАПОО" Position="TooltipPosition.BottomCenter" OpensOn="Hover" CssClass="toolTip-zindex">
+                                    <button disabled="@(!this.IsEditable)" type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="FileInForVerificationBtn">Подай за проверка</button>
+                                </SfTooltip>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid DataSource="documentsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="documentsGrid" AllowSelection="true" AllowPaging="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridEvents TValue="ClientCourseDocumentVM" OnToolbarClick="ToolbarClick" />
+                        <GridSelectionSettings CheckboxOnly="true" />
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="8"></GridColumn>
+                            <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="8">
+                                <Template>
+                                    @GetRowNumber(documentsGrid, (context as ClientCourseDocumentVM).IdClientCourseDocument).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdClientCourseDocument" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="DocumentRegNo" HeaderText="Регистрационен номер" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="DocumentDateAsStr" HeaderText="Дата" TextAlign="TextAlign.Left" Width="20"></GridColumn>
+                            <GridColumn Field="DocumentSerialNumber.SerialNumber" HeaderText="Фабричен номер" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="TypeOfRequestedDocument.DocTypeName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="ClientCourse.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ClientCourse.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="ClientCourse.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="40"></GridColumn>
+                            <GridColumn Field="DocumentStatusValue" HeaderText="Статус на документа" TextAlign="TextAlign.Center" Width="50">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var doc = context as ClientCourseDocumentVM;
+                                            switch (doc.DocumentStatusValue)
+                                            {
+                                                case "Неподаден":
+                                                    <label class="form-label-status label label-warning">@doc.DocumentStatusValue</label>
+                                                    break;
+                                                case "Подаден":
+                                                    <label class="form-label-status label label-primary">@doc.DocumentStatusValue</label>
+                                                    break;
+                                                case "Върнат":
+                                                    <label class="form-label-status label label-danger">@doc.DocumentStatusValue</label>
+                                                    break;
+                                                case "Вписан в Регистъра":
+                                                    <label class="form-label-status label label-success">@doc.DocumentStatusValue</label>
+                                                    break;
+                                                case "Отказан":
+                                                    <label class="form-label-status label label-danger">@doc.DocumentStatusValue</label>
+                                                    break;
+                                                case "Скрит от РИДПК":
+                                                    <label class="form-label-status label label-danger">@doc.DocumentStatusValue</label>
+                                                    break;
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn TextAlign="TextAlign.Center" Width="15">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отвори файл с документа" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => OpenFileWithDocumentBtn(context as ClientCourseDocumentVM))"><i class="fa fa-file-o"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn TextAlign="TextAlign.Center" Width="15">
+                                <Template>
+                                    @{
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на статуса" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(() => OpenStatusHistoryBtn(context as ClientCourseDocumentVM))"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SubmissionCommentModal @ref="submissionCommentModal" CallbackAfterSubmit="UpdateDocumentsDataAfterDocumentSubmissionAsync" />
+<DocumentStatusModal @ref="documentStatusModal" />

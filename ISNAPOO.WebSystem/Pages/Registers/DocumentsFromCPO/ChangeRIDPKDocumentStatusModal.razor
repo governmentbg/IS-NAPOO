@@ -1,0 +1,57 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog Width="60%" EnableResize=true AllowDragging="true" IsModal="true"
+          ShowCloseIcon="true" CloseOnEscape="false" AllowPrerender="true" @bind-Visible="this.isVisible" ZIndex="3014">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration=500 />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>
+            @this.title
+        </Header>
+        <Content>
+            <EditForm EditContext="this.editContext">
+                <ValidationSummary />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label class="control-label">
+                                    Статус:
+                                </label>
+                                <SfComboBox TValue="int?" TItem="KeyValueVM" PopupHeight="230px" CssClass="form-control customPad" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" @bind-Value="this.model.IdDocumentStatus" DataSource="this.ridpkDocStatusesSource" AllowFiltering="true" AllowCustom="false">
+                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>Коментар: </label>
+                                <CustomInputTextArea style="width:-webkit-fill-available; border-block:"
+                                                     ondrop="5"
+                                                     rows="6"
+                                @bind-Value="this.model.Comment"
+                                                     maxlength="6000">
+                                </CustomInputTextArea>
+                                <div style="float:right"><label>@(this.model.Comment != null ? this.model.Comment.Length : 0)/6000</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <button style="margin-right: 5px;" class="btn btn-info" type="button" @onclick="(async () => { await this.SubmitBtn(); })">Изпрати</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="this.CancelClickedHandler">Отказ</button>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />

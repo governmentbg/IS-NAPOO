@@ -1,0 +1,81 @@
+﻿@inject IMunicipalityService MunicipalityService
+@inject IDistrictService DistrictService
+
+<EditForm Model="municipalityVM" OnValidSubmit="SubmitHandler">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label><b>Избери област</b></label>
+        <SfDropDownList TValue="string" TItem="DistrictVM" PopupHeight="230px" Placeholder="Област" DataSource="districts" @bind-Value="idDistrict">
+            <DropDownListFieldSettings Text="DistrictName" Value="idDistrict" />
+        </SfDropDownList>
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Име на общината:</label>
+        <InputText class="form-control" @bind-Value="municipalityVM.MunicipalityName" />
+    </div>
+    <div class="form-group">
+        <label>Код на общината:</label>
+        <InputText class="form-control" @bind-Value="municipalityVM.MunicipalityCode" />
+    </div>
+    <br />
+    <div class="text-center">
+        <SfButton Content="Запази" IsPrimary="true" Type="submit"></SfButton>
+    </div>
+</EditForm>
+
+<ToastMsg @ref="toast"></ToastMsg>
+
+@code {
+    ToastMsg toast;
+
+    MunicipalityVM municipalityVM = new MunicipalityVM();
+    IEnumerable<DistrictVM> districts = new List<DistrictVM>();
+    string idDistrict = string.Empty;
+
+    [Parameter]
+    public int MunicipalityId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.districts = await this.DistrictService.GetAllDistrictsAsync();
+
+        if (this.MunicipalityId != 0)
+        {
+            this.municipalityVM = await this.MunicipalityService.GetMunicipalityByIdAsync(this.MunicipalityId);
+            this.idDistrict = this.municipalityVM.idDistrict.ToString();
+        }
+    }
+
+    private async Task SubmitHandler()
+    {
+        int result;
+
+        this.municipalityVM.idDistrict = int.Parse(this.idDistrict);
+
+        if (this.MunicipalityId != 0)
+        {
+            result = await this.MunicipalityService.UpdateMunicipalityAsync(this.municipalityVM);
+        }
+        else
+        {
+            result = await this.MunicipalityService.CreateMunicipalityAsync(this.municipalityVM);
+        }
+
+        if (result == 1)
+        {
+            toast.sfSuccessToast.Content = "Записът e успешeн!";
+            await toast.sfSuccessToast.ShowAsync();
+            await this.OnSubmit.InvokeAsync();
+        }
+        else
+        {
+            toast.sfErrorToast.Content = "Грешка при запис в базата!";
+            await toast.sfErrorToast.ShowAsync();
+        }
+    }
+}

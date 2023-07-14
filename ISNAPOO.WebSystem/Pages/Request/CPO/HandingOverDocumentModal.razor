@@ -1,0 +1,188 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @ref="handingOverDocumentModal" @bind-Visible="isVisible" Width="60%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за предаване на документ по Наредба №8</Header>
+        <Content>
+            <EditForm EditContext="editContext" id="saveForm">
+                <div id="validation-errors">
+                    <ValidationSummary />
+                </div>
+                <div class="card">
+                    <div class="card-block" style="">
+                        <p>
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group required">
+                                        <label class="control-label">Предаден на (ЦПО): </label>
+                                        <SfAutoComplete @ref="providersAutoComplete" TValue="int?" TItem="CandidateProviderVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                        @bind-Value="requestDocumentManagementVM.IdCandidateProviderPartner" DataSource="providersSource" AllowFiltering="true" Enabled="@(this.requestDocumentManagementVM.IdRequestDocumentManagement == 0)">
+                                            <AutoCompleteTemplates TItem="CandidateProviderVM">
+                                                <NoRecordsTemplate>
+                                                    Няма намерени резултати.
+                                                </NoRecordsTemplate>
+                                                <ItemTemplate Context="providerCtx">
+                                                    <span class='item'><span class='cpo'>@((providerCtx as CandidateProviderVM).ProviderName)</span><span class='owner'>@((providerCtx as CandidateProviderVM).ProviderOwner)</span></span>
+                                                </ItemTemplate>
+                                                <HeaderTemplate>
+                                                    <span class='head'><span class='cpo'>ЦПО</span><span class='owner'>Юридическо лице</span></span>
+                                                </HeaderTemplate>
+                                            </AutoCompleteTemplates>
+                                            <AutoCompleteFieldSettings Text="CPONameAndOwnerName" Value="IdCandidate_Provider" />
+                                            <AutoCompleteEvents TValue="int?" TItem="CandidateProviderVM" Filtering="OnFilterProvider"></AutoCompleteEvents>
+                                        </SfAutoComplete>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group required">
+                                        <label class="control-label">Година: </label>
+                                        <SfComboBox CssClass="form-control" Enabled="@(this.requestDocumentManagementVM.IdRequestDocumentManagement == 0)" TValue="int?" TItem="int?" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="yearsSource" AllowFiltering="true" @bind-Value="requestDocumentManagementVM.ReceiveDocumentYear" AllowCustom="false">
+                                            <ComboBoxEvents TItem="int?" TValue="int?" ValueChange="LoadTypeOfDocumentsData" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                                @if (this.documentCount > 0)
+                                {
+                                    <div class="col-sm-3">
+                                        <div class="form-group required">
+                                            <label class="control-label">Дата на предаване: </label>
+                                            <SfDatePicker TValue="DateTime?" @bind-Value="requestDocumentManagementVM.DocumentDate" Format="dd.MM.yyyy" />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group required">
+                                        <label class="control-label">Вид на документ: </label>
+                                        <SfComboBox CssClass="form-control" TValue="int" TItem="TypeOfRequestedDocumentVM" Enabled="@(this.requestDocumentManagementVM.ReceiveDocumentYear != 0 && this.requestDocumentManagementVM.IdRequestDocumentManagement == 0)" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="typeOfRequestedDocumentsSource" AllowFiltering="true" @bind-Value="requestDocumentManagementVM.IdTypeOfRequestedDocument" AllowCustom="false">
+                                            <ComboBoxFieldSettings Text="NumberWithName" Value="IdTypeOfRequestedDocument" />
+                                            <ComboBoxEvents TItem="TypeOfRequestedDocumentVM" TValue="int" ValueChange="this.GetDocumentCount" />
+                                        </SfComboBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                @if (this.requestDocumentManagementVM.IdRequestDocumentManagement != 0 && this.documentCount > 0)
+                                {
+                                    <div class="col-sm-2">
+                                        <div class="form-group required">
+                                            <label class="control-label">Брой: </label>
+                                            <InputNumber min="0" class="form-control" @bind-Value="this.requestDocumentManagementVM.DocumentCount"></InputNumber>
+                                        </div>
+                                    </div>
+                                }
+                                @if (this.requestDocumentManagementVM.IdTypeOfRequestedDocument != 0)
+                                {
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label class="control-label">Налични: <b>@this.documentCount</b> бр.</label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (this.requestDocumentManagementVM.IdRequestDocumentManagement != 0 && this.hasSerialNumber)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <p>
+                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OnAddDocumentSerialNumbersClickHandler">Добави фабрични номера</button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <SfGrid DataSource="addedFabricNumbersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                            AllowTextWrap="true" @ref="addedFabricNumbersGrid" AllowSelection="true" AllowPaging="true">
+                                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                                            <GridTemplates>
+                                                <EmptyRecordTemplate Context="emptyRecord">
+                                                    <span>Няма намерени резултати.</span>
+                                                </EmptyRecordTemplate>
+                                            </GridTemplates>
+                                            <GridColumns>
+                                                <GridColumn Width="20">
+                                                    <Template Context="docSerialNumberCtx">
+                                                        @if ((docSerialNumberCtx as DocumentSerialNumberVM).DocumentOperationName == "Получен" || (docSerialNumberCtx as DocumentSerialNumberVM).DocumentOperationName == "Предаден")
+                                                        {
+                                                         <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+																<button type="button" class="btn-row" @onclick="(() => DeleteDocumentSerialNumber(docSerialNumberCtx as DocumentSerialNumberVM))"><i class="fa fa-trash-o"></i></button>
+                                                         </SfTooltip>
+                                                             }
+                                                </Template>
+                                            </GridColumn>
+                                            <GridColumn Field="TypeOfRequestedDocument.NumberWithName" HeaderText="Вид на документа" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+                                            <GridColumn Field="ReceiveDocumentYear" HeaderText="Година" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                            <GridColumn Field="DocumentSeriesName" HeaderText="Серия" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                            <GridColumn Field="SerialNumber" HeaderText="Фабричен номер" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                                            <GridColumn Field="DocumentOperationName" HeaderText="Операция" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </div>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @requestDocumentManagementVM.CreationDate.ToString("dd.MM.yyyy")</div>
+
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @requestDocumentManagementVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @requestDocumentManagementVM.CreatePersonName</div>
+
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @requestDocumentManagementVM.ModifyPersonName</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="submit" form="saveForm" @onclick="Save">Запиши</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .head, .item {
+        display: table;
+        width: 100%;
+        margin: auto;
+    }
+
+    .head {
+        height: 40px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .cpo, .owner {
+        display: table-cell;
+        vertical-align: middle;
+        width: 50%;
+    }
+
+    .head .cpo {
+        text-indent: 16px;
+    }
+</style>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+<HandingOverDocumentAddSerialNumberModal @ref="handingOverDocumentAddSerialNumberModal" CallbackAfterModalSubmit="UpdateAfterFabricNumbersAdded" />

@@ -1,0 +1,169 @@
+﻿@*@inject IMenuNodeService MenuNodeService
+@inherits BlazorBaseComponent
+
+<SfDialog @ref="sfDialog" Target="#target" Width="50%" AllowDragging="true" IsModal="true" ShowCloseIcon="true" AllowPrerender="true" @bind-Visible="isVisibleEditModal" ZIndex="2000">
+    <DialogEvents OnClose="OnXClickHandler"></DialogEvents>
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogTemplates>
+        <Header>
+            Данни за елемент от навигационното меню
+        </Header>
+        <Content>
+            <EditForm id="submitFormAreaModal" EditContext="editContext" OnSubmit="OnSubmitHandler">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                @{
+                switch (entityType)
+                {
+                    case MenuNodeTypes.MenuNodeRoot:
+                            <MenuNodeRoot OnSubmit="OnSubmitHandler" OnClose="CloseModal" IsModified="() => IsContextModified = true" MenuNodeVM="menuNodeVM" editContext="editContext"></MenuNodeRoot>
+                        break;
+                    case MenuNodeTypes.MenuNodeParent:
+                        <br />
+                            <MenuNodeParent OnSubmit="OnSubmitHandler" OnClose="CloseModal" IsModified="() => IsContextModified = true"  MenuNodeVM="menuNodeVM" editContext="editContext" IdRoot="idRoot"></MenuNodeParent>
+                        break;
+                    case MenuNodeTypes.MenuNodeLink:
+                        <br />
+                        <MenuNodeLink OnSubmit="OnSubmitHandler" OnClose="CloseModal" IsModified="() => IsContextModified = true"  MenuNodeVM="menuNodeVM" editContext="editContext" IdRoot="idRoot" IdParent="idParent" EnableParentDropDown="enableSubmenuCombobox"></MenuNodeLink>
+                        break;
+                }
+            }
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@if (this.showConfirmDialog)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(this.showConfirmDialog ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Внимание!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>@ConfirmMessages.UnsavedChanges</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(async () => { this.closeConfirmed = true; CancelHandler(); })">Да</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="(() => this.showConfirmDialog = false)">Отказ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}*@
+
+@code {
+    //SfDialog sfDialog = new SfDialog();
+
+    //string entityType = string.Empty;
+    //int entityId;
+    //bool isVisibleEditModal = false;
+    //int idRoot;
+    //int idParent;
+    //bool enableSubmenuCombobox;
+    //bool IsContextModified = false;
+
+    //MenuNodeVM menuNodeVM = new MenuNodeVM();
+    //EditContext editContext;
+
+    //[Parameter]
+    //public EventCallback OnSubmit { get; set; }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    this.isVisibleEditModal = false;
+    //    this.editContext = new EditContext(menuNodeVM);
+    //}
+
+    //protected virtual void OnXClickHandler(BeforeCloseEventArgs args)
+    //{
+    //    if (args.ClosedBy == "Close Icon")
+    //    {
+    //        args.Cancel = true;
+
+    //        this.CloseModal();
+    //    }
+    //}
+
+    //private void CancelHandler()
+    //{
+    //    if (!this.isSubmitClicked)
+    //    {
+    //        if (this.closeConfirmed)
+    //        {
+    //            this.showConfirmDialog = false;
+    //            this.closeConfirmed = false;
+    //            this.isVisible = false;
+    //            this.isVisibleEditModal = false;
+    //            this.StateHasChanged();
+    //        }
+    //        else
+    //        {
+    //            this.showConfirmDialog = true;
+    //            this.closeConfirmed = false;
+    //        }
+    //    }
+    //}
+
+    //public async Task OpenModal(int entityId, string entityType)
+    //{
+    //    this.entityId = entityId;
+    //    this.entityType = entityType;
+    //    this.menuNodeVM = await this.MenuNodeService.GetMenuNodeByIdAsync(this.entityId);
+    //    this.editContext = new EditContext(menuNodeVM);
+
+    //    if (this.entityType == MenuNodeTypes.MenuNodeParent)
+    //    {
+    //        this.idRoot = this.menuNodeVM.IdParentNode;
+    //    }
+
+    //    if (this.entityType == MenuNodeTypes.MenuNodeLink)
+    //    {
+    //        this.idParent = this.menuNodeVM.IdParentNode;
+    //        MenuNodeVM parentNode = await this.MenuNodeService.GetMenuNodeByIdAsync(this.idParent);
+    //        this.idRoot = parentNode.IdParentNode;
+    //        this.enableSubmenuCombobox = true;
+    //    }
+
+    //    this.isVisibleEditModal = true;
+    //    this.StateHasChanged();
+    //}
+
+    //private async Task CloseModal()
+    //{
+    //    if (this.editContext.IsModified())
+    //    {
+    //        this.showConfirmDialog = true;
+    //        if (this.closeConfirmed)
+    //        {
+    //            this.showConfirmDialog = false;
+    //            this.closeConfirmed = false;
+    //            this.isVisible = false;
+    //            this.isVisibleEditModal = false;
+    //            this.StateHasChanged();
+    //        }
+    //        else
+    //        {
+    //            this.showConfirmDialog = true;
+    //            this.closeConfirmed = false;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        this.isVisibleEditModal = false;
+    //        this.StateHasChanged();
+    //    }
+        
+    //}
+
+    //private async Task OnSubmitHandler()
+    //{
+    //    //bool hasPermission = await CheckUserActionPermission("ManageMenuNodesData", false);
+    //    //if (!hasPermission) { return; }
+
+    //    this.isVisibleEditModal = false;
+    //    this.StateHasChanged();
+    //    await this.OnSubmit.InvokeAsync();
+    //}
+}

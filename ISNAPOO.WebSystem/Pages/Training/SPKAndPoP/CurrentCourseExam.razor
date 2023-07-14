@@ -1,0 +1,97 @@
+﻿@inherits BlazorBaseComponent
+
+<div class="card" style="margin-bottom: 0px;">
+    <div class="card-block" style="">
+        <p>
+            <EditForm EditContext="editContext">
+                @if (this.IsEditable)
+                {
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Име: </label>
+                                <SfTextBox @bind-Value="this.model.FirstName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Презиме: </label>
+                                <SfTextBox @bind-Value="this.model.SecondName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group required">
+                                <label class="control-label">Фамилия: </label>
+                                <SfTextBox @bind-Value="this.model.FamilyName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="new-task" style="margin-top: 28px;">
+                                <div class="to-do-list">
+                                    <div class="checkbox-fade fade-in-primary">
+                                        <label class="form-label">
+                                            <input type="checkbox" @bind-value="this.model.IsChairman" checked="@(this.model.IsChairman ? "checked" : null)">
+                                            <span class="cr">
+                                                <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                            </span> <span>Председател</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <p>
+                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddMemberBtn">Добави</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </EditForm>
+            <div class="row">
+                <div class="col-sm-12">
+                    @if (this.CourseVM.OldId.HasValue && !string.IsNullOrEmpty(this.model.CommissionMembersFromOldIS))
+                    {
+                        <div class="form-group required">
+                            <label class="control-label">Комисия: </label>
+                            <SfTextBox Multiline="true" Value="@(this.model.CommissionMembersFromOldIS)" Enabled="false" HtmlAttributes="@(new Dictionary<string, object>() { { "rows", "4" } })" />
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="text-gray"><b>Членове на комисии и Квестори:</b></label>
+                        <SfGrid DataSource="membersSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                                AllowTextWrap="true" @ref="membersGrid" AllowSelection="false" AllowPaging="true"
+                                Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true">
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                            <GridEvents TValue="CourseCommissionMemberVM" OnToolbarClick="ToolbarClick" />
+                            <GridColumns>
+                                <GridColumn AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="5">
+                                    <Template>
+                                        @GetRowNumber(membersGrid, (context as CourseCommissionMemberVM).IdCourseCommissionMember).Result
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Width="5" HeaderText=" " Visible="this.IsEditable">
+                                    <Template>
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                            <button type="button" class="btn-row" @onclick="(async () => await this.DeleteMemberBtn(context as CourseCommissionMemberVM))"><i class="fa fa-trash-o"></i></button>
+                                        </SfTooltip>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="IdCourseCommissionMember" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field="FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                <GridColumn Field="SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                <GridColumn Field="FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                                <GridColumn Field="IsChairmanAsStr" HeaderText="Председател" TextAlign="TextAlign.Left" Width="30"></GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    }
+                </div>
+            </div>
+        </p>
+    </div>
+</div>
+

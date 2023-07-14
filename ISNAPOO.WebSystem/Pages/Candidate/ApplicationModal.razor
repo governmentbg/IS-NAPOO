@@ -1,0 +1,232 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<CandidateProviderVM>
+
+<SfDialog @bind-Visible="this.isVisible" Width="99%" EnableResize="true" AllowDragging="true" Height="99%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="this.AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="this.OnXClickHandler" />
+    <DialogTemplates>
+        <Header>@((MarkupString)this.title)</Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <SfTab @ref="this.applicationTab" EnablePersistence="true" OverflowMode="OverflowMode.Scrollable" LoadOn="ContentLoad.Dynamic" @bind-SelectedItem="this.selectedTab">
+                <TabEvents Selecting="Select" />
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Обучаваща институция"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <TrainingInstitution @ref="this.trainingInstitution" CandidateProviderVM="this.candidateProviderVM" IsCPO="this.isCPO" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.isCPO">
+                        <ChildContent>
+                            <TabHeader Text="Учебен план и учебни програми"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <Specialities @ref="this.specialities" CandidateProviderVM="this.candidateProviderVM" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.isCPO">
+                        <ChildContent>
+                            <TabHeader Text="Услуги"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <Consultings @ref="this.consultings" CandidateProviderVM="this.candidateProviderVM" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Устройство и дейност"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <StructureAndActivities @ref="structureAndActivities" CandidateProviderVM="this.candidateProviderVM" IsCPO="this.isCPO" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="@(this.isCPO ? "Преподаватели" : "Консултанти и адм. персонал")"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <Trainers @ref="trainers" CandidateProviderVM="this.candidateProviderVM" IsCPO="this.isCPO" TabReference="this.applicationTab" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="MTБ"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <MaterialTechnicalBase @ref="materialTechnicalBase" CandidateProviderVM="this.candidateProviderVM" IsCPO="this.isCPO" TabReference="this.applicationTab" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.disableFieldsWhenOpenFromProfile && !this.isUserExternalExpertOrExpertCommittee && !this.disableFieldsWhenUserIsNAPOO">
+                        <ChildContent>
+                            <TabHeader Text="Организация на работата"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <FormApplicationModal @ref="formApplicationModal" DocumentIsGenerated="() => FormApplicationStatus = false" isCPO="this.isCPO" IdCandidateProvider="this.candidateProviderVM.IdCandidate_Provider" />
+                                    <nav class="navbar navbar-expand">
+                                        <!-- Left navbar links -->
+                                        <ul class="navbar-nav float">
+                                            <li class="nav-item d-none d-sm-inline-block">                                               
+                                                @if (this.isCPO)
+                                                {
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отваряне на бланка на Формуляр за кандидатстване за лицензиране на ЦПО" OpensOn="Hover">
+                                                        <button class="btn btn-info" type="submit" @onclick="OpenFormApplicationModal">Попълване на формуляр</button>
+                                                    </SfTooltip>
+                                                }
+                                                else
+                                                {
+                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Отваряне на бланка на Формуляр за кандидатстване за лицензиране на ЦИПО" OpensOn="Hover">
+                                                        <button class="btn btn-info" type="submit" @onclick="OpenFormApplicationModal">Попълване на формуляр</button>
+                                                    </SfTooltip>
+                                                }                                               
+                                                
+                                            </li>
+                                            <li class="nav-item d-none d-sm-inline-block">
+                                                &nbsp;
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Приложени документи"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <CandidateProviderDocuments @ref="candidateProviderDocuments" CandidateProviderVM="this.candidateProviderVM" IsCPO="this.isCPO" IsUserProfileAdministrator="this.isUserProfileAdministrator" DisableFieldsWhenUserIsNAPOO="this.disableFieldsWhenUserIsNAPOO" DisableFieldsWhenApplicationStatusIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" DisableFieldsWhenUserIsExternalExpertOrCommittee="this.isUserExternalExpertOrExpertCommittee" DisableFieldsWhenOpenFromProfile="this.disableFieldsWhenOpenFromProfile" DisableFieldsWhenActiveLicenceChange="this.disableFieldsWhenActiveLicenceChange" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="!this.disableFieldsWhenOpenFromProfile && !this.isUserExternalExpertOrExpertCommittee && !this.disableFieldsWhenUserIsNAPOO">
+                        <ChildContent>
+                            <TabHeader Text="Подаване и печат на заявлението"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="wrap">
+                                <article>
+                                    <ApplicationStatus @ref="applicationStatus" CandidateProviderVM="this.candidateProviderVM" IsCPO="this.isCPO" DisableFieldsWhenApplicationIsNotDocPreparation="this.disableFieldsWhenApplicationStatusIsNotDocPreparation" IsUserProfileAdministrator="this.isUserProfileAdministrator" CallbackAfterStartedProcedure="ReloadCandidateProviderDataAfterStartedProcedureAsync" />
+                                </article>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.disableFieldsWhenUserIsNAPOO">
+                        <ChildContent>
+                            <TabHeader Text="Процедури по лицензиране"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <LicensingProcedure @ref="licensingProcedure" CandidateProviderVM="this.candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem Visible="this.candidateProviderVM.IdLicenceStatus.HasValue && !this.isLicenceChange">
+                        <ChildContent>
+                            <TabHeader Text="Лицензиране"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <LicenceChange @ref="licenceChange" CandidateProviderVM="this.candidateProviderVM" />
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.candidateProviderVM.CreationDate.ToString("dd.MM.yyyy") г.</div>
+                        <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.candidateProviderVM.ModifyDate.ToString("dd.MM.yyyy") г.</div>
+                        @if (this.percentage != 0)
+                        {
+                            <div class="col text-left">Процент на завършеност: <b>@(percentage)%</b></div>
+                        }
+                    </div>
+                    <div class="row">
+                        <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.candidateProviderVM.CreatePersonName</div>
+                        <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.candidateProviderVM.ModifyPersonName</div>
+                        @if (this.percentage != 0)
+                        {
+                            <div class="col text-left">
+                                <div class="faq-progress">
+                                    <div class="progress">
+                                        @if (this.percentage <= 40)
+                                        {
+                                            <div class="faq-bar3" style="width: @(percentage)%;"></div>
+                                        }
+                                        else if (this.percentage > 40 && this.percentage <= 70)
+                                        {
+                                            <div class="faq-bar1" style="width: @(percentage)%;"></div>
+                                        }
+                                        else if (this.percentage > 70 && this.percentage <= 90)
+                                        {
+                                            <div class="faq-bar2" style="width: @(percentage)%;"></div>
+                                        }
+                                        else if (this.percentage > 90 && this.percentage <= 100)
+                                        {
+                                            <div class="faq-bar4" style="width: @(percentage)%;"></div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <div class="text-right">
+                            @if (this.isCPO && this.isLicenceChange && this.candidateProviderVM.IdApplicationStatus.HasValue && this.candidateProviderVM.IdApplicationStatus.Value == this.kvDocumentPreparation.IdKeyValue && !this.disableFieldsWhenUserIsNAPOO && !this.isUserExternalExpertOrExpertCommittee)
+                            {
+                                <button style="margin-right: 20px;" class="btn btn-danger" type="button" @onclick="(async () => { await this.CancelLicenceChangeBtn(); })">Прекратяване на процедурата</button>
+                            }
+
+                            @if (!this.disableFieldsWhenUserIsNAPOO && !this.disableFieldsWhenApplicationStatusIsNotDocPreparation && !this.isUserExternalExpertOrExpertCommittee && !this.disableFieldsWhenActiveLicenceChange && !this.hideBtnsConcurrentModal)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => { await this.Submit(); })">Запиши</button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>

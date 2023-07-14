@@ -1,0 +1,21 @@
+<SearchParticipationInCompaniesResponse xmlns="http://egov.bg/RegiX/AV/TR/SearchParticipationInCompaniesResponse">
+	<IsFound>true</IsFound>
+	<PersonInformation>
+		<Indent xmlns="http://egov.bg/RegiX/AV/TR">2408031234</Indent>
+		<Name xmlns="http://egov.bg/RegiX/AV/TR">Валери Петров Борисов</Name>
+		<IndentType xmlns="http://egov.bg/RegiX/AV/TR">EGN</IndentType>
+	</PersonInformation>
+	<CompanyParticipation>
+		<Company xmlns="http://egov.bg/RegiX/AV/TR">
+			<EIK>831641791</EIK>
+			<CompanyName>ИНФОРМАЦИОННО ОБСЛУЖВАНЕ</CompanyName>
+			<LegalForm>
+				<LegalFormAbbr>АД</LegalFormAbbr>
+				<LegalFormName>Акционерно дружество</LegalFormName>
+			</LegalForm>
+			<Fields>
+				<Field>Съвет на директорите</Field>
+			</Fields>
+		</Company>
+	</CompanyParticipation>
+</SearchParticipationInCompaniesResponse>

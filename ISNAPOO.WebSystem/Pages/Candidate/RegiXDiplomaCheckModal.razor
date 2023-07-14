@@ -1,0 +1,75 @@
+﻿@inherits BlazorBaseComponent
+
+<SfDialog @bind-Visible="isVisible" EnableResize="true" AllowDragging="true" Height="60%" Width="60%" IsModal="true" ZIndex="2500" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Проверка в RegiX: Регистърът на дипломи и свидетелства за завършено основно и средно образование и придобита степен на професионална квалификация</Header>
+        <Content>
+            @{
+                var counter = 1;
+                foreach (var diplomaType in this.diplomaResponse.DiplomaDocument)
+                {
+                    <div class="form-group"><label>Диплома @(counter++) от @this.diplomaResponse.DiplomaDocument.Length</label></div>
+                    <div class="form-group"><label><u>Идентификатор на документа; служебно поле:</u> @diplomaType.intID</label></div>
+                    <div class="form-group"><label><u>@this.identifier:</u> @diplomaType.intStudentID</label></div>
+                    <div class="form-group"><label><u>Име на ученика:</u> @diplomaType.vcName1</label></div>
+                    <div class="form-group"><label><u>Презиме на ученика:</u> @diplomaType.vcName2</label></div>
+                    <div class="form-group"><label><u>Фамилия на ученика:</u> @diplomaType.vcName3</label></div>
+                    <div class="form-group"><label><u>Месторождение (код на населеното място по ЕКАТТЕ):</u> @diplomaType.intBPlaceE</label></div>
+                    <div class="form-group"><label><u>Гражданство (код на държавата по международната класификация ISO 3166):</u> @diplomaType.codeNationality</label></div>
+                    <div class="form-group"><label><u>Пол на студента:</u> @(diplomaType.boolGender == true ? "жена" : "мъж")</label></div>
+                    <div class="form-group"><label><u>Код на документа:</u> @diplomaType.intDocumentType</label></div>
+                    <div class="form-group"><label><u>Наименование на документа:</u> @diplomaType.vcDocumentName</label></div>
+                    <div class="form-group"><label><u>Година на завършване:</u> @diplomaType.intYearGraduated</label></div>
+                    <div class="form-group"><label><u>Серия на документа:</u> @diplomaType.vcPrnSer</label></div>
+                    <div class="form-group"><label><u>Номер на документа:</u> @diplomaType.vcPrnNo</label></div>
+                    <div class="form-group"><label><u>Регистрационен на документа (част 1):</u> @diplomaType.vcRegNo1</label></div>
+                    <div class="form-group"><label><u>Регистрационен на документа (част 2):</u> @diplomaType.vcRegNo2</label></div>
+                    <div class="form-group"><label><u>Дата на издаване на документа:</u> @diplomaType.dtRegDate</label></div>
+                    <div class="form-group"><label><u>Код на училището, издало документа:</u> @diplomaType.intSchoolID</label></div>
+                    <div class="form-group"><label><u>Наименование на училището, издало документа:</u> @diplomaType.vcSchoolName</label></div>
+                    <div class="form-group"><label><u>Код на населеното място по ЕКАТТЕ на училището, издало документа:</u> @diplomaType.intEKATTE</label></div>
+                    <div class="form-group"><label><u>Код на завършена специалност (при придобита професионална квалификация):</u> @diplomaType.intVETSpeciality</label></div>
+                    <div class="form-group"><label><u>Наименование на специалност (при придобита професионална квалификация):</u> @diplomaType.vcVETSpecialityName</label></div>
+                    <div class="form-group"><label><u>Код на придобита степен на професионална квалификация:</u> @diplomaType.intVETLevel</label></div>
+                    <div class="form-group"><label><u>Код на степен на професионална квалификация:</u> @diplomaType.vcVETLevelName</label></div>
+                    <div class="form-group"><label><u>Код на професионално направление (при придобита степен на професионална квалификация):</u> @diplomaType.intVETGroupIdent</label></div>
+                    <div class="form-group"><label><u>Наименование на професионално направление (при придобита степен на професионална квалификация):</u> @diplomaType.vcEducAreaName</label></div>
+                    <div class="form-group"><label><u>Код на форма на обучение:</u> @diplomaType.intEdForm</label></div>
+                    <div class="form-group"><label><u>Наименование на форма на обучение:</u> @diplomaType.vcEdFormName</label></div>
+                    <div class="form-group"><label><u>Код на вид подготовка:</u> @diplomaType.intClassType</label></div>
+                    <div class="form-group"><label><u>Наименование на вид подготовка (профилирана, професионална и пр.):</u> @diplomaType.vcClassTypeName</label></div>
+                    <div class="form-group"><label><u>Среден успех от дипломата:</u> @diplomaType.intMeanMark</label></div>
+
+                    if (diplomaType.DocumentImages.Length > 0)
+                    {
+                        <div class="form-group"><label>Диплома</label></div>
+                        foreach (var docImage in diplomaType.DocumentImages)
+                        {
+                            string imgString = Convert.ToBase64String(docImage);
+                            var img = String.Format("data:image/Bmp;base64,{0}", imgString);
+
+                            <div class="form-group">
+                                <img src="@(img)" />
+                            </div>
+                        }
+                    }
+                }
+            }
+
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+

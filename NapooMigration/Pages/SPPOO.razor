@@ -1,0 +1,257 @@
+﻿@page "/"
+@using NapooMigration.Data
+
+<h3>SPPOO</h3>
+
+<input @bind-value="inputValue" placeholder="Provider OldId"/>
+<button @onclick="importAll">Импорт на ЦПО/ЦИПО</button>
+<button @onclick="importAllNoDocuments">Импорт на ЦПО/ЦИПО без документи</button>
+
+<button @onclick="importDocumentsOnly">Импорт документи за ЦПО/ЦИПО</button>
+@*<button @onclick="btnImportCandidateCurriculumModificationId">Импорт на Curriculum Modification</button>*@
+
+<br />
+<br />
+<button type="button" @onclick="test">test</button>
+
+<button type="button" @onclick="Spravka">Spravka</button>
+
+<button type="button" @onclick="ImportCPOs">ImportCPOs</button>
+
+
+<h1>Не се ползва</h1>
+<button type="button" @onclick="btnImportNationality">Импорт Nationality</button>
+
+<button type="button" @onclick="btnImportCandidateProviderDocumentType ">Импорт CandidateProviderDocumentType</button>
+<button type="button" @onclick="btnImportDocuentsOnly ">Импорт ImportDocuentsOnly</button>
+
+<br />
+<br />
+<h1>Преди миграция</h1>
+<button type="button" @onclick="btnImportSPPOO">Импорт SPPOO</button>
+<button type="button" @onclick="btnImportRequestNapooRequestDoc">Импорт RequestNapooRequestDoc</button>
+<button type="button" @onclick="btnImportRequestDocumentSeries">Импорт RequestDocumentSeries</button>
+<button type="button" @onclick="btnImportRequestTypeOfRequestedDocuments">Импорт RequestTypeOfRequestedDocuments</button>
+<br />
+<br />
+<button type="button" @onclick="btnImportSppooFrameworkPrograms">Импорт SppooFrameworkProgram</button>
+<br />
+
+<h1>Candidate</h1>
+<br />
+<button type="button" @onclick="btnImportProcedures">Импорт Procedures</button>
+
+<button type="button" @onclick="btnImportProviders">Импорт Providers</button>
+
+<button type="button" @onclick="btnImportCandidateProviderInactive">Импорт CandidateProviders</button>
+
+<button type="button" @onclick="btnImportProviderDocuments">Импорт ProviderDocuments</button>
+
+<button type="button" @onclick="btnImportCandidateProviderDocuments">Импорт CandidateProviderDocuments</button>
+
+<br/>
+<br/>
+
+<button type="button" @onclick="btnImportCurriculumModification">Импорт CurriculumModification</button>
+
+<button type="button" @onclick="btnImportCandidateCurriculumModification">Импорт CandidateCurriculumModification</button>
+
+<button type="button" @onclick="btnImportProviderLicenceChange">Импорт ProviderLicenceChange</button>
+
+<br/>
+<br/>
+<button type="button" @onclick="btnImportProviderProcedureDocuments">Импорт ImportProviderProcedureDocuments</button>
+
+<br/>
+<h1>Trainers</h1>
+<br />
+<button type="button" @onclick="btnImportProvidersTrainers">Импорт ProvidersTrainers</button>
+
+<button type="button" @onclick="btnImportCandidateProvidersTrainers">Импорт CandidateProvidersTrainers</button>
+
+<button type="button" @onclick="btnImportProvidersTrainerQualifications">Импорт ProvidersTrainerQualifications</button>
+<br />
+<br />
+<button type="button" @onclick="btnImportCandidateProvidersTrainerQualifications">Импорт CandidateProvidersTrainerQualifications</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnImportProvidersTrainerProfiles">Импорт ProvidersProfiles</button>
+
+<button type="button" @onclick="btnImportCandidateProvidersTrainerProfiles">Импорт CandidateProvidersProfiles</button>
+
+<button type="button" @onclick="btnImportProviderTrainerDocument">Импорт ProviderTrainerDocument</button>
+
+<button type="button" @onclick="btnImportCandidateProviderTrainerDocument">Импорт CandidateProviderTrainerDocument</button>
+
+<br />
+<h1>Premises</h1>
+<br />
+
+<button type="button" @onclick="btnImportPremisies">Импорт premisies</button>
+
+<button type="button" @onclick="btnImportCandidatePremisies">Импорт candidatePremisies</button>
+
+<button type="button" @onclick="btnImportPremisiesRooms">Импорт premisiesRooms</button>
+
+<button type="button" @onclick="btnImportCandidatePremisiesRooms">Импорт candidatePremisiesRooms</button>
+<br />
+<br />
+<button type="button" @onclick="btnImportPremisesSpecialities">Импорт PremisesSpecialities</button>
+
+<button type="button" @onclick="btnImportCandidatePremisesSpecialities">Импорт CandidatePremisesSpecialities</button>
+
+<br />
+<h1>Request</h1>
+<br />
+<button type="button" @onclick="btnImportRequestProviderRequestDocument">Импорт RequestProviderRequestDocument</button>
+
+<button type="button" @onclick="btnImportRequestDocumentStatus">Импорт RequestDocumentStatus</button>
+
+<button type="button" @onclick="btnImportRequestDocumentType">Импорт RequestDocumentType</button>
+
+<button type="button" @onclick="btnImportRequestReport">Импорт RequestReport</button>
+<br /><br />
+
+<button type="button" @onclick="btnImportRequestDocumentManagement">Импорт RequestDocumentManagement</button>
+
+<button type="button" @onclick="btnImportRequestDocumentSerialNumber">Импорт RequestDocumentSerialNumber</button>
+
+<button type="button" @onclick="btnImportRequestProviderDocumentOffer">Импорт RequestProviderDocumentOffer</button>
+<button type="button" @onclick="btnUpdateRequestProviderDocumentStatus">Импорт UpdateRequestProviderDocumentStatus</button>
+
+<br />
+<h1>Experts</h1>
+<br />
+<button type="button" @onclick="btnImportDoc">Импорт Doc</button>
+
+<button type="button" @onclick="btnImportExperts">Импорт Experts</button>
+
+<button type="button" @onclick="btnImportExpertExpert">Импорт ExpertExpert</button>
+
+<button type="button" @onclick="btnImportExpertCommission">Импорт ImportExpertCommission</button>
+
+<button type="button" @onclick="btnImportNapooExpert">Импорт ImportNapooExpert</button>
+
+<br />
+<h1>Training</h1>
+<br />
+
+<button type="button" @onclick="btnImportTrainingProgram">Импорт TrainingProgram</button>
+
+<button type="button" @onclick="btnImportTrainingCourse">Импорт TrainingCourse</button>
+
+<button type="button" @onclick="btnImportTrainingClient">Импорт TrainingClient</button>
+
+<button type="button" @onclick="btnImportTrainingClientCourses">Импорт TrainingClientCourses</button>
+<br />
+<br />
+<button type="button" @onclick="btnImportTrainingClientCourseDocument">Импорт ClientCourseDocument/ValidationDocument</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnImportTrainingClientCourseDocumentStatus">Импорт ClientCourseDocumentStatus/ValidationDocumentStatus</button>
+
+<button type="button" @onclick="btnImportTrainingCurriculumTheory">Импорт TrainingCurriculumTheory</button>
+
+<button type="button" @onclick="btnImportTrainingCurriculumTheoryPractice">Импорт TrainingCurriculumPractice</button>
+
+<button type="button" @onclick="btnImportValidationCompetency">Импорт ValidationCompetency</button>
+<br />
+<br />
+
+<button type="button" @onclick="btnImportClientRequiredDocument">Импорт ClientRequiredDocument</button>
+
+<button type="button" @onclick="btnImportCourseCommisionMembers">Импорт CourseCommisionMembers</button>
+
+<button type="button" @onclick="btnImportTrainingTrainerCourse">Импорт TrainingTrainerCourse</button>
+
+<button type="button" @onclick="btnImportTrainingPremisesCourse">Импорт TrainingPremisesCourse</button>
+
+<br/>
+
+<br/>
+<button type="button" @onclick="btnImportTrainingCourseSubject">Импорт TrainingCourseSubject</button>
+<button type="button" @onclick="btnImportCourseCandidateCurriculumModification">Импорт CourseCandidateCurriculumModification</button>
+
+<br />
+<h1>Arch Candidate</h1>
+<button type="button" @onclick="btnImportArchProvider">Импорт ImportArchProvider</button>
+
+<button type="button" @onclick="btnImportArchPremises">Импорт ImportArchPremises</button>
+
+<button type="button" @onclick="btnImportArchPremisesSpecialities">Импорт ImportArchPremisesSpecialities</button>
+
+<button type="button" @onclick="btnImportArchTrainer">Импорт ImportArchTrainer</button>
+<button type="button" @onclick="btnImportAnnualInfo">Импорт ImportAnnualInfo</button>
+<br />
+<br />
+<button type="button" @onclick="btnImportSelfAssessmentReport">Импорт ImportSelfAssessmentReport</button>
+<button type="button" @onclick="btnUpdateSelfAssessmentStatus">Импорт UpdateSelfAssessmentStatus</button>
+
+<br />
+<br />
+
+<button type="button" @onclick="btnImportArchProviderTrainerQualifications">Импорт ImportArchProviderTrainerQualifications</button>
+
+<button type="button" @onclick="btnImportArchTrainingCourse">Импорт ImportArchTrainingCourse</button>
+
+<button type="button" @onclick="btnImportArchTrainingValidation">Импорт ImportArchTrainingValidation</button>
+
+<br />
+<br />
+
+<br />
+<br />
+<h1>Documents</h1>
+<br />
+<button type="button" @onclick="btnImportCandidateCurriculumModificationMigrateDomuments">Импорт CandidateCurriculumModificationMigrateDomuments</button>
+<button type="button" @onclick="btnCandidateProviderDocumentMigrateDocuments">Импорт CandidateProviderDocumentMigrateDocuments</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnCandidateProviderTrainerDocumentMigrateDocuments">Импорт CandidateProviderTrainerDocumentMigrateDocuments</button>
+<button type="button" @onclick="btnCandidateProviderProcedureDocumentMigrateDocuments">Импорт CandidateProviderProcedureDocumentMigrateDocuments</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnRequestDocumentManagementMigrateDocuments">Импорт RequestDocumentManagementMigrateDocuments</button>
+<button type="button" @onclick="btnRequestReportMigrateDocuments">Импорт RequestReportMigrateDocuments</button>
+<button type="button" @onclick="btnAnnualInfoMigrateDocuments">Импорт AnnualInfoMigrateDocuments</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnSelfAssessmentMigrateDocuments">Импорт SelfAssessmentMigrateDocuments</button>
+<button type="button" @onclick="btnProviderRequestDocumentMigrateDocuments">Импорт ProviderRequestDocumentMigrateDocuments</button>
+<button type="button" @onclick="btnCourseProtocolMigrateDocuments">Импорт CourseProtocolMigrateDocuments</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnValidationProtocolMigrateDocuments">Импорт ValidationProtocolMigrateDocuments</button>
+<button type="button" @onclick="btnValidationRequiredDocumentsMigrateDocuments">Импорт ValidationRequiredDocumentsMigrateDocuments</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnClientCourseRequiredDocumentsMigrateDocuments">Импорт ClientCourseRequiredDocumentsMigrateDocuments</button>
+<button type="button" @onclick="btnClientCourseDocumentsMigrateDocuments">Импорт ClientCourseDocumentsMigrateDocuments</button>
+
+<br />
+<br />
+<button type="button" @onclick="btnValidationClientDocumentsMigrateDocuments">Импорт ValidationClientDocumentsMigrateDocuments</button>
+<button type="button" @onclick="btnRequestCandidateProviderDocumentMigrateDocuments">Импорт RequestCandidateProviderDocumentMigrateDocuments</button>
+
+<br />
+<br />
+<h1>Скриптове за оправяне на миграция</h1>
+<br />
+<br />
+<button type="button" @onclick="btnImportSPPOOrder">Импорт ImportSPPOOrder</button>
+<button type="button" @onclick="btnUpdateOidValidationDocument">Импорт UpdateOidValidationDocument</button>
+<button type="button" @onclick="btnUpdateOidClientCourseDocument">Импорт UpdateOidClientnDocument</button>
+<button type="button" @onclick="btnUpdateCandidateProviderDocumentType">Импорт UpdateCandidateProviderDocumentType</button>
+<br />
+<br />
+<button type="button" @onclick="btnUpdateTrainingClientCourseDocumentStatus">Импорт UpdateTrainingClientCourseDocumentStatus</button>
+
+
+@*<button type="button" @onclick="btnImportCandidateProviderDocuments">Импорт CandidateProviderDocuments</button>*@

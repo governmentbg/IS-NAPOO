@@ -1,0 +1,366 @@
+﻿@inherits BlazorBaseComponent
+@implements IConcurrencyCheck<SurveyVM>
+
+<SfDialog @bind-Visible="isVisible" Width="98%" Height="98%" EnableResize="true" AllowDragging="true" IsModal="true" ZIndex="2002" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Данни за шаблон <span style="color: #ffffff;">@this.surveyVM.Name</span></Header>
+        <Content>
+            <div id="validation-errors">
+                @if (this.validationMessages.Any())
+                {
+                    <ul class="validation-errors">
+                        @foreach (var msg in this.validationMessages)
+                        {
+                            <li class="validation-message">@msg</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-body">
+                                <EditForm EditContext="this.editContext">
+                                    <div class="row">
+                                        <div class="col-sm-9">
+                                            <div class="form-group required">
+                                                <label class="control-label">Наименование на шаблон: </label>
+                                                <SfTextBox Enabled="this.surveyVM.IdSurveyStatus == this.kvSurveyStatusCreated.IdKeyValue && this.ifSelfAssessmentSurveyReady == false" @bind-Value="this.surveyVM.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group required">
+                                                <label class="control-label">Вътрешен код на шаблона: </label>
+                                                <SfTextBox Enabled="this.surveyVM.IdSurveyStatus == this.kvSurveyStatusCreated.IdKeyValue && this.ifSelfAssessmentSurveyReady == false" @bind-Value="this.surveyVM.InternalCode" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="control-label">
+                                                    Описание:
+                                                </label>
+                                                <textarea style="width:-webkit-fill-available; border-block:"
+                                                          ondrop="5"
+                                                          rows="3"
+                                                          @bind="this.surveyVM.AdditionalText"
+                                                          @bind:event="oninput"
+                                                          maxlength="4000"
+                                                          class="form-control"
+                                                          disabled="@(this.surveyVM.IdSurveyStatus != this.kvSurveyStatusCreated.IdKeyValue || this.ifSelfAssessmentSurveyReady == true)">
+                                            </textarea>
+                                                <div style="float:right"><label>@(this.surveyVM.AdditionalText != null ? this.surveyVM.AdditionalText.Length : 0)/4000</label></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group required">
+                                                <label class="control-label">Тип на шаблона: </label>
+                                                <SfComboBox Enabled="this.ifSelfAssessmentSurveyReady == false" TValue="int?" TItem="KeyValueVM" PopupHeight="200px" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" DataSource="this.kvSurveyTypeSource" AllowFiltering="true" @bind-Value="this.surveyVM.IdSurveyТype" AllowCustom="false">
+                                                    <ComboBoxFieldSettings Text="Name" Value="IdKeyValue" />
+                                                </SfComboBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group required">
+                                                <label class="control-label">Година: </label>
+                                                <SfNumericTextBox Enabled="this.ifSelfAssessmentSurveyReady == false" @bind-Value="this.surveyVM.Year" TValue="int?" Format="####" ShowSpinButton="false" />
+                                            </div>
+                                        </div>
+                                        @if (ifSelfAssessmentSurveyForCPO)
+                                        {
+                                            <div class="col-sm-2">
+                                                <div class="form-group required">
+                                                    <label class="control-label">Точки отлично: </label>
+                                                    <SfNumericTextBox Enabled="this.ifSelfAssessmentSurveyReady == false" @bind-Value="this.surveyVM.Excellent" TValue="int?" Format="####" ShowSpinButton="false" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group required">
+                                                    <label class="control-label">Точки добро: </label>
+                                                    <SfNumericTextBox Enabled="this.ifSelfAssessmentSurveyReady == false" @bind-Value="this.surveyVM.Good" TValue="int?" Format="####" ShowSpinButton="false" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group required">
+                                                    <label class="control-label">Точки задоволително: </label>
+                                                    <SfNumericTextBox Enabled="this.ifSelfAssessmentSurveyReady == false" @bind-Value="this.surveyVM.Satisfactory" TValue="int?" Format="####" ShowSpinButton="false" />
+                                                </div>
+                                            </div>
+                                        }
+
+
+                                    </div>
+                                </EditForm>
+                            </div>
+                            @if (this.surveyVM.IdSurvey != 0)
+                            {
+                                <div class="card-header">
+                                    <nav class="navbar navbar-expand  ">
+                                        <!-- Left navbar links -->
+                                        <ul class="navbar-nav">
+                                            @if (this.surveyVM.IdSurveyStatus == this.kvSurveyStatusCreated.IdKeyValue && this.ifSelfAssessmentSurveyReady == false)
+                                            {
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="AddQuestionBtn">Добави въпрос</button>
+                                                </li>
+                                                <li class="nav-item d-none d-sm-inline-block">
+                                                    &nbsp;
+                                                </li>
+                                            }
+                                        </ul>
+                                    </nav>
+                                </div>
+                                <div class="card-body">
+
+                                    @if (this.surveyVM.Questions.Any())
+                                    {
+                                        questionCounter = 1;
+                                        @foreach (var areaSelfAssessment in this.surveyVM.Questions.GroupBy(x => x.AreaSelfAssessment).OrderBy(x => x.Key.Order))
+                                        {
+                                            foreach (var question in this.surveyVM.Questions.Where(q => q.IdAreaSelfAssessment == areaSelfAssessment.Key.IdKeyValue))
+                                            {
+                                                question.CurrentNumber = questionCounter;
+                                                questionCounter++;
+                                            }
+
+                                        }
+
+                                        <SfAccordion>
+                                            <AccordionItems>
+
+
+                                                @foreach (var areaSelfAssessment in this.surveyVM.Questions.GroupBy(x => x.AreaSelfAssessment).OrderBy(x => x.Key.Order))
+                                                {
+
+                                                    <AccordionItem>
+                                                        <HeaderTemplate>
+                                                            <div class="row">
+                                                                <div class="col-sm-10">@areaSelfAssessment.Key.Name</div>
+
+
+                                                                <div class="col-sm-2">
+                                                                    @{
+                                                                        var areaMaxPoints = Decimal.Zero;
+                                                                        @foreach (var question in this.surveyVM.Questions.Where(q => q.IdAreaSelfAssessment == areaSelfAssessment.Key.IdKeyValue))
+                                                                        {
+
+                                                                            if (question.Answers.Any(x => x.Points.HasValue))
+                                                                            {
+                                                                                decimal maxPoint = question.Answers.Max(x => x.Points).Value;
+                                                                                areaMaxPoints += maxPoint;
+                                                                            }
+
+                                                                        }
+
+                                                                        var maxPointText = areaMaxPoints == decimal.Zero ? "" : "Макс. брой точки " + areaMaxPoints;
+                                                                    }
+                                                                    @maxPointText
+
+                                                                </div>
+                                                            </div>
+                                                        </HeaderTemplate>
+
+                                                        <ContentTemplate>
+                                                            @{
+
+
+                                                                foreach (var question in this.surveyVM.Questions.Where(q => q.IdAreaSelfAssessment == areaSelfAssessment.Key.IdKeyValue))
+                                                                {
+
+
+
+                                                                    var header = $"{question.CurrentNumber}. {question.Text}";
+                                                                    var type = this.kvQuestionTypeSource.FirstOrDefault(x => x.IdKeyValue == question.IdQuestType)!.Name;
+                                                                    string icon = string.Empty;
+                                                                    if (type.Contains("Единствен"))
+                                                                    {
+                                                                        icon = "radio";
+                                                                    }
+                                                                    else if (type.Contains("Множествен"))
+                                                                    {
+                                                                        icon = "checkbox";
+                                                                    }
+
+                                                                    <div class="row" style="margin-bottom: 20px;">
+                                                                        <div class="col-sm-12">
+                                                                            <SfCard CssClass="@(question.IsRequired ? "custom" : string.Empty)">
+                                                                                <CardHeader Title="@header" SubTitle="@type" />
+                                                                                <CardContent>
+                                                                                    @if (question.Answers.Any())
+                                                                                    {
+                                                                                        if (question.IdQuestType != this.kvOpenQuestion.IdKeyValue && this.ifSelfAssessmentSurveyReady == false)
+                                                                                        {
+                                                                                            var counter = 0;
+                                                                                            foreach (var answer in question.Answers)
+                                                                                            {
+                                                                                                var symbol = this.GetSymbolByOrder(counter++);
+                                                                                                <div class="row">
+                                                                                                    <div class="col-sm-12">
+                                                                                                        <p>
+                                                                                                            <input type="@icon" disabled /> @symbol. @answer.Text
+                                                                                                            @{
+                                                                                                                string pointStr = answer.Points.HasValue ? "(" + answer.Points + " т.)" : "";
+                                                                                                            }
+                                                                                                            <b>@pointStr</b>
+                                                                                                        </p>
+                                                                                                    </div>
+
+                                                                                                </div>
+                                                                                            }
+                                                                                        }
+
+                                                                                        if (question.IdQuestType == this.kvOpenQuestion.IdKeyValue || question.IdQuestType == this.kvSingleOpenQuestion.IdKeyValue || question.IdQuestType == this.kvMultipleOpenQuestion.IdKeyValue)
+                                                                                        {
+                                                                                            <EditForm EditContext="this.editContext">
+                                                                                                <div class="row">
+                                                                                                    <div class="col-sm-12">
+                                                                                                        <div class="form-group">
+                                                                                                            <CustomInputTextArea class="form-control" @bind-Value="openQuestionText" disabled="@(true)" rows="3" />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </EditForm>
+                                                                                        }
+
+
+                                                                                        <div class="row">
+                                                                                            <div class="col-sm-12">
+                                                                                                <p class="text-muted">@question.Description</p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    }
+                                                                                </CardContent>
+                                                                                <CardContent EnableSeparator="true"></CardContent>
+                                                                                <CardFooter>
+                                                                                    <CardFooterContent>
+                                                                                        @if (this.surveyVM.IdSurveyStatus == this.kvSurveyStatusCreated.IdKeyValue && this.ifSelfAssessmentSurveyReady == false)
+                                                                                        {
+                                                                                            <div class="row">
+                                                                                                <div class="col-sm-12">
+                                                                                                    <div class="row">
+                                                                                                        <button type="button" style="max-width: 3%;" class="btn-row" @onclick="(async () => await this.EditQuestionBtn(question))"><i class="fa fa-pencil-square-o"></i></button>
+                                                                                                        <button type="button" style="max-width: 3%;" class="btn-row" @onclick="(async () => await this.DeleteQuestionBtn(question))"><i class="fa fa-trash-o"></i></button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        }
+                                                                                    </CardFooterContent>
+                                                                                </CardFooter>
+                                                                            </SfCard>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </ContentTemplate>
+                                                    </AccordionItem>
+                                                }
+
+                                            </AccordionItems>
+                                        </SfAccordion>
+
+                                    }
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-7">
+                    @if (this.surveyVM.IdSurvey != 0)
+                    {
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-newspaper-o" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на създаване: @this.surveyVM.CreationDate.ToString("dd.MM.yyyy")</div>
+                            <div class="col text-left"><i class="fa fa-save" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Дата на последна актуализация: @this.surveyVM.ModifyDate.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left"><i class="fa fa-user" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Създадено от: @this.surveyVM.CreatePersonName</div>
+                            <div class="col text-left"><i class="fa fa-user-plus" style="font-size: 18px;color: #01A9AC !important;"></i>&nbsp;&nbsp;&nbsp;&nbsp;Актуализирано от: @this.surveyVM.ModifyPersonName</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <div class="text-right">
+
+                            @if (!this.hideBtnsConcurrentModal && this.surveyVM.IdSurveyStatus == this.kvSurveyStatusCreated.IdKeyValue && this.ifSelfAssessmentSurveyReady == false)
+                            {
+                                <button style="margin-right: 5px;" class="btn btn-info" type="submit" @onclick="(async () => await this.SubmitBtn(true))">Запиши</button>
+                            }
+                            <button style="margin-right: 30px;" class="btn btn-info" type="submit" @onclick="(async () => await this.CopySurveyBtn())">Копиране на шаблон</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+@if (this.copySurveyConfirmDlg)
+{
+
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(this.copySurveyConfirmDlg ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Внимание!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Сигурни ли сте, че искате да копирате шаблона?</p>
+
+                    <div class="form-group required">
+                        <label class="control-label">Година: </label>
+                        <SfNumericTextBox Value="@copyYear" TValue="int?" Format="####" ShowSpinButton="false">
+                            <NumericTextBoxEvents TValue="int?" ValueChange="OnChange"></NumericTextBoxEvents>
+                        </SfNumericTextBox>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+
+                    <button type="submit" class="btn btn-primary" @onclick="@(async () => { this.copySurveyConfirmed = true; await this.CopySurveyBtn(); })">Да</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="@(()=> this.copySurveyConfirmDlg = false)">Отказ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<style>
+    .e-card .e-card-header .e-card-header-caption .e-card-sub-title {
+        font-size: 12px !important;
+        font-style: italic;
+    }
+
+    .custom.e-card .e-card-header .e-card-header-caption .e-card-header-title:after {
+        color: #d00;
+        content: " *";
+        position: inherit;
+        margin-left: 0px;
+        top: 15px;
+    }
+
+    .e-acrdn-header-content {
+        width: 100% !important;
+    }
+</style>
+
+<ConfirmDialog @ref="ConfirmDialog" CallbackCancel="ConfirmDialogCallback" />
+<SelfAssessmentQuestionModal @ref="questionModal" CallbackAfterSubmit="UpdateAfterQuestionModalSubmitAsync" />
+<SelfAssessmentSurveyEmailTemplateModal @ref="surveyEmailTemplateModal" CallbackAfterSubmit="CloseAfterEmailTemplateModalSubmit" />
+
+

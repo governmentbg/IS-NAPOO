@@ -1,0 +1,141 @@
+﻿@page "/FrameworkProgramList"
+@attribute [Authorize(Policy = "ShowFPList")]
+@using ISNAPOO.Common.Framework
+@using ISNAPOO.WebSystem.Pages.SPPOO.Modals.FrameworkProgram
+
+@inject IFrameworkProgramService FrameworkProgramService
+@inject IJSRuntime JsRuntime
+
+@inject ILocService LS
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Списък с рамкови програми</h6>
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenAddNewModal">Нов</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="defaultGrid" DataSource="@frameworkPrograms" EnableAltRow="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "PdfExport" })" AllowExcelExport="true" AllowPdfExport="true"
+                            EnableHover=false AllowSelection=true AllowTextWrap="true" AllowSorting="true" AllowFiltering="true" @ref="frameworkProgramGrid" AllowPaging=true>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridSortSettings>
+                            <GridSortColumns>
+                                <GridSortColumn Field="FrameworkProgramNameFormatted" Direction="SortDirection.Ascending" />
+                            </GridSortColumns>
+                        </GridSortSettings>
+                        <GridEvents TValue="FrameworkProgramVM" PdfQueryCellInfoEvent="PdfQueryCellInfoHandler" OnToolbarClick="ToolbarClick" RowSelected="RowSelected" RowDeselected="RowDeselected"></GridEvents>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="10px">
+                                <Template>
+                                    @GetRowNumber(frameworkProgramGrid, (context as FrameworkProgramVM).IdFrameworkProgram).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="20">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Редакция" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => SelectedRow(context as FrameworkProgramVM))">
+                                            <i class="fa fa-pencil-square-o"></i>
+                                        </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="20">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => DeleteSelected(context as FrameworkProgramVM))">
+                                            <i class="fa fa-trash-o"></i>
+                                        </button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdFrameworkProgram" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Рамкова програма" TextAlign="TextAlign.Left" Width="40">
+                            </GridColumn>
+                            <GridColumn Field="VQSName" HeaderText="СПК" TextAlign="TextAlign.Left" Width="25"></GridColumn>
+                            <GridColumn Field="TypeFrameworkProgramName" HeaderText="Вид" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="FormEducationNames" HeaderText="Форма на обучение" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="QualificationLevelName" HeaderText="Квалификационно равнище" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                            <GridColumn Field="SectionА" HeaderText="Мин. задължителни уч. часове" TextAlign="TextAlign.Center" Width="50">
+                                <Template>
+                                    <div class="text-right">
+                                        @{
+                                            var ctx = context as FrameworkProgramVM;
+                                            @ctx.SectionА
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="SectionB" HeaderText="Избираеми уч. часове" TextAlign="TextAlign.Center" Width="50">
+                                <Template>
+                                    <div class="text-right">
+                                        @{
+                                            var ctx = context as FrameworkProgramVM;
+                                            @ctx.SectionB
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="SectionА1WithPercent" HeaderText="Макс. % А1" TextAlign="TextAlign.Center" Width="30">
+                                <Template>
+                                    <div class="text-right">
+                                        @{
+                                            var ctx = context as FrameworkProgramVM;
+                                            @ctx.SectionА1WithPercent
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="PracticeWithPercent" HeaderText="Мин. % практическо обучение" TextAlign="TextAlign.Center" Width="40">
+                                <Template>
+                                    <div class="text-right">
+                                        @{
+                                            var ctx = context as FrameworkProgramVM;
+                                            @ctx.PracticeWithPercent
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="StatusValue" HeaderText="Статус" TextAlign="TextAlign.Center" Width="40">
+                                <Template>
+                                    <div class="text-center">
+                                        @{
+                                            var ctx = context as FrameworkProgramVM;
+                                            switch (ctx.StatusValue)
+                                            {
+                                                case "Активен":
+                                                    <label class="form-label-status label label-success">@ctx.StatusValue</label>
+                                                    break;
+                                                case "Неактивен":
+                                                    <label class="form-label-status label label-danger">@ctx.StatusValue</label>
+                                                    break;
+                                            }
+                                        }
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<FrameworkProgramModal @ref="frameworkProgramModal" CallbackAfterSave="UpdateAfterSave"></FrameworkProgramModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

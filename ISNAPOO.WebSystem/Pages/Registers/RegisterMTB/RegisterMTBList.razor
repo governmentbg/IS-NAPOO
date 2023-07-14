@@ -1,0 +1,101 @@
+﻿@page "/RegisterMTBList"
+@attribute [Authorize(Policy = "ShowRegisterMTBList")]
+@using ISNAPOO.Core.ViewModels.Register;
+@inherits BlazorBaseComponent
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <h6 class="page-title-left">Регистър на материално-техническите бази на ЦПО и ЦИПО</h6>
+            <div class="card">
+               <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-none d-sm-inline-block">
+                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="OpenFilterModal">Филтър</button>
+                            </li>
+                            <li class="nav-item d-none d-sm-inline-block">
+                                &nbsp;
+                            </li>
+                        </ul>
+                    </nav>
+				</div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="mtbsSource" AllowSorting="true" AllowFiltering="true" EnableAltRow="true" EnableHover="false"
+                            AllowTextWrap="true" @ref="mtbsGrid" AllowSelection="true" AllowPaging="true" Toolbar="@(new List<string>() { "ExcelExport","CsvExport" , "PdfExport" })"
+                            AllowExcelExport="true" AllowPdfExport="true">
+                        <GridEvents OnToolbarClick="ToolbarClick" TValue="RegisterMTBVM"></GridEvents>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(mtbsGrid, (context as RegisterMTBVM).CandidateProviderPremises.IdCandidateProviderPremises).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.IdCandidateProviderPremises" IsPrimaryKey="true" Visible="false" ></GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                     <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                    <button @onclick="(async () => await this.OpenMTBInformationModalBtn(context as RegisterMTBVM))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    @{
+                                        var premises = context as RegisterMTBVM;
+                                        if (premises.haveCandidateProviderPremisesCheckings == true)
+                                        {
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                            <button @onclick="(async () => await this.OpenCheckingModalBtn(context as RegisterMTBVM))" class="btn-row"><i class="fa fa-check-square-o"></i></button>
+                                            </SfTooltip>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceNumber" HeaderText="Лицензия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="CandidateProvider.ProviderNameAndOwnerForRegister" HeaderText="Име на центъра" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.PremisesName" HeaderText="Материално-техническа база" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="CandidateProvider.LicenceTypeValue" HeaderText="Вид на лицензия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.ProviderAddress" HeaderText="Адрес" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                            <GridColumn Field="CandidateProviderPremises.OwnershipValue" HeaderText="Форма на собственост" TextAlign="TextAlign.Left" Width="15%" />
+                            <GridColumn HeaderText="Статус" TextAlign="TextAlign.Center" Width="12%">
+                                <Template>
+                                    @{
+                                        var premises = context as RegisterMTBVM;
+                                        if (premises.CandidateProviderPremises.StatusValue != "Активен")
+                                        {
+                                            <label class="form-label-status label label-danger">@premises.CandidateProviderPremises.StatusValue</label>
+                                        }
+                                        else
+                                        {
+                                            <label class="form-label-status label label-success">@premises.CandidateProviderPremises.StatusValue</label>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText=" " TextAlign="TextAlign.Left" Width="3%">
+                                <Template>
+                                    @{
+                                        var premises = context as RegisterMTBVM;
+                                        <SfTooltip Position="TooltipPosition.BottomCenter" Content="История на промените" OpensOn="Hover">
+                                        <button type="button" class="btn-row" @onclick="(() => this.OpenMTBStatusModalBtn(context as RegisterMTBVM))"><i class="fa fa-history" style="font-size: 18px"></i></button>
+                                        </SfTooltip>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<MTBInformationModal @ref="mTBInformationModal"></MTBInformationModal>
+<MTBStatusModal @ref="mTBStatusModal" />
+<MTBChecking @ref="mTBCheckingModal" />
+<FilterMTBModal @ref="filterMTB" DataSource="originalMtbsSource" CallbackAfterSave="UpdateAfterFilterModalSubmit"/>

@@ -1,0 +1,84 @@
+﻿@using ISNAPOO.Core.ViewModels.Control
+
+
+@inherits BlazorBaseComponent
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <nav class="navbar navbar-expand  ">
+                        <!-- Left navbar links -->
+                        <ul class="navbar-nav">
+                            @if (this.IsEditable)
+                            {
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Взимане на документ по данни от деловодна система" OpensOn="Hover">
+                                        <button disabled="@(this.Model.IdFollowUpControl == 0)" class="btn btn-primary btn-outline-primary waves-effect md-trigger" type="button" @onclick="AddNewDocument">Добави документ</button>
+                                    </SfTooltip>
+                                </li>
+
+                                <li class="nav-item d-none d-sm-inline-block">
+                                    &nbsp;
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    <SfGrid ID="sfGrid" DataSource="@documentsSource" AllowSorting="true" EnableAltRow="true" EnableHover=false AllowSelection=true AllowFiltering="true"
+                            @ref="sfGrid" AllowPaging=true AllowReordering=true AllowTextWrap="true">
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridPageSettings PageCount="5" PageSize=20 PageSizes="true"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn HeaderText=" " AllowFiltering="false" AllowSorting="false" TextAlign="TextAlign.Left" CustomAttributes="@(new Dictionary<string, object>(){ { "class", "e-removewrap" }})" Width="3%">
+                                <Template>
+                                    @GetRowNumber(sfGrid, (context as FollowUpControlUploadedFileVM).IdFollowUpControlUploadedFile).Result
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                        <button class="btn-row" @onclick="(() => GetDocument(context as FollowUpControlUploadedFileVM))"><i class="fa fa-file-o"></i></button>
+                                         
+                                    </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="4%">
+                                <Template>
+                                            <SfTooltip Position="TooltipPosition.BottomCenter" Content="Изтриване" OpensOn="Hover">
+                                                <button type="button" class="btn-row" @onclick="(() => DeleteDocument(context as FollowUpControlUploadedFileVM))"><i class="fa fa-trash-o"></i></button>
+                                            </SfTooltip>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="IdFollowUpControlUploadedFile" IsPrimaryKey="true" HeaderText="ID" TextAlign="TextAlign.Center" Visible=false></GridColumn>
+                            <GridColumn Field="Description" HeaderText="Описание на документа" TextAlign="TextAlign.Left" Width="18%"></GridColumn>
+                            <GridColumn Field="UploadedFileName" HeaderText="Прикачен файл" TextAlign="TextAlign.Left" Width="20%">
+                                <Template Context="docContext">
+                                    @{
+                                        var entry = (docContext as FollowUpControlUploadedFileVM);
+
+                                        if (!string.IsNullOrEmpty(entry.UploadedFileName))
+                                        {
+                                            <a href="#" @onclick="(() => OnDownloadClick(entry))">@entry.FileName</a>
+                                        }
+                                        else
+                                        {
+                                            @entry.UploadedFileName
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CreationDate" HeaderText="Дата на прикачване" TextAlign="TextAlign.Left" Width="14%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                            <GridColumn HeaderText="Прикачено от" Field="CreatePersonName" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<FollowUpControlUploadedFileModal @ref="this.followUpControlUploadedFileModal" CallBackAfterSave="CallBackAfterSave"></FollowUpControlUploadedFileModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>

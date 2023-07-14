@@ -1,0 +1,69 @@
+﻿@*@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout))
+    {
+    Layout = (string)parentLayout;
+    }
+    else
+    {
+    Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+    }
+    }*@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="ISNAPOO.WebSystem.styles.css" rel="stylesheet" />
+
+    <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="page">
+        <div class="sidebar">
+        </div>
+        <main>
+            <div class="top-row px-4">
+                @if (this.User.Identity.IsAuthenticated)
+                {
+                    <a href="Identity/Account/Manage/Index">
+                        Hello, @this.User.Identity.Name!
+                    </a>
+                    <a class="nav-link btn btn-link" href="Identity/Account/Logout">Logout</a>
+                }
+                else
+                {
+                    <a href="Identity/Account/Register">Register</a>
+                    <a href="Identity/Account/Login">Login</a>
+                }
+                <a href="https://docs.microsoft.com/aspnet/">About</a>
+                <a href="/">Home</a>
+            </div>
+
+            <article class="content px-4">
+                <h1>Manage your account</h1>
+
+                <div>
+                    <h2>Change your account settings</h2>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-3">
+                            <partial name="_ManageNav.cshtml" />
+                        </div>
+                        <div class="col-md-9">
+                            @RenderBody()
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </main>
+    </div>
+</body>
+</html>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}

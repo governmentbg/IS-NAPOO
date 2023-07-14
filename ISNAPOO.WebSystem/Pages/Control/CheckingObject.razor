@@ -1,0 +1,389 @@
+﻿@using ISNAPOO.Common.Framework
+@using ISNAPOO.Core.ViewModels.Control
+@using ISNAPOO.Core.Contracts.Training
+@using System.ComponentModel.DataAnnotations
+@using ISNAPOO.WebSystem.Pages.Registers.Courses
+@using ISNAPOO.WebSystem.Pages.Training.Validation;
+
+
+@inherits BlazorBaseComponent
+<EditForm EditContext="editContext" id="checkingForm">
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body">
+                        <SfAccordion ExpandMode="ExpandMode.Single">
+                            <AccordionItems>
+                                <AccordionItem Header="Материално-технически бази">
+                                    <ContentTemplate>
+                                        <div class="row">
+                                            <nav class="navbar navbar-expand  ">
+                                                <!-- Left navbar links -->
+                                                <ul class="navbar-nav">
+                                                    @if (this.IsEditable)
+                                                    {
+                                                        <li class="nav-item d-none d-sm-inline-block">
+                                                            <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(() => {this.AddNewChecking("MTB");})">Избери МТБ за проверка</button>
+                                                        </li>
+                                                        <li class="nav-item d-none d-sm-inline-block">
+                                                            &nbsp;
+                                                        </li>
+                                                        <li class="nav-item d-none d-sm-inline-block">
+                                                            <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="@(() => {this.DeleteChecking("MTB");})">Премахни избора</button>
+                                                        </li>
+                                                        <li class="nav-item d-none d-sm-inline-block">
+                                                            &nbsp;
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <SfGrid ID="mtbSfGrid" DataSource="mtbsSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                        AllowTextWrap="true" @ref="mtbSfGrid" AllowSelection="true">
+                                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                    <GridTemplates>
+                                                        <EmptyRecordTemplate Context="emptyRecord">
+                                                            <span>Няма намерени резултати.</span>
+                                                        </EmptyRecordTemplate>
+                                                    </GridTemplates>
+                                                    <GridColumns>
+                                                        <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="3%" />
+                                                        <GridColumn Width="6%">
+                                                            <Template Context="premisesCtx">
+                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                    <button @onclick="(async () => await this.OpenRegisterMTBModalBtn((premisesCtx as CandidateProviderPremisesCheckingVM)))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                                                </SfTooltip>
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Width="6%">
+                                                            <Template Context="premisesCtx">
+                                                                <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                                                    <button @onclick="(async () => await this.OpenPremisesCheckingModalBtn(premisesCtx as CandidateProviderPremisesCheckingVM))" class="btn-row"><i class="fa fa-check-square-o"></i></button>
+                                                                </SfTooltip>
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CandidateProviderPremises.PremisesName" HeaderText="Материално-техническа база" TextAlign="TextAlign.Left" Width="23%"></GridColumn>
+                                                        <GridColumn Field="CandidateProviderPremises.Location.LocationName" HeaderText="Населено място" TextAlign="TextAlign.Left" Width="20%"></GridColumn>
+                                                        <GridColumn Context="mtbContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="7%%">
+
+                                                            <Template>
+                                                                <div class="text-center">
+                                                                    @{
+                                                                        var ctx = mtbContext as CandidateProviderPremisesCheckingVM;
+                                                                        if (ctx.CheckDone)
+                                                                        {
+                                                                            <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                        }
+
+                                                                    }
+                                                                </div>
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                        <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="22%"></GridColumn>
+                                                    </GridColumns>
+                                                    <GridEvents TValue="CandidateProviderPremisesCheckingVM" RowSelected="MTBSelectedHandler" RowDeselected="MTBDeselectedHandler" />
+                                                </SfGrid>
+                                            </div>
+                                        </div>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Header="@TrainersHeader">
+                                    <ContentTemplate>
+
+                                        <ContentTemplate>
+                                            <div class="row">
+
+                                                <nav class="navbar navbar-expand  ">
+                                                    <!-- Left navbar links -->
+                                                    <ul class="navbar-nav">
+                                                        @if (this.IsEditable)
+                                                        {
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(() => {this.AddNewChecking("Trainer");})">@AddTrainerMsg</button>
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                &nbsp;
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="@(() => {this.DeleteChecking("Trainer");})">Премахни избора</button>
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                &nbsp;
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <SfGrid ID="trainerSfGrid" DataSource="trainersSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                            AllowTextWrap="true" @ref="trainerSfGrid" AllowSelection="true">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridTemplates>
+                                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                                <span>Няма намерени резултати.</span>
+                                                            </EmptyRecordTemplate>
+                                                        </GridTemplates>
+                                                        <GridColumns>
+                                                            <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="3%" />
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="trainerCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                        <button @onclick="(async () => await this.OpenRegisterTrainerModalBtn((trainerCtx as CandidateProviderTrainerCheckingVM)))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="trainerCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                                                        <button @onclick="(async () => await this.OpenTrainerCheckingModalBtn(trainerCtx as CandidateProviderTrainerCheckingVM))" class="btn-row"><i class="fa fa-check-square-o"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="CandidateProviderTrainer.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                            <GridColumn Field="CandidateProviderTrainer.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                            <GridColumn Field="CandidateProviderTrainer.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                            <GridColumn Context="trainerContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="7%">
+                                                                <Template>
+                                                                    <div class="text-center">
+                                                                        @{
+                                                                            var ctx = trainerContext as CandidateProviderTrainerCheckingVM;
+                                                                            if (ctx.CheckDone)
+                                                                            {
+                                                                                <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                            }
+
+                                                                        }
+                                                                    </div>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="27%"></GridColumn>
+                                                        </GridColumns>
+                                                        <GridEvents TValue="CandidateProviderTrainerCheckingVM" RowSelected="TrainerSelectedHandler" RowDeselected="TrainerDeselectedHandler" />
+                                                    </SfGrid>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Header="Курсове на обучение" Visible="IsCPO">
+                                    <ContentTemplate>
+
+                                        <ContentTemplate>
+
+                                            <div class="row">
+
+                                                <nav class="navbar navbar-expand  ">
+                                                    <!-- Left navbar links -->
+                                                    <ul class="navbar-nav">
+                                                        @if (this.IsEditable)
+                                                        {
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(() => {this.AddNewChecking("Course");})">Избери курс на обучение за проверка</button>
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                &nbsp;
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="@(() => {this.DeleteChecking("Course");})">Премахни избора</button>
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                &nbsp;
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <SfGrid ID="courseSfGrid" DataSource="courseSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                            AllowTextWrap="true" @ref="courseSfGrid" AllowSelection="true">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridTemplates>
+                                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                                <span>Няма намерени резултати.</span>
+                                                            </EmptyRecordTemplate>
+                                                        </GridTemplates>
+                                                        <GridColumns>
+                                                            <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="3%" />
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="courseCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                        <button @onclick="(async () => await this.OpenRegisterCourseModalBtn((courseCtx as CourseCheckingVM)))" class="btn-row"><i class="fa fa-search-plus"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="courseCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                                                        <button @onclick="(async () => await this.OpenCourseCheckingModalBtn(courseCtx as CourseCheckingVM))" class="btn-row"><i class="fa fa-check-square-o"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="Course.CourseName" HeaderText="Наименование на курс" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Program.CourseTypeName" HeaderText="Вид на обучение" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Program.Speciality.Profession.CodeAndName" HeaderText="Професия" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Program.Speciality.CodeAndName" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Field="Course.Period" HeaderText="Период на провеждане" TextAlign="TextAlign.Left" Width="12%"></GridColumn>
+                                                            <GridColumn Context="courseContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="9%">
+
+                                                                <Template>
+                                                                    <div class="text-center">
+                                                                        @{
+                                                                            var ctx = courseContext as CourseCheckingVM;
+                                                                            if (ctx.CheckDone)
+                                                                            {
+                                                                                <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                            }
+
+                                                                        }
+                                                                    </div>
+                                                                </Template>
+
+                                                            </GridColumn>
+                                                            <GridColumn Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="15%"></GridColumn>
+                                                        </GridColumns>
+                                                        <GridEvents TValue="CourseCheckingVM" RowSelected="CourseSelectedHandler" RowDeselected="CourseDeselectedHandler" />
+                                                    </SfGrid>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                                <AccordionItem Header="Валидирани лица" Visible="IsCPO">
+                                    <ContentTemplate>
+
+                                        <ContentTemplate>
+
+                                            <div class="row">
+
+                                                <nav class="navbar navbar-expand  ">
+                                                    <!-- Left navbar links -->
+                                                    <ul class="navbar-nav">
+                                                        @if (this.IsEditable)
+                                                        {
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                <button type="button" class="btn btn-primary btn-outline-primary waves-effect md-trigger" @onclick="@(() => {this.AddNewChecking("Validation");})">Избери валидирани лица за проверка</button>
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                &nbsp;
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                <button type="button" class="btn btn-danger btn-outline-danger waves-effect md-trigger" @onclick="@(() => {this.DeleteChecking("Validation");})">Премахни избора</button>
+                                                            </li>
+                                                            <li class="nav-item d-none d-sm-inline-block">
+                                                                &nbsp;
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <SfGrid ID="validationSfGrid" DataSource="validationSource" AllowSorting="true" AllowFiltering=true EnableAltRow="true" EnableHover="false"
+                                                            AllowTextWrap="true" @ref="validationSfGrid" AllowSelection="true">
+                                                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                                        <GridTemplates>
+                                                            <EmptyRecordTemplate Context="emptyRecord">
+                                                                <span>Няма намерени резултати.</span>
+                                                            </EmptyRecordTemplate>
+                                                        </GridTemplates>
+                                                        <GridColumns>
+                                                            <GridColumn Type="Syncfusion.Blazor.Grids.ColumnType.CheckBox" Width="3%" />
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="validationCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Преглед" OpensOn="Hover">
+                                                                        <button  class="btn-row" @onclick="(async () => await this.OpenValidationClientModalBtn((validationCtx as ValidationClientCheckingVM)))"><i class="fa fa-search-plus"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Width="6%">
+                                                                <Template Context="validationCtx">
+                                                                    <SfTooltip Position="TooltipPosition.BottomCenter" Content="Информация за проверка НАПОО" OpensOn="Hover">
+                                                                        <button  class="btn-row" @onclick="(async () => await this.OpenValidationCheckingModalBtn(validationCtx as ValidationClientCheckingVM))"><i class="fa fa-check-square-o"></i></button>
+                                                                    </SfTooltip>
+                                                                </Template>
+                                                            </GridColumn>
+                                                            <GridColumn Field="ValidationClient.FirstName" HeaderText="Име" TextAlign="TextAlign.Left" Width="7%"></GridColumn>
+                                                            <GridColumn Field="ValidationClient.SecondName" HeaderText="Презиме" TextAlign="TextAlign.Left" Width="7%"></GridColumn>
+                                                            <GridColumn Field="ValidationClient.FamilyName" HeaderText="Фамилия" TextAlign="TextAlign.Left" Width="7%"></GridColumn>
+                                                            <GridColumn Field="ValidationClient.Speciality.Profession.Name" HeaderText="Професия" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                                            <GridColumn Field="ValidationClient.Speciality.Name" HeaderText="Специалност" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                                            <GridColumn Field="ValidationClient.StartDate" HeaderText="Дата на започване на процедурата" TextAlign="TextAlign.Left" Width="8%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn Field="ValidationClient.EndDate" HeaderText="Дата на приключване на процедурата" TextAlign="TextAlign.Left" Width="8%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn Context="courseContext" Field="CheckDone" HeaderText="Проверка" TextAlign="TextAlign.Left" Width="8%">
+
+                                                                <Template>
+                                                                    <div class="text-center">
+                                                                        @{
+                                                                            var ctx = courseContext as ValidationClientCheckingVM;
+                                                                            if (ctx.CheckDone)
+                                                                            {
+                                                                                <label class="form-label-status label label-success" style="width: 40px;">Да</label>
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <label class="form-label-status label label-danger" style="width: 40px;">Не</label>
+                                                                            }
+
+                                                                        }
+                                                                    </div>
+                                                                </Template>
+
+                                                            </GridColumn>
+                                                            <GridColumn  Field="CheckingDate" HeaderText="Дата на проверка" TextAlign="TextAlign.Left" Width="10%" Type="ColumnType.Date" Format="dd.MM.yyyy"></GridColumn>
+                                                            <GridColumn  Field="Comment" HeaderText="Коментар" TextAlign="TextAlign.Left" Width="10%"></GridColumn>
+                                                        </GridColumns>
+                                                        <GridEvents TValue="ValidationClientCheckingVM" RowSelected="ValidationSelectedHandler" RowDeselected="ValidationDeselectedHandler" />
+                                                    </SfGrid>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                    </ContentTemplate>
+                                </AccordionItem>
+                            </AccordionItems>
+                        </SfAccordion>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<CheckingObjectModal @ref="checkingObjectModal" CallbackAfterSaveMTB="CallbackAfterSaveMTB" CallbackAfterSaveTrainer="CallbackAfterSaveTrainer" CallbackAfterSaveCourse="CallbackAfterSaveCourse" CallbackAfterSaveValidation="CallbackAfterSaveValidation" IsCPO="this.IsCPO"></CheckingObjectModal>
+<ConfirmDialog CallbackCancel="ConfirmDialogCallback" CallbackDelete="ConfirmDeleteCallback" @ref="ConfirmDialog"></ConfirmDialog>
+<ToastMsg @ref="toast"></ToastMsg>
+<MTBInformationModal @ref="mTBInformationModal" />
+<TrainerInformationModal @ref="trainerInformationModal" />
+<CurrentTrainingCourseModal @ref="currentTrainingCourseModal" />
+<ValidationClientInformationModal @ref="validationClientInformationModal " />
+
+    <MTBChecking @ref="mTBCheckingModal"/>
+    <TrainerChecking @ref="trainerChecking" LicensingType="@LicensingType"/>
+    <CourseCheckingsList @ref="courseCheckingsList" ></CourseCheckingsList>
+    <ValidationClientCheckingsList @ref="validationClientCheckingsList" ></ValidationClientCheckingsList>
+
+    

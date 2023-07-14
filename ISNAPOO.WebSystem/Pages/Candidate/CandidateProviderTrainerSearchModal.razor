@@ -1,0 +1,194 @@
+﻿@inherits BlazorBaseComponent
+
+
+<SfDialog @bind-Visible="this.isVisible" Width="70%" EnableResize="true" AllowDragging="true" Height="60%" IsModal="true" ZIndex="2000" CloseOnEscape="false" ShowCloseIcon="true">
+    <DialogAnimationSettings Effect="AnimationEffect" Duration="500" />
+    <DialogEvents OnClose="OnXClickHandler" />
+    <DialogTemplates>
+        <Header>Филтър на @(this.isCPO ? "преподаватели" : "консултанти")</Header>
+        <Content>
+            <div class="card">
+                <div class="card-block" style="">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Име: </label>
+                                <SfTextBox @bind-Value="currentFilter.Name"></SfTextBox>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Презиме: </label>
+                                <SfTextBox @bind-Value="currentFilter.MiddleName"></SfTextBox>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Фамилия: </label>
+                                <SfTextBox @bind-Value="currentFilter.FamilyName"></SfTextBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="control-label">ЕГН/ИДН/ЛНЧ: </label>
+                                <SfTextBox @bind-Value="currentFilter.Indent"></SfTextBox>
+                            </div>
+                        </div>
+                        @if (this.isCPO)
+                        {
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="control-label">Професиoнално направление: </label>
+                                    <SfComboBox OnBlur="OnProfessionalDirectionSelect" TValue="int" TItem="ProfessionalDirectionVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                    @bind-Value="this.currentFilter.IdProfessionalDirection"
+                                                DataSource="this.professionalDirectionSource" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Value="IdProfessionalDirection" Text="DisplayNameAndCode" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="control-label">Професия: </label>
+                                    <SfComboBox OnBlur="OnProfessionSelect" TValue="int" TItem="ProfessionVM" PopupHeight="230px" AllowCustom="false" ShowClearButton="true"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                    @bind-Value="this.currentFilter.IdProfession"
+                                                DataSource="this.professionFiltered" AllowFiltering="true">
+                                        <ComboBoxFieldSettings Value="IdProfession" Text="CodeAndName" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (this.isCPO)
+                        {
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="control-label">Специалност: </label>
+                                    <SfMultiSelect @ref="SpecialitiesMultiSelect" CssClass="form-control" TValue="List<SpecialityVM>" TItem="SpecialityVM" PopupHeight="230px" AllowFiltering="true" ShowClearButton="true" AllowCustomValue="false"
+                                                   DataSource="@this.specialities"
+                                    @bind-Value="this.currentFilter.Specialities">
+                                        <MultiSelectTemplates TItem="SpecialityVM">
+                                            <NoRecordsTemplate>
+                                                Няма намерени резултати.
+                                            </NoRecordsTemplate>
+                                        </MultiSelectTemplates>
+                                        <MultiSelectFieldSettings Text="CodeAndAreaForAutoCompleteSearch" Value="IdSpeciality" />
+                                        <MultiSelectEvents TValue="List<SpecialityVM>" TItem="SpecialityVM" Filtering="OnFilterSpeciality" Focus="OnFocusSpeciality" />
+                                    </SfMultiSelect>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="control-label">Вид обучение: </label>
+                                    <SfComboBox OnBlur="OnKvEducationtypeSelect" ShowClearButton="true" TValue="int?" TItem="KeyValueVM"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                PopupHeight="230px"
+                                                DataSource="this.kvTypePracticeOrTheory"
+                                    @bind-Value="this.currentFilter.kvPracticeOrTheory"
+                                                AllowCustom="false">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name" />
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Образователно-квалификационна степен: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM"
+                                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            PopupHeight="230px"
+                                            DataSource="this.kvEducation"
+                                            @bind-Value="this.currentFilter.IdEducation"
+                                            AllowCustom="false">
+                                    <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                </SfComboBox>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Втора колона-->
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Специалност по диплома: </label>
+                                <SfTextBox @bind-Value="currentFilter.EducationSpecialityNotes"></SfTextBox>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Свидетелство за правоспособност: </label>
+                                <SfTextBox @bind-Value="currentFilter.EducationCertificateNotes"></SfTextBox>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Специална научна подготовка: </label>
+                                <SfTextBox @bind-Value="currentFilter.EducationAcademicNotes"></SfTextBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="control-label">Вид на договора: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM"
+                                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            PopupHeight="230px"
+                                            DataSource="this.kvDocumentType"
+                                            @bind-Value="this.currentFilter.IdContractType"
+                                            AllowCustom="false">
+                                    <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="control-label">Статус: </label>
+                                <SfComboBox ShowClearButton="true" TValue="int" TItem="KeyValueVM"
+                                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                            PopupHeight="230px"
+                                            DataSource="this.kvStatus"
+                                            @bind-Value="this.currentFilter.IdStatus"
+                                            AllowCustom="false">
+                                    <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                </SfComboBox>
+                            </div>
+                        </div>
+                        @if (this.isCPO)
+                        {
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label class="control-label">Сътветствие с ДОС: </label>
+                                    <SfComboBox ShowClearButton="true" TValue="int?" TItem="KeyValueVM"
+                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                                PopupHeight="230px"
+                                                DataSource="this.kvComplianceDOC"
+                                    @bind-Value="this.currentFilter.IdComplianceDOC"
+                                                AllowCustom="false">
+                                        <ComboBoxFieldSettings Value="IdKeyValue" Text="Name"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div class="text-right">
+                            <button class="btn btn-info" type="button" @onclick="SumbitFilter">Търси</button>
+                            <button class="btn btn-warning btn-outline-warning waves-effect md-trigger" type="button" @onclick="ClearFilter">Изчисти</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="CancelClickedHandler">Отказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
